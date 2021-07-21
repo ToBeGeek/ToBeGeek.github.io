@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>路由策略、容错策略傻傻分不清楚 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="分布式系统,容错策略,路由策略," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2021-01-30
+    </span>
+    
+      <span>
+        | <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"><i class="fa fa-bookmark"></i>分布式系统</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    路由策略、容错策略傻傻分不清楚
+  </h1>
+  
+  <article class="passage-article">
+    <!-- TOC -->
+
+<ul>
+<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
+<li><a href="#%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E4%B8%8E%E8%B7%AF%E7%94%B1%E7%AD%96%E7%95%A5">负载均衡与路由策略</a><ul>
+<li><a href="#%E8%BD%AE%E8%AF%A2%E7%AD%96%E7%95%A5">轮询策略</a></li>
+<li><a href="#%E9%9A%8F%E6%9C%BA%E7%AD%96%E7%95%A5">随机策略</a></li>
+<li><a href="#%E7%B2%98%E6%BB%9E%E8%BF%9E%E6%8E%A5%E5%9B%BA%E5%AE%9A%E7%9B%B4%E9%93%BE">粘滞连接（固定直链）</a></li>
+<li><a href="#%E4%B8%80%E8%87%B4%E6%80%A7hash">一致性Hash</a><ul>
+<li><a href="#%E8%8A%82%E7%82%B9%E6%95%B0%E5%8F%98%E6%9B%B4%E7%9A%84%E6%97%B6%E5%80%99%E4%BC%9A%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88">节点数变更的时候会发生什么</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E5%80%BE%E6%96%9C%E4%B8%8E%E8%99%9A%E6%8B%9F%E8%8A%82%E7%82%B9">数据倾斜与虚拟节点</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8%E6%97%B6%E5%BB%B6%E7%AD%96%E7%95%A5">服务调用时延策略</a></li>
+<li><a href="#%E5%B0%8F%E8%8A%82">小节</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AE%B9%E9%94%99%E7%AD%96%E7%95%A5">容错策略</a></li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>前些天一个在读大三的师弟和我讨论问题的时候，师弟以为Failover也是一种路由策略。我问他为什么这么想，他说因为请求失败后要对失败的路由剔除，再进行路由的重新选择呗。我告诉他，两者虽然都可以在一条请求链路中出现，但是针对的场景是不同的。路由策略，是负载均衡的一种体现，有时候也被叫做“负载均衡策略”，决定请求的去向，其目的在于系统节点的负载保持稳定。容错策略决定当集群服务调用发生错误的时候，需要做什么。</p>
+<blockquote>
+<p>“举个例子，现在不是春节要到了吗？”<br>“路由策略就好比，你返乡的方式。你可以选择客运站、高铁站、飞机场。”<br>“你原本买了飞机票，结果你要去飞机场的时候，发现机场由于天气恶劣停掉了你的班次”<br>“就如同调用服务发生错误，这个时候你对这个班次取消事件的处理策略就好比容错策略。”<br>“你选择不返乡了，这就叫快速失败(FailFast)。你选择去高铁站，那么就是自动切换(FailOver)。你选择等天气好转再坐延班飞机，这不就是失败缓存(FailCache)吗？？”</p>
+</blockquote>
+<p><img src="/.io//%E8%B4%9F%E8%BD%BD%E4%B8%8E%E5%AE%B9%E9%94%99.png" alt="负载与容错.png"></p>
+<h3 id="负载均衡与路由策略"><a href="#负载均衡与路由策略" class="headerlink" title="负载均衡与路由策略"></a>负载均衡与路由策略</h3><p>分布式系统中的生产运行实例，往往都是集群组网，也就是说同样的服务会有多个水平节点。这意味着一次请求必须对路由做出选择，“如何选”就是路由策略。路由策略即负载均衡策略，但不完全等于负载均衡。负载均衡是一种机制，负载均衡策略是它的一部分。从软硬件来说，可以分硬件负载如F5，软负载如Nginx,LVS,Apache等。从决策的发生来说，又可以分成客户端负载均衡(如上述图中，路由选择发生在consumer中。经典如SpringCloud的Ribbon组件)，服务端负载均衡（比如网关Nginx，Zuul，GatWay等）。更多关于Ribbon的可以看我的这一篇<a href="https://lihaohanggitee.gitee.io/passages/%E8%AF%A6%E8%A7%A3Springcloud%E4%B9%8BRibbon%E7%BB%84%E4%BB%B6/">详解Springcloud之Ribbon组件</a></p>
+<h4 id="轮询策略"><a href="#轮询策略" class="headerlink" title="轮询策略"></a>轮询策略</h4><p>轮询策略RoundRobin:<br>几乎是很多负载均衡器的默认选择策略(Nginx,ribbon),<strong>实现轮询的方式比较简单，其实就是按照权重值(也可以没有权重值)，顺序循环遍历服务提供者列表，当到达边界的时候则从头结点再开始新一轮循环。</strong></p>
+<p>Weighted-RoundRobin即带权重值的轮询，每次更新权重值的时候，都需要生成一个“符合比例关系”的路由表，数组结构即可。举个例子，假设现在有一个request，调用的服务集群有两节点A，B。如果是单纯的轮询策略，则A与B之间的权重值是1：1的关系，那么这个时候数组应该是[A,B]，则每一轮轮询对于A和B节点来说，大家都依次调用且仅有一次调用。如果我们希望A接收更多的请求，我们把权重值设置比例为2:1，那么重新计算后的路由数组应该是[A,A,B]，则每一轮轮询，A节点都会被两次调用。</p>
+<p>优点：实现简单，实用性强<br>缺点：一旦出现故障节点（宕机，处理不及时），会造成部分请求的丢失或者是响应卡在问题节点处理中，时延大。</p>
+<h4 id="随机策略"><a href="#随机策略" class="headerlink" title="随机策略"></a>随机策略</h4><p>随机策略Random：<br>随机策略也是非常容易实现的一种路由选择策略，根据随机算法进行负载均衡。<strong>适用于集群中每个节点的负载能力相近，采用随机策略可以使得请求分发的比较均匀</strong></p>
+<p>优点：实现简单，请求分发比较均匀（多节点负载能力相近的前提）</p>
+<p>缺点：有一定的概率造成请求丢失或者时延过大。在一个截面上碰撞的概率也高，甚至丢失的请求比轮询策略还多。<br>其次，随机策略没有考虑到不同节点的负载能力差异，负载能力差异大的时候会导致负载不均衡</p>
+<h4 id="粘滞连接（固定直链）"><a href="#粘滞连接（固定直链）" class="headerlink" title="粘滞连接（固定直链）"></a>粘滞连接（固定直链）</h4><p>粘滞连接策略：客户端创建链路成功后，只要不出故障就一直保持连接进行通信。这种策略<strong>适用于有状态要求的请求</strong>。实现的思想也比较简单，只要首次连接成功则将目标路由打上粘滞连接的标记，仅仅当连接中断后才选择下一个路由。现在的系统往往都是被设计成无状态的服务，因此极少情况下会使用粘滞连接。</p>
+<h4 id="一致性Hash"><a href="#一致性Hash" class="headerlink" title="一致性Hash"></a>一致性Hash</h4><p>一致性Hash算法是一个非常有意思的算法。它解决了分布式系统中的请求热点问题，也能够保证当系统中出现节点数变化时影响面较低，使得负载更加分散,相同的请求总是给到同一个节点。先来看下面的一张图，结合该图，尝试理解一致性Hash算法。</p>
+<p><img src="/.io//%E4%B8%80%E8%87%B4%E6%80%A7Hash.png" alt="一致性Hash"></p>
+<p><strong>三个关键要点：环形数组，Hash计算，有向查找</strong><br>1：环形数组：如下图中的大圆环，数组的值[0,2^32-1]，收尾连接构成闭环。<br>可以抽象理解该数组上的数据，[null,…,A节点IP地址,…,B节点IP地址,…]</p>
+<p>2：Hash计算：该hash计算公式用于将Object的标志信息(ip,key等)散列在数组上的某个(也可以是多个)索引位置index上。比如上图中的A，B，C，D节点新增进来的时候，根据IP算出他们各自在环上的位置即途中黑色节点。这些节点会存在指向他们的ref。</p>
+<p>3：有向查找：当接收到request的时候，会通过上述所说的hash公式计算其在环上映射的index值（图中红点），然后根据顺时针方向查找，查找到的首个Node即为处理当前IP的节点。比如图中的requestA，顺时针方向查找到的节点是B，也就是由B节点处理requestA请求。</p>
+<h5 id="节点数变更的时候会发生什么"><a href="#节点数变更的时候会发生什么" class="headerlink" title="节点数变更的时候会发生什么"></a>节点数变更的时候会发生什么</h5><p>上面说到的策略，当节点数发生边动的时候，对所有的节点的负载都会造成影响。没错，是对所有节点。而一致性Hash算法可以将节点变更的影响降到最低。</p>
+<p>比如当前我们移除了节点C。<br><img src="/.io//%E7%A7%BB%E9%99%A4%E8%8A%82%E7%82%B9C.png" alt="移除节点C.png"></p>
+<p>图中红色表示该节点已经不存在，那么原来映射到C上的请求requestB则按照顺序查找到的节点是D。也就是说C节点的移除，造成了D节点负载增加，但是其他节点的负载不受影响。同样的，如果我们在B节点与C节点中间，插入新节点E，那么也仅仅影响了C节点的负载（C节点负载减少）。</p>
+<p><img src="/.io//%E6%96%B0%E5%A2%9EE%E8%8A%82%E7%82%B9.png" alt="新增E节点.png"></p>
+<h5 id="数据倾斜与虚拟节点"><a href="#数据倾斜与虚拟节点" class="headerlink" title="数据倾斜与虚拟节点"></a>数据倾斜与虚拟节点</h5><p>什么是数据倾斜？<strong>在分布式系统集群中，不同节点会负责不同范围的缓存数据。如果缓存的分散度不足，就会出现大量的数据集中在部分或者个别服务节点上，这样的现象被称为数据倾斜。</strong>前面说到一致性Hash能够保证数据分散，这看起来好像没它啥事情啊？别急，展开来说。</p>
+<p>对于一致性Hash来说，什么时候可能造成数据倾斜呢？答案是，节点数量少的时候。还是以上面的图为例，我们将节点数移除，仅仅保留A节点和D节点。由下图，可以看出来。顺时针方向上看，A-&gt;D的范围明显要大于D-&gt;A的范围，也意味着更多的请求将分发到D节点上，这样就出现了数据倾斜了！</p>
+<p><img src="/.io//%E6%95%B0%E6%8D%AE%E5%80%BE%E6%96%9C.png" alt="数据倾斜.png"></p>
+<p>如果我们希望当节点少的时候，也能保证数据的分散程度尽量均匀怎么办？引入虚拟节点的概念。虚拟节点本质就是对同个节点在环上的多个副本。当实际节点数量不足的时候，我们可以将这些实际节点copy成多个副本节点并插入在环中，这样的一些节点就叫虚拟节点。虚拟节点和实际节点的效果是相同的，它们将请求的归属范围分成更多片区域，从而使得实际节点数量少的时候，数据分散的更均匀。如下图中，#号后数字表示当前节点是虚拟节点，用灰点表示。</p>
+<p><img src="/.io//%E8%99%9A%E6%8B%9F%E8%8A%82%E7%82%B9.png" alt="虚拟节点.png"></p>
+<h4 id="服务调用时延策略"><a href="#服务调用时延策略" class="headerlink" title="服务调用时延策略"></a>服务调用时延策略</h4><p>服务调用时延策略其实就是对加权轮询策略的一种改良版本。消费者根据服务调用时的某些KPI指标(通常是调用时延)进行缓存。当周期结束的时候，会进行一次计算，根据每个服务的调用次数和总时延计算出平均时延，平均时延会决定这些服务之间的权重值，从而决定了下一次轮询的时候，消费者应该给予哪些节点更多或更少的请求分发。过程原理示例图如下：</p>
+<p><img src="/.io//%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8%E6%97%B6%E5%BB%B6.png" alt="服务调用时延.png"></p>
+<p>使用服务调用时延策略，在一定程度上来说可以充当流量控制的一种方式，并且使用该策略，会使得同样的请求调用时延趋于稳定，而不会出现明显的波动。</p>
+<p><img src="/.io//%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8%E6%97%B6%E5%BB%B6%E7%AD%96%E7%95%A5%E7%9A%84%E5%A5%BD%E5%A4%84.png" alt="服务调用时延策略的好处.png"></p>
+<p>哇，看起啦这个策略非常不错。那为什么那么多中间件都不用它呢？它也有缺点，往下展开说。</p>
+<p>服务调用时延策略的不足之处：<br>1.<strong>性能损耗</strong>：计算是需要资源的，一旦参与计算的指标、节点数多，则意味着每次计算都需要付出代价。<br>2.<strong>周期过长，计划赶不上变化</strong>：如果每次计算的间隔周期过长，则不能很好的反应各个节点的负载能力变化，容易出现误差<br>3.<strong>周期过短，计算频率增大</strong>：带来额外的开销</p>
+<p>当然对于上述缺点也不用过于担心，开发人员凭借着经验和KPI数据可以估算一个适当的周期。只是该策略实现起来麻烦些是了。</p>
+<h4 id="小节"><a href="#小节" class="headerlink" title="小节"></a>小节</h4><p>上面说到的几种策略，都是路由策略中非常经典的策略。当然其实还有一种<strong>自定义策略</strong>，其实在很多组件中多数都会支持自定义的策略实现。但往往都可以在上述的几种策略中找到它们的“影子”。</p>
+<p>头都晕了，总结了大半天，才写了一半…休息以下，接下来准备讲讲关于容错策略的那亿点点事情。</p>
+<h3 id="容错策略"><a href="#容错策略" class="headerlink" title="容错策略"></a>容错策略</h3><p>当消费发起服务调用，此期间发生了远程服务调用异常，RPC框架往往会对该异常事件按照缺省（或者用户指定）的集群容错策略进行处理。整个过程是底层屏蔽的，上层调用者并不能感知。就以Dubbo框架为例子，展开讲讲它的容错策略。</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E4%B8%8E%E8%B7%AF%E7%94%B1%E7%AD%96%E7%95%A5"><span class="toc-text">负载均衡与路由策略</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BD%AE%E8%AF%A2%E7%AD%96%E7%95%A5"><span class="toc-text">轮询策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9A%8F%E6%9C%BA%E7%AD%96%E7%95%A5"><span class="toc-text">随机策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B2%98%E6%BB%9E%E8%BF%9E%E6%8E%A5%EF%BC%88%E5%9B%BA%E5%AE%9A%E7%9B%B4%E9%93%BE%EF%BC%89"><span class="toc-text">粘滞连接（固定直链）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E8%87%B4%E6%80%A7Hash"><span class="toc-text">一致性Hash</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%8A%82%E7%82%B9%E6%95%B0%E5%8F%98%E6%9B%B4%E7%9A%84%E6%97%B6%E5%80%99%E4%BC%9A%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88"><span class="toc-text">节点数变更的时候会发生什么</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%80%BE%E6%96%9C%E4%B8%8E%E8%99%9A%E6%8B%9F%E8%8A%82%E7%82%B9"><span class="toc-text">数据倾斜与虚拟节点</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8%E6%97%B6%E5%BB%B6%E7%AD%96%E7%95%A5"><span class="toc-text">服务调用时延策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B0%8F%E8%8A%82"><span class="toc-text">小节</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%B9%E9%94%99%E7%AD%96%E7%95%A5"><span class="toc-text">容错策略</span></a></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E8%B7%AF%E7%94%B1%E7%AD%96%E7%95%A5%E3%80%81%E5%AE%B9%E9%94%99%E7%AD%96%E7%95%A5%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%E6%A5%9A/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E5%AE%B9%E9%94%99%E7%AD%96%E7%95%A5/"><i class="fa fa-tags"></i>容错策略</a>
+     
+      <a href="/tags/%E8%B7%AF%E7%94%B1%E7%AD%96%E7%95%A5/"><i class="fa fa-tags"></i>路由策略</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Linux%E5%86%85%E6%A0%B8-%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80%E4%B8%8A%E7%AF%87/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E6%9E%B6%E6%9E%84%E6%98%AF%E5%A6%82%E4%BD%95%E6%BC%94%E8%BF%9B%E7%9A%84/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>设计模式-状态模式 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="编程哲学与思想,设计模式,状态模式," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2020-11-26
+    </span>
+    
+      <span>
+        | <a href="/categories/%E7%BC%96%E7%A8%8B%E5%93%B2%E5%AD%A6%E4%B8%8E%E6%80%9D%E6%83%B3/"><i class="fa fa-bookmark"></i>编程哲学与思想</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    设计模式-状态模式
+  </h1>
+  
+  <article class="passage-article">
+    <p>软件开发中，经常会遇到带有“状态”属性的对象，而这些对象的状态变化，往往都牵连着外部事件的产生，其内部状态发生改变从而导致其行为发生改变。比如人开心的时候，脸上会有笑容。人伤心的时候，脸上会有泪水。遇到不同状态的处理，最暴力的方法就是用多种if-else或者switch-case来处理。但是这种做法，在状态变化复杂的时候，会导致代码中充斥太多if-else,代码可读性差，扩展性弱，复杂度也高！新增状态的时候，就意味着要新增if-else分支逻辑，完全违背了对修改关闭，对扩展开放。因而这种情况之下，更加适合使用今天介绍的“状态模式”</p>
+<!-- TOC -->
+
+<ul>
+<li><a href="#%E4%BB%8B%E7%BB%8D">介绍</a><ul>
+<li><a href="#%E4%BC%98%E7%82%B9%E4%B8%8E%E7%BC%BA%E7%82%B9">优点与缺点</a></li>
+<li><a href="#%E6%88%90%E5%91%98%E4%B8%8E%E7%BB%93%E6%9E%84%E5%9B%BE">成员与结构图</a></li>
+<li><a href="#demo%E7%A4%BA%E4%BE%8B">DEMO示例</a></li>
+<li><a href="#%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F%E5%92%8C%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB">状态模式和责任链模式的区别</a></li>
+<li><a href="#%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F%E5%92%8C%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB">状态模式和策略模式的区别</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>状态模式定义：当控制一个对象状态转换的表达式过于复杂，把这块的复杂的判断逻辑提出出来，用各个不同的类进行表示，系统处于什么状态，直接用相应的状态类对象进行处理。<strong>状态模式是一种对象行为型模式</strong>。</p>
+<p>状态模式的出发点，是把受环境改变的对象行为封装在不同的状态对象中，当一个对象在其内部状态改变的时候，其行为也随之联动发生改变。</p>
+<h4 id="优点与缺点"><a href="#优点与缺点" class="headerlink" title="优点与缺点"></a>优点与缺点</h4><p>优点：<br>1.<strong>满足“单一职责原则”</strong>,状态模式将于特定状态相关的行为抽离到一个状态类中，并将不同状态的行为分离，即不同状态负责不同行为<br>2.不同的状态用不同的具体状态对象表示，且能够显示转换状态，<strong>减少了对象之间的相互依赖</strong>。<strong>TODO 解释一下</strong><br>3.<strong>状态类职责明确，有利于程序扩展</strong></p>
+<p>缺点：<br>1.状态模式的使用必然会增加系统的类于对象的个数，<strong>使用不当则可能导致系统结构混乱，复杂度整体上升</strong><br>2.由于状态模式支持状态的切换，所以<strong>增加新状态类的时候，可能会导致旧代码的修改</strong>（旧状态可能要转换成新增状态类），这点是有悖于开闭原则的（只能说支持的不是很好）</p>
+<h4 id="成员与结构图"><a href="#成员与结构图" class="headerlink" title="成员与结构图"></a>成员与结构图</h4><p>三个成员：</p>
+<p>1.环境类（Context）：也叫上下文，它直接与客户端对接，定义了客户端需要的基本接口，内部维护了一个当前状态，并负责状态之间的切换。<br>2.抽象状态类（State）：可以是接口类，也可以是抽象类，用于封装环境对象中具体行为状态所对应的行为，可以是一个或者多个行为<br>3.具体状态类（Conctrete State）：实现抽象状态所对应的行为，并在需要的情况下进行状态切换</p>
+<p>结构如下图：<br><img src="/.io//%E7%BB%93%E6%9E%84.jpg" alt="结构.jpg"></p>
+<h4 id="DEMO示例"><a href="#DEMO示例" class="headerlink" title="DEMO示例"></a>DEMO示例</h4><p>状态模式的适用场景：<br>1.对象的行为依赖于它自身的状态变化（如某些属性值），状态的改变将联动其行为发生改变。<br>2.代码中包含大量与对象状态有关的if-else语句。</p>
+<p>举个生活中常见的示例：某些游戏充值与VIP等级之间的关系，举个栗子。用户累计充值10元-&gt;VIP1，累计20-&gt;VIP2，累计30-&gt;VIP3,依次升级，最多到VIP3<br>不同的VIP等级，游戏将赠送不同的大礼包奖励，还有不同的充值优惠折扣！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Context类：上下文</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Context</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> AbstractState abstractState;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> AbstractState <span class="title">getAbstractState</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> abstractState;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAbstractState</span><span class="params">(AbstractState abstractState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.abstractState = abstractState;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Context()&#123;</span><br><span class="line">        <span class="keyword">this</span>.abstractState=<span class="keyword">new</span> NormalState(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 尝试更新用户VIP等级</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> payment 用户充值金额</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">   <span class="function"><span class="keyword">void</span> <span class="title">updateVIPGrade</span><span class="params">(<span class="keyword">int</span> payment)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.abstractState.updateVIPGrade(payment);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 抽象状态类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractState</span> </span>&#123;</span><br><span class="line">    Context context;</span><br><span class="line">    <span class="keyword">int</span> total=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateVIPGrade</span><span class="params">(<span class="keyword">int</span> payment)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.total+=payment;</span><br><span class="line">        System.out.println(<span class="string">&quot;当前新增充值金额:&quot;</span>+payment+<span class="string">&quot;,累计金额:&quot;</span>+total);</span><br><span class="line">        currentGrade();</span><br><span class="line">        System.out.println(<span class="string">&quot;当前用户VIP等级为:&quot;</span>+context.getAbstractState());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 检查当前用户到达哪个等级</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">currentGrade</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 具体状态类：普通会员</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NormalState</span> <span class="keyword">extends</span> <span class="title">AbstractState</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">NormalState</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.context=context;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">NormalState</span><span class="params">(AbstractState state)</span> </span>&#123;</span><br><span class="line">        context=state.context;</span><br><span class="line">        total=state.total;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">currentGrade</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(total&lt;<span class="number">10</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">10</span>&amp;&amp;total&lt;<span class="number">20</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> VIP1State(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">20</span>&amp;&amp;total&lt;<span class="number">30</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> VIP2State(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">30</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> VIP3State(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;【普通会员等级】&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 具体状态类：VIP1</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VIP1State</span> <span class="keyword">extends</span> <span class="title">AbstractState</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">VIP1State</span><span class="params">(AbstractState state)</span> </span>&#123;</span><br><span class="line">        context=state.context;</span><br><span class="line">        total=state.total;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">currentGrade</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(total&lt;<span class="number">10</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> NormalState(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">10</span>&amp;&amp;total&lt;<span class="number">20</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">20</span>&amp;&amp;total&lt;<span class="number">30</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> VIP2State(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">30</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> VIP3State(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;【VIP1会员等级】&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 具体状态类：VIP2</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VIP2State</span> <span class="keyword">extends</span> <span class="title">AbstractState</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">VIP2State</span><span class="params">(AbstractState state)</span> </span>&#123;</span><br><span class="line">        context=state.context;</span><br><span class="line">        total=state.total;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">currentGrade</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(total&lt;<span class="number">10</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> NormalState(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">10</span>&amp;&amp;total&lt;<span class="number">20</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> VIP1State(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">20</span>&amp;&amp;total&lt;<span class="number">30</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">30</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> VIP3State(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;【VIP2会员等级】&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 具体状态类：VIP3</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VIP3State</span> <span class="keyword">extends</span> <span class="title">AbstractState</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">VIP3State</span><span class="params">(AbstractState state)</span> </span>&#123;</span><br><span class="line">        context=state.context;</span><br><span class="line">        total=state.total;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">currentGrade</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(total&lt;<span class="number">10</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> NormalState(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">10</span>&amp;&amp;total&lt;<span class="number">20</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> VIP1State(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">20</span>&amp;&amp;total&lt;<span class="number">30</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">new</span> VIP2State(<span class="keyword">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(total&gt;=<span class="number">30</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.context.setAbstractState(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;【VIP3会员等级】&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoMain</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Context context=<span class="keyword">new</span> Context();</span><br><span class="line">        <span class="comment">//用户依次充值</span></span><br><span class="line">        context.updateVIPGrade(<span class="number">1</span>);</span><br><span class="line">        context.updateVIPGrade(<span class="number">10</span>);</span><br><span class="line">        context.updateVIPGrade(<span class="number">10</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;=============用户误充值10000元&quot;</span>);</span><br><span class="line">        context.updateVIPGrade(<span class="number">10000</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;=============用户申请平台退费10000元成功&quot;</span>);</span><br><span class="line">        context.updateVIPGrade(-<span class="number">10000</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>运行如下：</p>
+<blockquote>
+<p>“C:\Program Files\Java\jdk1.8.0_221\bin\java.exe”…<br>当前新增充值金额:1,累计金额:1<br>当前用户VIP等级为:【普通会员等级】<br>当前新增充值金额:10,累计金额:11<br>当前用户VIP等级为:【VIP1会员等级】<br>当前新增充值金额:10,累计金额:21<br>当前用户VIP等级为:【VIP2会员等级】<br>=============用户误充值10000元<br>当前新增充值金额:10000,累计金额:10021<br>当前用户VIP等级为:【VIP3会员等级】<br>=============用户申请平台退费10000元成功<br>当前新增充值金额:-10000,累计金额:21<br>当前用户VIP等级为:【VIP2会员等级】</p>
+<p>Process finished with exit code 0</p>
+</blockquote>
+<p>好了，仔细读完上面代码后,你会越发觉得这个状态模式和责任链模式，策略模式很相近。<br>下面讲一下，他们的区别。</p>
+<h4 id="状态模式和责任链模式的区别"><a href="#状态模式和责任链模式的区别" class="headerlink" title="状态模式和责任链模式的区别"></a>状态模式和责任链模式的区别</h4><p>责任链模式结构图<br><img src="/.io//%E7%BB%93%E6%9E%84.jpg" alt="结构.jpg"></p>
+<p>最直观的来说，责任链模式是一个链状的。每个节点都有明确的职责，但是不知道自己下一个节点是啥，需要通过组装的方式确定。而状态模式中，各个状态类在编译时期就可以确定自己的下游状态类有哪些，转换出口在哪里。状态模式，可能是“链状”的，也可能是“星状”，“网状”的。状态模式和责任链模式都可以实现“解耦合”，消除过多的“if-else”</p>
+<h4 id="状态模式和策略模式的区别"><a href="#状态模式和策略模式的区别" class="headerlink" title="状态模式和策略模式的区别"></a>状态模式和策略模式的区别</h4><p>策略模式结构图<br><img src="/.io//%E7%BB%93%E6%9E%84.jpg" alt="结构.jpg"></p>
+<p>策略模式的结构图和状态模式的结构图太相似了！但是其适用的场景不同，状态模式强调状态变化而联动的行为变化，客户端不需要了解状态与行为的细节（细节封装在状态类或者上下文中了，对外屏蔽细节）。而策略模式强调对一种算法的运行时替换，要求客户端在调用前就必须清楚知道自己要用什么策略。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>1.状态模式是一种行为型设计模式，符合单一职责原则，每个状态类处理状态切换和各自应对的行为。<br>2.状态模式不宜滥用，否则系统复杂度上升，甚至结构复杂化<br>3.状态模式适合的场景是，对象的状态与行为之间存在联动关系</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-text">介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%82%B9%E4%B8%8E%E7%BC%BA%E7%82%B9"><span class="toc-text">优点与缺点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%88%90%E5%91%98%E4%B8%8E%E7%BB%93%E6%9E%84%E5%9B%BE"><span class="toc-text">成员与结构图</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DEMO%E7%A4%BA%E4%BE%8B"><span class="toc-text">DEMO示例</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F%E5%92%8C%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">状态模式和责任链模式的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F%E5%92%8C%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">状态模式和策略模式的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><i class="fa fa-tags"></i>设计模式</a>
+     
+      <a href="/tags/%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F/"><i class="fa fa-tags"></i>状态模式</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>云游戏:一键秒玩,让用户更爽畅 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="方案总结,生产实践,云游戏," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2021-02-11
+    </span>
+    
+      <span>
+        | <a href="/categories/%E6%96%B9%E6%A1%88%E6%80%BB%E7%BB%93/"><i class="fa fa-bookmark"></i>方案总结</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    云游戏:一键秒玩,让用户更爽畅
+  </h1>
+  
+  <article class="passage-article">
+    <blockquote>
+<p>一切上云的时代，游戏为何上云？游戏是如何上云的?</p>
+</blockquote>
+<!-- TOC -->
+
+<ul>
+<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
+<li><a href="#%E6%B8%B8%E6%88%8F%E4%B8%BA%E4%BD%95%E4%B8%8A%E4%BA%91">游戏为何上云？</a><ul>
+<li><a href="#%E7%AB%99%E5%9C%A8%E6%B8%B8%E6%88%8F%E7%8E%A9%E5%AE%B6%E7%9A%84%E8%A7%92%E5%BA%A6">站在游戏玩家的角度</a></li>
+<li><a href="#%E7%AB%99%E5%9C%A8%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E5%95%86%E7%9A%84%E8%A7%92%E5%BA%A6">站在游戏开发商的角度</a></li>
+<li><a href="#%E7%AB%99%E5%9C%A8%E6%B8%B8%E6%88%8F%E6%B8%A0%E9%81%93%E8%BF%90%E8%90%A5%E7%9A%84%E8%A7%92%E5%BA%A6">站在游戏渠道运营的角度</a></li>
+<li><a href="#%E4%BA%91%E6%9C%8D%E5%8A%A1%E6%8F%90%E4%BE%9B%E5%95%86">云服务提供商</a></li>
+</ul>
+</li>
+<li><a href="#%E6%88%91%E4%BB%AC%E6%98%AF%E5%A6%82%E4%BD%95%E4%B8%8A%E4%BA%91%E7%9A%84">我们是如何上云的？</a><ul>
+<li><a href="#%E7%94%A8%E6%88%B7%E5%A6%82%E4%BD%95%E7%8E%A9%E4%BA%91%E6%B8%B8%E6%88%8F">用户如何玩云游戏？</a><ul>
+<li><a href="#%E4%BA%91%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6">云资源调度</a><ul>
+<li><a href="#%E4%BA%91%E6%89%8B%E6%9C%BA%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E9%85%8D%E7%9A%84">云手机是怎么分配的</a></li>
+</ul>
+</li>
+<li><a href="#websocket%E9%80%9A%E4%BF%A1%E9%81%87%E5%88%B0%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98">WebSocket通信遇到的一些问题</a><ul>
+<li><a href="#%E5%A6%82%E4%BD%95%E5%AF%BB%E6%89%BE%E4%BC%9A%E8%AF%9D">如何寻找会话？</a></li>
+<li><a href="#%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6%E8%AF%A5%E6%80%8E%E4%B9%88%E8%AE%BE%E8%AE%A1">心跳机制该怎么设计？</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E6%81%B6%E6%84%8F%E7%94%A8%E6%88%B7%E5%A4%84%E7%90%86%E6%96%B9%E6%A1%88">恶意用户处理方案</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AF%B9%E4%BA%91%E6%B8%B8%E6%88%8F%E7%9A%84%E4%B8%80%E4%BA%9B%E4%B8%AA%E4%BA%BA%E6%80%9D%E8%80%83">对云游戏的一些个人思考</a></li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>20年下旬，有幸参与了公司云游戏平台从0-1的研发过程，让我直接对云游戏有了更深刻的体会。<strong>我相信为来的云游戏会很大程度上升华游戏行业</strong>。什么是云游戏，简单来说就是<strong>把原本运行在本地终端设备的游戏应用，搬到远程服务器上去运行，几乎所有的运算都是在服务器上去完成的，客户端主要负责接收服务端的音视频流和指令流，最后在客户端上展现出来服务于用户。</strong></p>
+<h3 id="游戏为何上云？"><a href="#游戏为何上云？" class="headerlink" title="游戏为何上云？"></a>游戏为何上云？</h3><p>游戏行业可以粗略的划分成三个参与方：玩家，CP（游戏开发商），发行(渠道运营)。没有对比就没有“伤害”，从这三者的角度去看待云游戏这个新鲜事物，并与传统的本地游戏方式进行对比。</p>
+<h4 id="站在游戏玩家的角度"><a href="#站在游戏玩家的角度" class="headerlink" title="站在游戏玩家的角度"></a>站在游戏玩家的角度</h4><p>玩家就是游戏的直接体验者。玩家想要玩一款游戏之前往往都会对机子发起一系列的灵魂叩问：<br>“这大型游戏我的机子带的动吗？”，“安装包这么大，下载和更新要好久，还玩么？”，“玩这个游戏还要买专门的设备，太费钱了吧”。</p>
+<p>传统本地游戏的玩家痛点：<br>1.配置可能带不动游戏，玩不了<br>2.游戏包体积超大，下载、安装、更新流程繁琐，造成厌烦心理<br>3.玩个游戏要买专门的设备，比如手柄，体感手杆等</p>
+<p>借用网络上曾经风风火火的一款3A大作的梗图，以表玩家的痛点之处。<br><img src="/.io//%E8%B5%9B%E5%8D%9A%E6%9C%8B%E5%85%8B%E7%9A%84%E6%A2%97.jpg" alt="赛博朋克的梗.jpg"></p>
+<p>云游戏将给玩家带来哪些爽点呢？<br>1.3A大作云端运行，让<strong>玩家不再担心配置跟不上的问题</strong>！<br>2.游戏部署在云端，用户<strong>无需下载游戏更无需本地安装等操作</strong>。远程服务器统一进行游戏热更新，用户点开即玩。<br>3.玩游戏还要买手柄？不需要了，手机APP虚拟一套操作手柄，通过<strong>虚拟手柄</strong>玩游戏(甚至手机玩大型PC游戏)</p>
+<h4 id="站在游戏开发商的角度"><a href="#站在游戏开发商的角度" class="headerlink" title="站在游戏开发商的角度"></a>站在游戏开发商的角度</h4><p>CP也就是我们常说的游戏开发商。游戏开发最重视的就是客户端的开发，而客户端开发需要考虑到很多的硬件差异和系统差异，往往最常见的就是不同机型的兼容性问题，或者是用户终端操作系统升级带来兼容性问题。而云游戏平台不担心这个问题，因为游戏的运行平台是统一在服务器上的。终端仅仅需要通过网络来玩游戏。对于游戏开发商来说，云上的设备相对固定且统一，可以对特定平台做一些优化！其次对于开发商来说，客户端是不安全的，想要破解的手段挺多的，所以为什么会有外挂软件就是这样。云游戏，可以避免挂B的参与，因为游戏运行在云服务端，用户拿不到安装包，也无法通过非法途径去获取云游戏的应用程序数据。</p>
+<p>云游戏将给CP带来哪些爽点呢？<br>1.<strong>终端设备相对统一，兼容性好</strong>，可以针对云游戏服务端配置做特定优化<br>2.<strong>更加安全</strong>，用户无法获取安装包进行反编译或者获取到云游戏的应用程序数据，不能轻易地作弊</p>
+<p>云游戏下，甚至可以出现跨平台玩游戏~比如我司研发的云游戏平台可以允许一些原本只能在安卓系统下玩的手游，在苹果设备上也能一起玩。反过来说，这也是用户的一个爽点！对于用户来说，不必要担心从安卓手机切换到苹果手机使用，但是没有苹果版的游戏可以玩的情况！</p>
+<h4 id="站在游戏渠道运营的角度"><a href="#站在游戏渠道运营的角度" class="headerlink" title="站在游戏渠道运营的角度"></a>站在游戏渠道运营的角度</h4><p>游戏渠道运营和游戏开发商不同，CP将游戏研发出来后需要通过各种发行渠道将游戏推向用户，而这些渠道、平台就是游戏渠道运营商。<br>渠道最看重的就是如何转化用户，提高用户体验。主要有几点。</p>
+<p>1.丰富的活动支持(优惠券秒杀，省钱卡，节日营销活动等)，这个和本文主题无关，不过多讲解。<br>2.丰富的游戏品类，精品游戏要够多！</p>
+<p>往往精品游戏都是大型游戏，而这类游戏往往包体积都巨大，动不动一个GB的下载，然后用户下载完后可能拿到的还是旧包要强更，又没了一个G流量。没点耐心的用户可能就真的不玩了。而云游戏可以做到不需下载，点开即玩，不需要更新(云端低峰期检查更新并触发更新流程)。这对于用户转化来说，是非常棒的！</p>
+<p>云游戏给渠道运营商带来的爽点：<br>1.<strong>提高用户转化</strong>，点开即玩大型游戏，哪个用户不想试试看<br>2.<strong>更安全</strong>，往往渠道商会以SDK插件的方式将CP的游戏与渠道商打通数据交互，游戏与SDK都在云端了，非法用户也无法轻易获取敏感数据。</p>
+<h4 id="云服务提供商"><a href="#云服务提供商" class="headerlink" title="云服务提供商"></a>云服务提供商</h4><p>严格来说，云服务提供商不算游戏行业的一个角色。但是在云游戏时代趋势下，云游戏的发展需要这些云服务厂商提供基础支撑。这对于他们来说也是一个很大的盈利点。</p>
+<p>简单讲讲云游戏的原理图吧。网上借来的好图，我觉得描述的非常棒！<br><img src="/.io//%E4%BA%91%E6%B8%B8%E6%88%8F%E5%8E%9F%E7%90%86%E5%9B%BE.png" alt="云游戏原理图.png"></p>
+<p>WebRTC相关的通信机制其实很多云服务商已经有提供了，对于渠道商来说，只关心如何部署应用，客制化一个操作手柄即可。</p>
+<h3 id="我们是如何上云的？"><a href="#我们是如何上云的？" class="headerlink" title="我们是如何上云的？"></a>我们是如何上云的？</h3><p>笔者本人是从事游戏行业中的渠道运营商的一猿，云游戏所依赖的云基础自然是轮不到我去“造轮子”的啦，所以我们选择了国内某大型云服务商来做这个底层支撑。我们做云游戏的初衷是在于提高用户的转化，希望提供给用户一个试玩游戏，免安装下载的功能。用户如果觉得游戏不错的话，也意愿将游戏下载到本地玩。</p>
+<h4 id="用户如何玩云游戏？"><a href="#用户如何玩云游戏？" class="headerlink" title="用户如何玩云游戏？"></a>用户如何玩云游戏？</h4><p>我梳理了一下，关于用户玩云游戏的核心过程，实现方案大致如下图中所示（假定图中用户是华南地区用户）：<br><img src="/.io//%E7%94%A8%E6%88%B7%E6%8E%92%E9%98%9F%E7%8E%A9%E6%B8%B8%E6%88%8F.png" alt="云游戏用户试玩.png"></p>
+<p>在研发过程中我也遇到了不少问题，相信也是大多数想做这个方向的同行必须要踩的坑。必须要说的是虽然云服务提供商，很大程度解决了低延迟，保证了视频质量。但是实际生产中，每个用户的终端所处网络都不同，复杂的网络常常会带来许多问题。</p>
+<h5 id="云资源调度"><a href="#云资源调度" class="headerlink" title="云资源调度"></a>云资源调度</h5><p><strong>一个用户同时只能接入一台云手机资源</strong>，而云手机资源是有限量的(主要是当下阶段资费昂贵，不过我相信这点在未来会降低的)。用户的量大于云资源的量，所以当产生竞争的时候就需要做<strong>资源分配和用户的排队方案</strong>。资源分配，我姑且称他为：云(手)机分配</p>
+<p>云机的分配第一原则是：<br>就近分配原则，我们会根据用户端IP进行解析分析用户所在的地理大区（华北、东北、华东、中南、西南、西北）。如果就近的云服务器资源充裕，则直接返资源相关的启动参数给客户端，直接进入云游戏。若该地区的云服务器资源紧张，用户置入待分配队列，告知<strong>客户端建立WebSocket长链接，等待排队成功通知</strong>。</p>
+<p>就近分配的好处在于两点：<br>缩小地理距离，追求更低的网络延迟。<br>可以根据地区的热力分布情况，按需对大区的云资源扩容(简单说，哪个地区对云手机的需要更多，就加机子！！)</p>
+<h6 id="云手机是怎么分配的"><a href="#云手机是怎么分配的" class="headerlink" title="云手机是怎么分配的"></a>云手机是怎么分配的</h6><p>这个问题的方案比较复杂，因为很大部分的因素取决于所选择的云服务提供商，需要根据云服务提供商支持查询云资源状态的方式来做方案。通常来说云服务提供商支持API查询云资源状态的方式，或者心跳通知的方式这两种。而这两种的方式我们可以加以比较</p>
+<table>
+<thead>
+<tr>
+<th align="center">比较维度</th>
+<th align="center">API查询</th>
+<th align="center">心跳通知</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">模式</td>
+<td align="center">PULL模型</td>
+<td align="center">PUSH模型</td>
+</tr>
+<tr>
+<td align="center">优点</td>
+<td align="center">我们可以根据服务端消费能力来调整fetch频率，服务器压力可控。失败可重试，数据可靠性好</td>
+<td align="center">实时性优于PULL模型</td>
+</tr>
+<tr>
+<td align="center">缺点</td>
+<td align="center">性能与实时性不可兼得，实时性好则需要高频fetch，但低峰期容易造成性能浪费。对数据更新的感知较差</td>
+<td align="center">服务端需要做好流控，以避免当消费者消费能力不足或者承压能力较弱的时候，一次推送的流量过大造成消费者处理不过来</td>
+</tr>
+</tbody></table>
+<p><strong>我们这里的场景，追求实时性，所以采用的是以通知机制为主的PUSH模型</strong>（当然这个通知的频率也是可以动态调整的）。大致的实现方案，下图可见。<br><img src="/.io//%E5%88%86%E9%85%8D%E7%9A%84%E8%BF%87%E7%A8%8B%E5%8E%9F%E7%90%86.jpg" alt="分配的过程原理.jpg"></p>
+<p>由上述方案可知，空闲云机可分配的第一步便是：心跳包的解析处理。<br>该模块主要有如下两个功能。<br>1：数据监控与告警<br>2：结合业务状态，如何做到空闲资源分配和资源回收</p>
+<p>数据的监控是统计主要是用户在线时长，区域热力图数据等运营数据。主要想总结的是第二点，如何结合我们自身平台业务状态去做资源分配和回收策略。<br>我们在DB中会有记录去跟踪用户从开始到游戏结束的业务状态。</p>
+<p><img src="/.io//%E7%8A%B6%E6%80%81%E4%B8%8E%E4%BA%91%E6%9C%BA.jpg" alt="状态与云机.jpg"></p>
+<p>我们心跳处理模块就需要根据这些状态做相对应得处理。这里即可以使用策略模式也可以采用责任链模式。我采用了责任链模式，因为在某些节点上可以对数据做前置流程的加工。</p>
+<p><img src="/.io//%E8%B4%A3%E4%BB%BB%E9%93%BE1.jpg" alt="责任链1.jpg"><br><img src="/.io//%E8%B4%A3%E4%BB%BB%E9%93%BE2.jpg" alt="责任链2.jpg"></p>
+<p>比如在FreeWithNone、FreeWithWaiting，FreeWithExist三种组合状态下分表表示。<br>1.云机空闲&amp;&amp;没有关联的业务记录（一般是扩容后一直没有被分配到的机子状态才会为None，出现概率不高）<br>2.云机空闲&amp;&amp;当前等待分配<br>3.云机空闲&amp;&amp;该云机最近的业务记录对应的用户已经成功退出游戏<br>这三种情况会将云机视为空闲可分配的资源。拿其中的FreeWithExist为例子</p>
+<p><img src="/.io//FreeWithExist.jpg" alt="FreeWithExist.jpg"></p>
+<p>对于一些看起来不可能出现的“状态组合”我们一般采用告警方案，一旦出现则直接发起DingDing告警（一旦出现该问题，一定是逻辑上有重大缺陷），并将云机用户踢下线&amp;&amp;状态更新【已退出】。比如BusyWithNone，云机非空闲但是又不存在与之关联的业务状态，那么肯定是出大问题了呀！这里就不过多去叙述了。</p>
+<h5 id="WebSocket通信遇到的一些问题"><a href="#WebSocket通信遇到的一些问题" class="headerlink" title="WebSocket通信遇到的一些问题"></a>WebSocket通信遇到的一些问题</h5><p>在研发云游戏项目的过程中，大量使用到了WebSocket技术。WebSocket提供了双全工通信，能够让服务器端主动推送消息给客户端。相信做过Ws相关工作的人都知道，WebSocket产生的<strong>会话是有状态的，无法序列化的。</strong>而我们平时大多数场景下的Service都是无状态的。基于RestFul架构，我们可以轻易的将用户登录会话存入Redis等中间件，再业务上判断用户是否登录。但是WebSocket中产生的Session是不可序列化&amp;有链接状态的，说白了，你没办法存入Redis中。长连接建立后，客户端立即与服务端某个节点保持会话，因此其他服务要想找到用户会话在哪个节点上，会有一点麻烦。且听下述小节</p>
+<h6 id="如何寻找会话？"><a href="#如何寻找会话？" class="headerlink" title="如何寻找会话？"></a>如何寻找会话？</h6><p>通常来说解决会话寻找问题有两种方案。<br>方案一：将用户信息、会话服务器信息等元信息注册到注册中心，集中管理并提供查询方式给订阅的服务器Service<br><img src="/.io//%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E6%96%B9%E6%A1%88%E7%A4%BA%E4%BE%8B.jpg" alt="注册中心方案示例.jpg"></p>
+<p>优势：会话映射关系清晰，在服务稳定的情况下可以一次性定位到会话服务器，适合大集群规模。<br>劣势：实现复杂，对研发部门的水平要求更高。需要保证注册中心高可用，有一定运维成本！</p>
+<p>方案二：通过广播的方式向集群所有WebSocket推送消息，节点获取消息后各自检查该消息对应的user会话是否在自己的节点上。<br><img src="/.io//%E5%8F%91%E5%B8%83%E8%AE%A2%E9%98%85%E6%96%B9%E5%BC%8F.jpg" alt="发布订阅方式.jpg"></p>
+<p>广播的机制可以利用常用的中间件实现。以下是常用的技术方案</p>
+<table>
+<thead>
+<tr>
+<th align="center">中间件</th>
+<th align="center">优点</th>
+<th align="center">缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">基于RabbitMQ</td>
+<td align="center">吞吐量高，高可用，可靠性机制完善</td>
+<td align="center">在广播模式下比较麻烦，每次新增一个广播分区都要主动创建相对应的Exchanger和Queue，该场景下运维麻烦</td>
+</tr>
+<tr>
+<td align="center">基于Kaffka</td>
+<td align="center">吞吐量高于rabbitMQ，可靠性好</td>
+<td align="center">实时性不如Redis</td>
+</tr>
+<tr>
+<td align="center">基于Redis</td>
+<td align="center">实时性高，吞吐量大，实现非常简单</td>
+<td align="center">不保证可靠，需要自己实现消息持久化和重试机制</td>
+</tr>
+<tr>
+<td align="center">基于Zookeeper</td>
+<td align="center">利用zk的观察者模式，实现方式最简单</td>
+<td align="center">高并发场景下写入性能差</td>
+</tr>
+</tbody></table>
+<p>我们从实时性，吞吐量，实现难易的程度考虑，我们直接排除掉RabbitMQ和Zookeeper的方案。剩下Kaffka和Redis我们结合自己团队的实际情况，采用了Redis的方式来做广播机制。实现非常简单，仅仅需要关注于client如何定义channelName,消费者如何订阅这个channelName即可，而在发送之前我们会将消息先存入redis中，当消费者消费消息后异步删除该通知。</p>
+<p>消费者订阅：<br><img src="/.io//%E6%B6%88%E8%B4%B9%E8%80%85%E8%AE%A2%E9%98%85.jpg" alt="消费者订阅.jpg"></p>
+<p>消息监听处理：<br><img src="/.io//%E6%B6%88%E8%B4%B9%E6%B6%88%E6%81%AF.jpg" alt="消费消息.jpg"></p>
+<p>publish消息：<br><img src="/.io//RedisClient.jpg" alt="RedisClient.jpg"></p>
+<p>基于广播方案的实现相比方案一实现简单许多，<strong>但是也造成了很多宽带的浪费</strong>！当然现阶段该方案是能够较好支撑我们生产场景的，以后当规模巨大，相信会重构为方案一的实现！</p>
+<h6 id="心跳机制该怎么设计？"><a href="#心跳机制该怎么设计？" class="headerlink" title="心跳机制该怎么设计？"></a>心跳机制该怎么设计？</h6><p>技术上使用了WebSocket通信，那么不可避免的需要涉及到心跳机制。使用WebSocket必须要建立有效的心跳机制，通过心跳机制来检查链路的连通性，实现保活和断线重连，这是系统可用性的一个保证。<strong>不能单纯依赖于TCP传输层的Keep-Alive，要在应用层上也做心跳机制</strong>。</p>
+<p>心跳机制需要做到两点基本的检查。<br>1.处理“<strong>心跳超时事件</strong>”，连续X次或者周期时间内接收到的心跳包(ping/pong)为达到预期，则可认为链路不通畅。<br>2.处理“<strong>心跳失败事件</strong>”，链路中发生的I/O异常应该被处理。</p>
+<p>说说我所在的云游戏业务线目前方案：<strong>单向的ping-pong方案+空闲检查策略</strong>。</p>
+<p>先说说单向ping-pong方案。客户端通过定时轮询的方式向服务端发送”ping”,服务端接收到来这客户端的”ping”马上回复“pong”。假定客户端定时发起的周期为T=30s，发起ping之后，若T周期内，客户端没有收到服务端响应的pong则记录value=1在一个长度为N的位图bitmap中。<strong>当bitmap最后一个位置为1的时候，检查是否该bitmap的所有元素值为1，是则说明当前出现了“心跳超时事件”</strong>，根据不同场景做一个业务策略，通常是客户端发起重连。如果没有连续N次，则需要将bitmap上对应的位置置为0表示成功。</p>
+<p>再说说什么是“空闲检查策略”。空闲检查策略其实就是<strong>将业务数据的流通行为，视作一次ping-pong的过程</strong>。客户端已经接收到服务端的业务数据了，所以在T周期内不需要再次发起ping-pong流程。这样可以避免掉无意义的网络传输。对服务器的压力也比较小</p>
+<p>了解更多请参考我此前的一篇文章<a href="https://lihaohanggitee.gitee.io/passages/%E4%BD%A0%E4%BB%A5%E4%B8%BA%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6%E5%8F%AA%E6%98%AF%E7%AE%80%E5%8D%95%E7%9A%84Ping-Pong%E5%90%97/">你以为心跳机制只是简单的Ping-Pong吗</a></p>
+<h4 id="恶意用户处理方案"><a href="#恶意用户处理方案" class="headerlink" title="恶意用户处理方案"></a>恶意用户处理方案</h4><p>很多小白在使用WebSocket的时候，都是按照网上的demo直接快速上手使用，完全没有考虑到WebSocket的安全问题！WebSocket和Http不同，Http请求有同源限制，不同源之间的通信需要跨域，而WebSocket没有同源限制。基于这个前提，非法用户是可以做到<strong>跨站点WebSocket劫持</strong>。</p>
+<p>1.<strong>为了防止跨站点WebSocket劫持，我们需要服务端代码中增加Origin检查，如果客户端发来的Origin信息来自不同的域，直接拒绝该请求或者发回403响应</strong></p>
+<p>2.<strong>防止中间人攻击</strong>。和http一样，websocket也存在中间人攻击的风险，为了安全起见，可以利用证书保证通信链路安全。WebSocketk可以使用HTTP或者HTTPS进行握手请求，在使用HTTP协议的情况下本身就是不安全的！http本身也有中间人攻击的问题。为了防范这种攻击，<strong>需要在加密信道上建立WebSocket连接，使用HTTPS协议发起握手请求</strong>。</p>
+<p><img src="/.io//WSS.jpg" alt="WSS.jpg"></p>
+<p>3.<strong>WebSocket同样令需要牌机制</strong>。服务端需要为了每个客户端websocket连接生成唯一的token，需要是一次性的（如果不允许断线重新连接使用）或者是有时效性的(比如过期失效)。客户端必须使用token作为发起websocket连接的URL参数，服务端获取到该token后会进行解析校验是否合法。</p>
+<p>4.<strong>建立IP黑名单机制</strong>。服务端需要设计一个阈值，当同个IP高频率访问或者建立WS连接的时候，进行拒绝并收录黑名单中。当然这块的实现逻辑也可以交由运维人员的安全服务去处理。也可以在业务上去实现，统计周期内用户连接次数是否超过阈值，若超过可以封杀该IP</p>
+<h3 id="对云游戏的一些个人思考"><a href="#对云游戏的一些个人思考" class="headerlink" title="对云游戏的一些个人思考"></a>对云游戏的一些个人思考</h3><p>亲历了一次云游戏的研发设计，让我更相信为来一切上云，一切业务在云端繁荣。为公司研发的云游戏试玩，很大程度上也提高了新游戏推广的效果，提高了用户的留存率。虽然目前云游戏在一些特大手游上仍然存在一些体验上稍有延迟的问题，但是我相信在未来的5G时代中，这些“延时感”问题都不是问题。</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B8%B8%E6%88%8F%E4%B8%BA%E4%BD%95%E4%B8%8A%E4%BA%91%EF%BC%9F"><span class="toc-text">游戏为何上云？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AB%99%E5%9C%A8%E6%B8%B8%E6%88%8F%E7%8E%A9%E5%AE%B6%E7%9A%84%E8%A7%92%E5%BA%A6"><span class="toc-text">站在游戏玩家的角度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AB%99%E5%9C%A8%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E5%95%86%E7%9A%84%E8%A7%92%E5%BA%A6"><span class="toc-text">站在游戏开发商的角度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AB%99%E5%9C%A8%E6%B8%B8%E6%88%8F%E6%B8%A0%E9%81%93%E8%BF%90%E8%90%A5%E7%9A%84%E8%A7%92%E5%BA%A6"><span class="toc-text">站在游戏渠道运营的角度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%91%E6%9C%8D%E5%8A%A1%E6%8F%90%E4%BE%9B%E5%95%86"><span class="toc-text">云服务提供商</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%88%91%E4%BB%AC%E6%98%AF%E5%A6%82%E4%BD%95%E4%B8%8A%E4%BA%91%E7%9A%84%EF%BC%9F"><span class="toc-text">我们是如何上云的？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E5%A6%82%E4%BD%95%E7%8E%A9%E4%BA%91%E6%B8%B8%E6%88%8F%EF%BC%9F"><span class="toc-text">用户如何玩云游戏？</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BA%91%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6"><span class="toc-text">云资源调度</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BA%91%E6%89%8B%E6%9C%BA%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E9%85%8D%E7%9A%84"><span class="toc-text">云手机是怎么分配的</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#WebSocket%E9%80%9A%E4%BF%A1%E9%81%87%E5%88%B0%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98"><span class="toc-text">WebSocket通信遇到的一些问题</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AF%BB%E6%89%BE%E4%BC%9A%E8%AF%9D%EF%BC%9F"><span class="toc-text">如何寻找会话？</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6%E8%AF%A5%E6%80%8E%E4%B9%88%E8%AE%BE%E8%AE%A1%EF%BC%9F"><span class="toc-text">心跳机制该怎么设计？</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%81%B6%E6%84%8F%E7%94%A8%E6%88%B7%E5%A4%84%E7%90%86%E6%96%B9%E6%A1%88"><span class="toc-text">恶意用户处理方案</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E4%BA%91%E6%B8%B8%E6%88%8F%E7%9A%84%E4%B8%80%E4%BA%9B%E4%B8%AA%E4%BA%BA%E6%80%9D%E8%80%83"><span class="toc-text">对云游戏的一些个人思考</span></a></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E4%BA%91%E6%B8%B8%E6%88%8F-%E4%B8%80%E9%94%AE%E7%A7%92%E7%8E%A9-%E8%AE%A9%E7%94%A8%E6%88%B7%E6%9B%B4%E7%88%BD%E7%95%85/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E7%94%9F%E4%BA%A7%E5%AE%9E%E8%B7%B5/"><i class="fa fa-tags"></i>生产实践</a>
+     
+      <a href="/tags/%E4%BA%91%E6%B8%B8%E6%88%8F/"><i class="fa fa-tags"></i>云游戏</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E5%AF%BB%E6%89%BE%E6%9C%80%E9%95%BF%E7%9A%84%E5%85%83%E9%9F%B3%E5%AD%97%E6%AF%8D%E5%AD%97%E7%AC%A6%E4%B8%B2/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Linux%E5%86%85%E6%A0%B8-%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80%E4%B8%8A%E7%AF%87/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

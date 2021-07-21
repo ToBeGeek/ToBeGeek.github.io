@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>Java8的Lambda表达式-Stream上篇 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="Java基础,Java基础,JDK8新特性," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2020-12-26
+    </span>
+    
+      <span>
+        | <a href="/categories/Java%E5%9F%BA%E7%A1%80/"><i class="fa fa-bookmark"></i>Java基础</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    Java8的Lambda表达式-Stream上篇
+  </h1>
+  
+  <article class="passage-article">
+    <!-- TOC -->
+
+<ul>
+<li><a href="#why-stream">Why Stream?</a><ul>
+<li><a href="#%E6%89%BE%E5%87%BA%E8%B4%AD%E4%B9%B0%E7%89%99%E5%88%B7%E7%9A%84%E4%BA%BA">找出购买牙刷的人</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%86%85%E9%83%A8%E8%BF%AD%E4%BB%A3">为什么要内部迭代</a></li>
+<li><a href="#%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AAstream%E7%9A%84%E6%96%B9%E5%BC%8F">创建一个Stream的方式</a><ul>
+<li><a href="#%E9%80%9A%E8%BF%87%E9%9B%86%E5%90%88%E8%8E%B7%E5%8F%96stream">通过集合获取Stream</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8arrays%E9%80%9A%E8%BF%87%E6%95%B0%E7%BB%84%E8%8E%B7%E5%8F%96stream">使用Arrays通过数组获取Stream</a></li>
+<li><a href="#%E9%80%9A%E8%BF%87stream%E7%B1%BBof%E6%96%B9%E6%B3%95%E8%8E%B7%E5%8F%96">通过Stream类of方法获取</a></li>
+</ul>
+</li>
+<li><a href="#%E9%80%9A%E8%BF%87stream%E7%B1%BB%E7%9A%84iterate%E8%8E%B7%E5%8F%96">通过Stream类的iterate获取</a></li>
+<li><a href="#%E6%83%B0%E6%80%A7%E6%B1%82%E5%80%BC%E4%B8%8E%E5%8F%8A%E6%97%A9%E6%B1%82%E5%80%BC">惰性求值与及早求值</a></li>
+<li><a href="#%E5%90%AC%E8%AF%B4stream%E6%80%A7%E8%83%BD%E4%B8%8D%E9%A6%99%E6%98%AF%E7%9C%9F%E7%9A%84%E5%90%97">听说Stream性能不香？是真的吗？</a></li>
+</ul>
+<!-- /TOC -->
+
+<h5 id="Why-Stream"><a href="#Why-Stream" class="headerlink" title="Why Stream?"></a>Why Stream?</h5><p>Java8中最让我感到喜欢的特性就是Stream，让我喜欢它的理由有：能够使得代码更加简洁易懂，能够轻易的创建一个并行流进行类Fork/join的任务处理，大数据量处理的时候更高效的性能…</p>
+<p>Stream直译过来就是流。想到“流”我的脑海中会出现两个特点：<br>1.有向，有起点和终点。<br>2.中间处理，就像生产车间的流水线处理，原材料(好比初始化的数据)在不同的部门车间(好比函数)进行加工处理，最终形成需要的产品(目标数据)</p>
+<p>先来个容易理解的demo，以下是一张订单表，让我们用JDK7的写法与JDK8写法做一个横向对比。定义一个List<OrderRecord> orderRecords，记录order表的所有数据<br><img src="/.io//%E8%AE%A2%E5%8D%95%E8%A1%A8.jpg" alt="订单表.jpg"></OrderRecord></p>
+<h6 id="找出购买牙刷的人"><a href="#找出购买牙刷的人" class="headerlink" title="找出购买牙刷的人"></a>找出购买牙刷的人</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//JDK7 写法</span></span><br><span class="line">List&lt;OrderRecord&gt; toothbrushBuyers = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"><span class="keyword">for</span> (OrderRecord record : orderRecords) &#123;</span><br><span class="line">     <span class="keyword">if</span> (<span class="string">&quot;牙刷&quot;</span>.equals(record.getGoodName())) &#123;</span><br><span class="line">        toothbrushBuyers.add(record);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//JDK8 写法</span></span><br><span class="line">List&lt;OrderRecord&gt; toothbrushBuyers2 = orderRecords.stream()</span><br><span class="line">    .filter(el -&gt; <span class="string">&quot;牙刷&quot;</span>.equals(el.getGoodName()))</span><br><span class="line">    .collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+
+<p>如果你熟悉链式调用的风格，你会发现JDK8中stream带来了这样的一种能力。而链式编程带来最直观的感受就是代码连贯，可读性强，容易维护。看到这里，你可能会喷我。上面JDK7的示例也很容易理解啊，怎么就可读性差了？</p>
+<p>OK，you are right!现在产品大佬说要加多一个需求了，找出购买牙刷的消费者中，牙刷单价最高的消费者！</p>
+<p>如果这个时候你基于JDK7代码的前提，你会怎么做？</p>
+<p>*calculateSinglePrice是计算单价的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//假设最高单价购买人的索引值topIndex=0</span></span><br><span class="line"><span class="keyword">int</span> topIndex=<span class="number">0</span>;</span><br><span class="line">OrderRecord topNode;</span><br><span class="line">OrderRecord currentNode;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;toothbrushBuyers.size();i++)&#123;</span><br><span class="line">    topNode= toothbrushBuyers.get(topIndex);</span><br><span class="line">    currentNode= toothbrushBuyers.get(i);</span><br><span class="line">    BigDecimal topSinglePrice=calculateSinglePrice(topNode.getPayment(),topNode.getNumb());</span><br><span class="line">    BigDecimal currentSinglePrice=calculateSinglePrice(currentNode.getPayment(),currentNode.getNumb());</span><br><span class="line">    <span class="comment">//对比，找出最高单价的消费者</span></span><br><span class="line">    <span class="keyword">if</span>(topSinglePrice.compareTo(currentSinglePrice)&lt;<span class="number">0</span>)&#123;</span><br><span class="line">        topIndex=i;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码，估计还是有不少小可爱会这么干。但如果这么干了，你觉得可读性如何？<strong>定义的变量变多，意味着代码中需要维护的变量也多了，可读性自然下降</strong>。而且两次for循环（for循环是代码中的大块，toothbrushBuyers的集合如果是超大集合，过多会造成性能下降）。或许你会反驳，我才不会这么写，我会写Comparator或者我可以把for循环合并成一个。对的，你可以写comparator，一旦下次需求又又又改了，那真的是恭喜你，请好好维护你的比较器~。合并for循环，确实能使得效率更高，但这也意味着你需要很谨慎的对旧有for进行改造。来看看JDK8中stream的写法吧！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">OrderRecord target=toothbrushBuyers2.stream()</span><br><span class="line">    .max(Comparator.comparing(x-&gt;calculateSinglePrice(x.getPayment(),x.getNumb())))</span><br><span class="line">    .orElse(<span class="keyword">null</span>);</span><br></pre></td></tr></table></figure>
+
+<p>或者更简单，合并之前的stream处理</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">OrderRecord target = orderRecords.stream()</span><br><span class="line">    .filter(el -&gt; <span class="string">&quot;牙刷&quot;</span>.equals(el.getGoodName()))</span><br><span class="line">    .max(Comparator.comparing(x-&gt;calculateSinglePrice(x.getPayment(),x.getNumb())))</span><br><span class="line">    .orElse(<span class="keyword">null</span>);</span><br></pre></td></tr></table></figure>
+
+<p>对比上述，相信你已经能感受到Stream风格写法的优雅了！后续产品再来需求，我们只要在这条链上，新增“处理节点”就可以了</p>
+<h5 id="为什么要内部迭代"><a href="#为什么要内部迭代" class="headerlink" title="为什么要内部迭代"></a>为什么要内部迭代</h5><p>链式调用对代码封装，底层屏蔽的要求很高，所以才能对使用者友好。好比我们常见的建造者模式，或者Lombok工具（<a href="https://lihaohanggitee.gitee.io/passages/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/">建造者模式</a>）</p>
+<p>同样的，Stream也做了不少的屏蔽工作。它屏蔽的内容细节主要是什么呢？我看来就是迭代。对比传统的写法，我们不难发现，迭代写在集合之外。而Stream则属于内部迭代。</p>
+<p><img src="/.io//%E5%86%85%E9%83%A8%E8%BF%AD%E4%BB%A3%E4%B8%8E%E5%A4%96%E9%83%A8%E8%BF%AD%E4%BB%A3.png" alt="内部迭代与外部迭代.png"></p>
+<p>从结构的对比上，可以知道，外部迭代的风格要求开发人员在应用代码中维护迭代并且实现“做什么”，内部迭代仅仅要求开发人员告知集合元素需要“做什么”。因此Stream可以让开发者更专注于业务实现，从而简化代码。<strong>code less,do more</strong></p>
+<h5 id="创建一个Stream的方式"><a href="#创建一个Stream的方式" class="headerlink" title="创建一个Stream的方式"></a>创建一个Stream的方式</h5><p>创建一个Stream的方式有多种，以下列出。</p>
+<h6 id="通过集合获取Stream"><a href="#通过集合获取Stream" class="headerlink" title="通过集合获取Stream"></a>通过集合获取Stream</h6><p>比如上面的代码**orderRecords.stream()**，Collection在JDK8中引入了stream()方法用于创建集合的流对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">OrderRecord target = orderRecords.stream()</span><br><span class="line">    .filter(el -&gt; <span class="string">&quot;牙刷&quot;</span>.equals(el.getGoodName()))</span><br><span class="line">    .max(Comparator.comparing(x-&gt;calculateSinglePrice(x.getPayment(),x.getNumb())))</span><br><span class="line">    .orElse(<span class="keyword">null</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h6 id="使用Arrays通过数组获取Stream"><a href="#使用Arrays通过数组获取Stream" class="headerlink" title="使用Arrays通过数组获取Stream"></a>使用Arrays通过数组获取Stream</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>[] tempArr = <span class="keyword">new</span> <span class="keyword">int</span>[]&#123;<span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line">IntStream intStream = Arrays.stream(tempArr);</span><br><span class="line">intStream.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h6 id="通过Stream类of方法获取"><a href="#通过Stream类of方法获取" class="headerlink" title="通过Stream类of方法获取"></a>通过Stream类of方法获取</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; streamFromOf = Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);</span><br><span class="line">streamFromOf.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h5 id="通过Stream类的iterate获取"><a href="#通过Stream类的iterate获取" class="headerlink" title="通过Stream类的iterate获取"></a>通过Stream类的iterate获取</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Stream</span><br><span class="line">    <span class="comment">//从0开始，获取t+2的数值（获取偶数）</span></span><br><span class="line">    .iterate(<span class="number">0</span>,t-&gt;t+<span class="number">2</span>)</span><br><span class="line">    <span class="comment">//仅仅获取前10个</span></span><br><span class="line">    .limit(<span class="number">10</span>)</span><br><span class="line">    <span class="comment">//输出0,2,4,6,8,10,12,14,16,18</span></span><br><span class="line">    .forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h5 id="惰性求值与及早求值"><a href="#惰性求值与及早求值" class="headerlink" title="惰性求值与及早求值"></a>惰性求值与及早求值</h5><p><img src="/.io//Stream%E7%BB%93%E6%9E%84.jpg" alt="Stream结构.jpg"></p>
+<p>打开idea，alt+7观察Stream类的结构。不难发现，Stream定义的方法大体分为两种1.返回一个Stream或XxxStream的流对象,2.返回一个泛型类型T。我们一般把第一种称作：<strong>惰性求值方法，仅仅对stream进行描述</strong>。第二种方法称作：<strong>及早求值，从stream中产生结果(值或者新集合)并且结束流的操作</strong></p>
+<p>比如我们上述提到的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;OrderRecord&gt; toothbrushBuyers2 = orderRecords.stream()</span><br><span class="line">    <span class="comment">//filter方法返回的是一个Stream对象，描述商品为“牙刷”的stream</span></span><br><span class="line">    .filter(el -&gt; <span class="string">&quot;牙刷&quot;</span>.equals(el.getGoodName()))</span><br><span class="line">    <span class="comment">//collect方法从filter描述后的stream中返回最终结果集并结束stream操作</span></span><br><span class="line">    .collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+
+<h5 id="听说Stream性能不香？是真的吗？"><a href="#听说Stream性能不香？是真的吗？" class="headerlink" title="听说Stream性能不香？是真的吗？"></a>听说Stream性能不香？是真的吗？</h5><p>其实是一个选择的问题，用对了，就是真香！</p>
+<p>以下给定两个集合数据[0,..10],[0,…100000],求集合中素数的个数列表<br>素数又称质数。所谓素数是指除了 1 和它本身以外，不能被任何整数整除的数，例如17就是素数，因为它不能被 2~16 的任一整数整除。</p>
+<p>判断方法，通过计算给定数字的平方根，缩小素数求值范围，具体原理可以去力扣上了解，这里不展开说了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//判断给定值是否素数</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isPrime</span><span class="params">(<span class="keyword">int</span> src)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">double</span> sqrt = Math.sqrt(src);</span><br><span class="line">    <span class="keyword">if</span> (src &lt; <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (src == <span class="number">2</span> || src == <span class="number">3</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 先判断是否为偶数，若偶数就直接结束程序</span></span><br><span class="line">    <span class="keyword">if</span> (src % <span class="number">2</span> == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">3</span>; i &lt;= sqrt; i += <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (src % i == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>本机运行环境：<br>4c16G<br><img src="/.io//%E6%9C%BA%E5%99%A8%E9%85%8D%E7%BD%AE.jpg" alt="机器配置.jpg"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoMain</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//十级</span></span><br><span class="line">        List&lt;Integer&gt; xsArr = Stream.iterate(<span class="number">0</span>, t -&gt; t + <span class="number">1</span>).limit(<span class="number">10</span>).collect(Collectors.toList());</span><br><span class="line">        <span class="comment">//百级</span></span><br><span class="line">        List&lt;Integer&gt; smArr = Stream.iterate(<span class="number">0</span>, t -&gt; t + <span class="number">1</span>).limit(<span class="number">100</span>).collect(Collectors.toList());</span><br><span class="line">        <span class="comment">//千级</span></span><br><span class="line">        List&lt;Integer&gt; mArr = Stream.iterate(<span class="number">0</span>, t -&gt; t + <span class="number">1</span>).limit(<span class="number">1000</span>).collect(Collectors.toList());</span><br><span class="line">        <span class="comment">//万级</span></span><br><span class="line">        List&lt;Integer&gt; lArr = Stream.iterate(<span class="number">0</span>, t -&gt; t + <span class="number">1</span>).limit(<span class="number">10000</span>).collect(Collectors.toList());</span><br><span class="line">        <span class="comment">//十万级</span></span><br><span class="line">        List&lt;Integer&gt; xlArr = Stream.iterate(<span class="number">0</span>, t -&gt; t + <span class="number">1</span>).limit(<span class="number">100000</span>).collect(Collectors.toList());</span><br><span class="line">        <span class="comment">//百万计</span></span><br><span class="line">        List&lt;Integer&gt; xxlArr = Stream.iterate(<span class="number">0</span>, t -&gt; t + <span class="number">1</span>).limit(<span class="number">1000000</span>).collect(Collectors.toList());</span><br><span class="line">        <span class="comment">//千万级</span></span><br><span class="line">        List&lt;Integer&gt; mxArr = Stream.iterate(<span class="number">0</span>, t -&gt; t + <span class="number">1</span>).limit(<span class="number">10000000</span>).collect(Collectors.toList());</span><br><span class="line"></span><br><span class="line">        mockToDoSomething(xsArr);</span><br><span class="line">        mockToDoSomething(smArr);</span><br><span class="line">        mockToDoSomething(mArr);</span><br><span class="line">        mockToDoSomething(lArr);</span><br><span class="line">        mockToDoSomething(xlArr);</span><br><span class="line">        mockToDoSomething(xxlArr);</span><br><span class="line">        mockToDoSomething(mxArr);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">mockToDoSomething</span><span class="params">(List&lt;Integer&gt; arr)</span> </span>&#123;</span><br><span class="line">        String size=String.format(<span class="string">&quot;当前数据量:%s条&quot;</span>,arr.size());</span><br><span class="line">        <span class="keyword">long</span> startTime1=System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//普通for</span></span><br><span class="line">        List&lt;Integer&gt; container=<span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; arr.size(); i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(isPrime(arr.get(i)))&#123;</span><br><span class="line">                container.add(arr.get(i));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">long</span> userTime=System.currentTimeMillis()-startTime1;</span><br><span class="line">        System.out.println(size+<span class="string">&quot;,普通for循环耗时(ms):&quot;</span>+userTime);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//串行流stream</span></span><br><span class="line">        <span class="keyword">long</span> startTime2=System.currentTimeMillis();</span><br><span class="line">        container=arr.stream().filter(DemoMain::isPrime).collect(Collectors.toList());</span><br><span class="line">        <span class="keyword">long</span> userTime2=System.currentTimeMillis()-startTime2;</span><br><span class="line">        System.out.println(size+<span class="string">&quot;,串行流stream()耗时(ms):&quot;</span>+userTime2);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//并行流</span></span><br><span class="line">        <span class="keyword">long</span> startTime3=System.currentTimeMillis();</span><br><span class="line">        container=arr.parallelStream().filter(DemoMain::isPrime).collect(Collectors.toList());</span><br><span class="line">        <span class="keyword">long</span> userTime3=System.currentTimeMillis()-startTime3;</span><br><span class="line">        System.out.println(size+<span class="string">&quot;,并行流parallelStream()耗时(ms):&quot;</span>+userTime3);</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;=====================可爱的分界线=====================&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">isPrime</span><span class="params">(<span class="keyword">int</span> src)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">double</span> sqrt = Math.sqrt(src);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">3</span>; i &lt;= sqrt; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (src % i == <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/.io//%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C.jpg" alt="运行结果.jpg"></p>
+<p>运行结果得出几个结论：<br>1.当数据量非常低的时候，比如小于1000条的时候，效率上总体来说：for≥stream&gt;parallelStream<br>2.当数据量开始偏大的时候，for循环的效率与stream的效率非常的接近，但parallelStream的效率更加高效！parallelStream&gt;stream≥for</p>
+<p>如果出于性能考虑，在数据量少&amp;&amp;操作简单的时候，推荐使用for循环。<br>如果数据量少&amp;&amp;逻辑相对复杂，推荐使用stream,因为这种情况下，代码的可维护性更加重要，而不是在于那对用户来说几乎无感知的性能差异。<br>如果数据量多&amp;&amp;数据操作可分解&amp;&amp;CPU多核，则推荐使用parallelStream，它能显著提高运行性能！</p>
+<p><strong>parallelStream在有限的前提下是可以显著提高运行性能的，但是如果把它当成集合操作的银弹，容易适得其反！</strong>我将会在<a href="https://lihaohanggitee.gitee.io/passages/Java8%E7%9A%84Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F-Stream%E4%B8%AD%E7%AF%87/">Java8的Lambda表达式-Stream中篇</a>讲解关于更多并行流的知识总结。</p>
+<p>上篇完！</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#Why-Stream"><span class="toc-text">Why Stream?</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%89%BE%E5%87%BA%E8%B4%AD%E4%B9%B0%E7%89%99%E5%88%B7%E7%9A%84%E4%BA%BA"><span class="toc-text">找出购买牙刷的人</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%86%85%E9%83%A8%E8%BF%AD%E4%BB%A3"><span class="toc-text">为什么要内部迭代</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AAStream%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="toc-text">创建一个Stream的方式</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E9%9B%86%E5%90%88%E8%8E%B7%E5%8F%96Stream"><span class="toc-text">通过集合获取Stream</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8Arrays%E9%80%9A%E8%BF%87%E6%95%B0%E7%BB%84%E8%8E%B7%E5%8F%96Stream"><span class="toc-text">使用Arrays通过数组获取Stream</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E9%80%9A%E8%BF%87Stream%E7%B1%BBof%E6%96%B9%E6%B3%95%E8%8E%B7%E5%8F%96"><span class="toc-text">通过Stream类of方法获取</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%80%9A%E8%BF%87Stream%E7%B1%BB%E7%9A%84iterate%E8%8E%B7%E5%8F%96"><span class="toc-text">通过Stream类的iterate获取</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%83%B0%E6%80%A7%E6%B1%82%E5%80%BC%E4%B8%8E%E5%8F%8A%E6%97%A9%E6%B1%82%E5%80%BC"><span class="toc-text">惰性求值与及早求值</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%90%AC%E8%AF%B4Stream%E6%80%A7%E8%83%BD%E4%B8%8D%E9%A6%99%EF%BC%9F%E6%98%AF%E7%9C%9F%E7%9A%84%E5%90%97%EF%BC%9F"><span class="toc-text">听说Stream性能不香？是真的吗？</span></a></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/Java8%E7%9A%84Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F-Stream%E4%B8%8A%E7%AF%87/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/Java%E5%9F%BA%E7%A1%80/"><i class="fa fa-tags"></i>Java基础</a>
+     
+      <a href="/tags/JDK8%E6%96%B0%E7%89%B9%E6%80%A7/"><i class="fa fa-tags"></i>JDK8新特性</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/Java8%E7%9A%84Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F-Stream%E4%B8%AD%E7%AF%87/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E4%BD%A0%E4%BB%A5%E4%B8%BA%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6%E5%8F%AA%E6%98%AF%E7%AE%80%E5%8D%95%E7%9A%84Ping-Pong%E5%90%97/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

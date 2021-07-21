@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>巧用位图 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="数据结构,位图,数据结构," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2021-03-27
+    </span>
+    
+      <span>
+        | <a href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"><i class="fa fa-bookmark"></i>数据结构</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    巧用位图
+  </h1>
+  
+  <article class="passage-article">
+    <blockquote>
+<p><strong>场景一：</strong><br>产品经理：“加一个需求，后台可以看到每天登陆人数的折现统计图”<br>程序员小李：“没问题，今晚就可以上线”。<br>拍定的方案是：开启定时任务对login_log表做一个select count(*)处理，再将汇总结果，写入cache中(key:count_login_{日期})，然后提供一个接口给前端返回cache中的数据。</p>
+<blockquote>
+<p><strong>场景二：</strong><br>…Two thousand years later,随着公司用户群体的增加…<br>小李此时正在头疼，膨胀的login_log表导致定时任务经常在深夜拉跨服务器，好几次搞得他夜不能寐。<br>产品经理此时走过来：“哎，项目发展的太好了，现在要多搞一个统计指标，活跃用户变化的折线统计图。”<br>小李：“哦？那怎么定义活跃用户呢？”<br>产品经理：“连续两天都登陆过的用户就是活跃用户，比如用户A从周一到周三都登陆了，那么他就属于周二，周三的活跃用户。不难吧，这个需求很简单，你多搞个定时器跑一跑，<strong>没有什么是代码实现不了的</strong>。”<br>小李：“让我想想怎么做吧，后面告诉你评估结果”</p>
+</blockquote>
+</blockquote>
+<p>相信熟练的Engineer们，已经想到方案了。它就是我今天要侃一侃的位图(BitMap).</p>
+<h3 id="什么是位图？"><a href="#什么是位图？" class="headerlink" title="什么是位图？"></a>什么是位图？</h3><p>位图也叫BitMap，是一种基于位(bit)的映射。</p>
+<p>比如我们要对判断某个用户在今年的某一天中是否登陆过App？最粗暴的方法就是拿着userId+指定日期去log表中查询。这种方案在数据量小的时候，是可以满足性能需求的，但是一旦用户群体膨胀导致log量级变大，那就只能“GG思密达”了。位图是怎么做到呢？</p>
+<p>首先，我们需要给用户登录接口动点“手脚”，当用户登录后，异步地向位图中写入登录结果。过程如图所示</p>
+<p><img src="/.io//%E7%94%A8%E6%88%B7%E7%99%BB%E5%BD%95.jpg" alt="用户登录.jpg"></p>
+<p>然后是怎么查询：请看下面的伪代码示例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//定义位图。如果当年是365天则，byte数组定义长度是365</span></span><br><span class="line"><span class="keyword">byte</span>[] xxUsrLoginMap=&#123;<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,....<span class="number">.0</span>&#125;;</span><br><span class="line"><span class="comment">//计算指定的那天，是当年的第几天，即天数的偏移量，比如查询2021年的第三天用户是否登陆</span></span><br><span class="line"><span class="keyword">int</span> offset=getOffset(<span class="string">&quot;20210103&quot;</span>);</span><br><span class="line"><span class="comment">//返回查询结果</span></span><br><span class="line"><span class="keyword">return</span> xxUsrLoginMap[offset]==<span class="number">1</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="为什么要使用位图？"><a href="#为什么要使用位图？" class="headerlink" title="为什么要使用位图？"></a>为什么要使用位图？</h3><p>位图是一种非常简单且紧凑的数据结构，本质上是数组。在合适的场景下，位图的使用可以极大的提高程序的空间利用率，加快查询速度从而提高性能。</p>
+<h4 id="排序小能手"><a href="#排序小能手" class="headerlink" title="排序小能手"></a><strong>排序小能手</strong></h4><p>假设有这样一组数据(3,2,7,0,4)，现在要求用最快的方法ASC排序。我们可以利用位图的思想来盘它！</p>
+<p>我们可以把这个问题当作“垃圾回收”。每一个element都想象成一个带有编号的垃圾袋(编号0则表示value也是0)。然后我们要给这些“垃圾”排序。<br>位图就好比是已知道顺序的“垃圾桶”，每一个垃圾桶的编号就是它的索引位值index。遍历每个垃圾袋，丢入对应编号的垃圾桶，然后再检查每个垃圾桶，有“垃圾”的桶就打印它的索引位，最后实现“垃圾排序”。</p>
+<p><img src="/.io//%E4%BD%8D%E5%9B%BE%E6%8E%92%E5%BA%8F.jpg" alt="位图排序.jpg"></p>
+<p>代码如下示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//定义位图</span></span><br><span class="line">        <span class="keyword">byte</span>[] bitMap=&#123;<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;;</span><br><span class="line">        <span class="comment">//乱序数组</span></span><br><span class="line">        <span class="keyword">int</span>[] arr=&#123;<span class="number">3</span>,<span class="number">2</span>,<span class="number">7</span>,<span class="number">0</span>,<span class="number">4</span>&#125;;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> value : arr) &#123;</span><br><span class="line">            bitMap[value] = <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bitMap.length; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(bitMap[i]==<span class="number">1</span>)&#123;</span><br><span class="line">                System.out.print(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>位图排序的优点：<br>运算效率还行，时间复杂度o(N)，不需要比较和交换顺序，对内存的占用少。</p>
+<p>位图排序的缺点：<br>数据不能出现重复，且数据必须在bitMap的长度范围中</p>
+<h4 id="查询小能手"><a href="#查询小能手" class="headerlink" title="查询小能手"></a><strong>查询小能手</strong></h4><p>位图的本质是一种数组，所以通过index的查询，性能杠杠滴！比如前面说到的场景，查找某个用户在某一天的登陆情况就非常适合。更多我就不展开叙述了。可以看看我的这篇文章<a href="https://lihaohanggitee.gitee.io/passages/%E8%AE%A4%E8%AF%86%E5%A4%A7%E5%9E%8B%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83/">《寻找最长的元音字母字符串》</a></p>
+<h4 id="布隆过滤器-Bloom-Filter"><a href="#布隆过滤器-Bloom-Filter" class="headerlink" title="布隆过滤器(Bloom Filter)"></a><strong>布隆过滤器(Bloom Filter)</strong></h4><p>基于bitMap衍生的布隆过滤器BloomFilter，是一种在数据判重情况下非常实用的结构。结论先行：<strong>布隆过滤器对已经见过的元素不会出现误判，但是对未见过的元素存在误判的可能。它告诉你数据不存在则一定不存在，但是告诉你数据已存在则不一定真的存在</strong></p>
+<p>比如APP消息推送，有时候营销活动的需要给APP用户们推送一些活动通知。当目标群体足够大的时候，要如何保证用户不会反复推送同样通知并且兼顾性能呢？总不能每次推送之前都先去查询一下DB是否有推送记录吧！</p>
+<p>可能有的人会说，可以通过redis给每个推送过的用户记录一个key:{userId}_{xxx活动id},value:1（1表示已经推送成功）。通过简单使用redis的这种方式会造成大量的内存浪费。所以我们推荐使用布隆过滤器，判断重复。</p>
+<p>布隆过滤器的实现原理，简单理解：<strong>对一个元素的值，通过多个散列函数映射到一个足够长的位图上。若下一个元素，散列后发现每一个映射的bit位都已经有1，则判断为重复元素.布隆过滤器中存入的是每个元素的指纹信息</strong></p>
+<p>流程如下：hash1、hash2、hash3分别表示三个不同的hash函数</p>
+<p><img src="/.io//%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.jpg" alt="布隆过滤器.jpg"></p>
+<p>从上图中可见，其实布隆过滤器并不是完美的方案，因为如果整个数组都是标记成1了，那误判率几乎是100%了。所以它需要初始化一个预估计的空间，比如实际用户量一千万，那就设置ini_size=一千两百万（适当冗余）。相比上述的redis简单方案，布隆过滤器不需要存储每个用户的推送标记键值对，更加节省空间（一千万个键值对和一千两百万个bit，可想而知）！</p>
+<p>使用布隆过滤器是一个相对平衡的方案，它性能好，误判率低，即使出现误判，像营销消息推送这种场景，极少数人收不到通知。如果要求一定能接收到，则可以从业务流程上入手，考虑一套软补偿方案！</p>
+<h3 id="场景二的解决方案"><a href="#场景二的解决方案" class="headerlink" title="场景二的解决方案"></a>场景二的解决方案</h3><p>好的，相信看到了这里，大家对BitMap有了基本的了解。接下来回归前言说到的场景二：如何统计活跃用户</p>
+<p>解决这个问题需要意识到两点：<br>1：需要记录每天的用户登陆情况<br>2：每次统计活跃用户，都需要把当前天的“登陆情况”和前一天的“登陆情况”做交集，找出活跃用户的这个集合</p>
+<p>利用Redis的位图可以给出这样一个解决方案。<br>第一点：为每一天“登陆情况”设定一个位图，key:{date}_{loginMap}。它的value假设是[0,1,0]，则表示ID=0，ID=2的用户没有登陆，但是ID=1的用户登陆了。</p>
+<p>第二点：计算活跃用户的时候，假设当天“登陆情况”是[0,1,1],也就是ID=1的用户是活跃用户。我们需要取交集，所以进行&amp;运算。010&amp;011=010,即得出活跃用户的“登陆情况”。并将这个交集，以key:{date}_{ActiveLoginMap}，记录下来。</p>
+<p>简单示例过程如下。</p>
+<p>首先我们需要知道几个redis的相关指令</p>
+<p><strong>setbit [key] [offset] [value]</strong>:setbit关键字用于设置指定key的offset位置的值</p>
+<p><strong>bitop [operation] [destkey] key…</strong>:bitop 表示使用运算符 and。destkey即运算后的数据集key</p>
+<p><strong>bitcount key</strong>:计算出指定位图中数值为1的数量</p>
+<p><img src="/.io//%E7%A4%BA%E4%BE%8B%E8%BF%87%E7%A8%8B.jpg" alt="示例过程.jpg"></p>
+<p>具体代码过程就不展开了！原理简单清晰，但是要注意一点的是，建议在进行运算后的交集中，尽可能采用别的数据结构存储ActiveLoginMap，避免运算积累下来的集合占据太多内存。</p>
+<p>方案给出，小李马上加班加点地code！终于顺利上线新功能~</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p><strong>场景三：</strong><br>产品经理又来了。刚准备开口谈谈下一个需求<br>小李俯下腰，从抽屉掏出了一块Brick…</p>
+</blockquote>
+</blockquote>
+</blockquote>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BD%8D%E5%9B%BE%EF%BC%9F"><span class="toc-text">什么是位图？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8%E4%BD%8D%E5%9B%BE%EF%BC%9F"><span class="toc-text">为什么要使用位图？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%92%E5%BA%8F%E5%B0%8F%E8%83%BD%E6%89%8B"><span class="toc-text">排序小能手</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%B0%8F%E8%83%BD%E6%89%8B"><span class="toc-text">查询小能手</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8-Bloom-Filter"><span class="toc-text">布隆过滤器(Bloom Filter)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%BA%E6%99%AF%E4%BA%8C%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-text">场景二的解决方案</span></a></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E5%B7%A7%E7%94%A8%E4%BD%8D%E5%9B%BE/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E4%BD%8D%E5%9B%BE/"><i class="fa fa-tags"></i>位图</a>
+     
+      <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"><i class="fa fa-tags"></i>数据结构</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E5%B7%A5%E4%BD%9C%E4%B8%AD%E5%A6%82%E4%BD%95%E7%94%A8DelayQueue/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E5%AF%BB%E6%89%BE%E6%9C%80%E9%95%BF%E7%9A%84%E5%85%83%E9%9F%B3%E5%AD%97%E6%AF%8D%E5%AD%97%E7%AC%A6%E4%B8%B2/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

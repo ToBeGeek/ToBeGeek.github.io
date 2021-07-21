@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>工作中如何用DelayQueue | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="延迟队列,DelayQueue," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2021-04-23
+    </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    工作中如何用DelayQueue
+  </h1>
+  
+  <article class="passage-article">
+    <!-- TOC -->
+
+<ul>
+<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
+<li><a href="#cache-aside-pattern">Cache-Aside Pattern</a><ul>
+<li><a href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E4%B8%8A%E9%9D%A2%E8%AF%B4%E7%9A%84%E4%B8%8D%E4%B8%80%E8%87%B4%E9%97%AE%E9%A2%98%E5%91%A2">如何解决上面说的不一致问题呢</a></li>
+</ul>
+</li>
+<li><a href="#%E5%A6%82%E4%BD%95%E5%81%9A%E5%88%B0%E5%BB%B6%E8%BF%9F%E5%A4%84%E7%90%86">如何做到延迟处理</a><ul>
+<li><a href="#delayqueue%E7%AE%80%E4%BB%8B">DelayQueue简介</a></li>
+<li><a href="#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B%E4%BD%BF%E7%94%A8">快速上手使用</a></li>
+</ul>
+</li>
+<li><a href="#%E6%88%91%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E8%B7%B5">我的生产实践</a><ul>
+<li><a href="#%E5%BB%B6%E8%BF%9F%E4%BB%BB%E5%8A%A1%E7%B1%BB-delayed%E6%8E%A5%E5%8F%A3%E5%AE%9E%E7%8E%B0%E7%B1%BB">延迟任务类-Delayed接口实现类</a></li>
+<li><a href="#manager%E7%BB%84%E4%BB%B6">Manager组件</a></li>
+<li><a href="#%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A8%A1%E6%8B%9F%E4%B8%80%E6%B3%A2">单元测试模拟一波</a></li>
+</ul>
+</li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>工作中有许多场景都会用到“延迟操作”。<br>比如：<br>1.支付超时取消。用户生成一笔“待支付”订单，15分钟内若没有支付则将订单状态更新为“已取消”。</p>
+<p>2.为了使得DB数据变更与缓存保持一致，我们会采用“双删”策略。</p>
+<p>以场景2为讲解示例，顺道总结一下<strong>Cache-Aside Pattern</strong></p>
+<h3 id="Cache-Aside-Pattern"><a href="#Cache-Aside-Pattern" class="headerlink" title="Cache-Aside Pattern"></a>Cache-Aside Pattern</h3><p>我们常说的<strong>Cache-Aside Pattern</strong>方案。它要满足三个原则：<br>1、读操作的时候优先从Cache中获取，没有命中则从DB中获取，从DB获取到数据后应该将数据放入缓存<br>2、读操作的时候如果从Cache中已经命中，那么直接使用缓存中的数据，不再去DB中获取。<br>3、DB数据发生变更后，需要删除缓存。</p>
+<p>以首页轮播图的读取和配置为例子。一般来说我们对轮播图这种热数据会做redis缓存，后台运营人员配置轮播图的时候，我们会将DB的数据更新然后对缓存删除操作。而用户进入首页请求轮播图的时候会优先从缓存中获取，如果缓存没有则去数据库中取数据并更新回缓存中。看起来好像没毛病，但是在高并发场景的时候就暴露问题了！如下，假设用户线程xxx是APP端的轮播图请求线程，运营人员线程是后台管理系统中对轮播图更改操作线程。</p>
+<p><img src="/.io//%E5%85%88%E6%9B%B4%E6%96%B0DB%E5%86%8D%E5%88%A0%E9%99%A4%E7%BC%93%E5%AD%98%E7%9A%84%E5%BC%8A%E7%AB%AF.jpg" alt="先更新DB再删除缓存的弊端"></p>
+<p>假设我们存在两条并发线程A、B。A线程读取缓存的时候，恰巧缓存失效了，A线程此时就去DB中捞出旧数据，准备将旧数据写入Cache中。与此同时，B线程将DB的数据更新了，然后准备将Cache数据删除掉。A线程准备将旧数据写入Cache，而B线程准备删除Cache。如果A线程先执行完成，那么B线程删除Cache，此时的结果是符合要求的（因为后续的线程C来读取Cache的时候无法命中，就会去DB中查询最新数据而后更新到Cache中。高并发的情况下，只有线程A是读取到旧数据）。如果B线程先执行完成，A线程会将旧数据写入Cache中，也就是说后续的其他读操作的线程会读取到旧数据（换言之，等着加班吧！）。</p>
+<h4 id="如何解决上面说的不一致问题呢"><a href="#如何解决上面说的不一致问题呢" class="headerlink" title="如何解决上面说的不一致问题呢"></a>如何解决上面说的不一致问题呢</h4><p>1.<strong>不设置缓存失效</strong>。这是一个较为粗暴的方案，因为上面说到读请求恰逢缓存失效而无法命中缓存，导致查询了DB旧数据并回写到缓存中。那么我们把这些缓存信息不设置失效时间不就好了吗？但这种方案会导致redis的存储压力变大，一般不采取</p>
+<p>2.<strong>缓存的延迟双删策略</strong>。B线程在A线程写入旧数据之前，先做了一波删除，导致旧数据写入缓存。基于旧方案，我们可以再第一次删除缓存之后，判断当前是否删除成功，不成功则采用延迟删除缓存的方式再删除一次。这样做的话，可以保证影响面最小。比如延迟100ms删除缓存，正常来说最差的情况就是100ms内的进来的读取线程读到旧数据，但是100ms后的读线程都是读取最新的数据。这种情况是允许的，毕竟你采用了缓存就要考虑到这种“极端”的不一致性问题。</p>
+<p>大体伪代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//更新数据库DB</span></span><br><span class="line">update(entity);</span><br><span class="line"><span class="comment">//第一次删除缓存</span></span><br><span class="line">deleteCache(key);</span><br><span class="line"><span class="comment">//判断缓存是否删除成功，成功等于key对于的缓存不存在||缓存中取出来的数据与上一步更新入库的数据保持一致</span></span><br><span class="line"><span class="keyword">if</span>(!deleteCacheSuccess(key,entity))&#123;</span><br><span class="line">    <span class="comment">//存在数据，但不一致，则延迟100ms删除</span></span><br><span class="line">    deleteCacheDelay(key,<span class="number">100</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来让我在总结一些场景的延迟处理方案。</p>
+<h3 id="如何做到延迟处理"><a href="#如何做到延迟处理" class="headerlink" title="如何做到延迟处理"></a>如何做到延迟处理</h3><p>关于如何做到延迟处理，这里的方案可选择性就多了去了！通常来说有如下几种</p>
+<table>
+<thead>
+<tr>
+<th align="center">方案类型</th>
+<th align="center">优点</th>
+<th align="center">缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">定时器处理</td>
+<td align="center">实现简单</td>
+<td align="center">分布式环境下需要注意多进程并行问题，实时性和性能无法同时满足。</td>
+</tr>
+<tr>
+<td align="center">Redis失效监听</td>
+<td align="center">实现难度一般，支持分布式环境的使用，实时性好</td>
+<td align="center">消息有可能丢失，如网络状况不好，还有可能影响实时性</td>
+</tr>
+<tr>
+<td align="center">RabbitMQ死信队列或者延迟队列</td>
+<td align="center">实时性好，支持分布式场景下的消息持久化，性能也不错</td>
+<td align="center">引入MQ中间件，实现复杂，需要使用到RabbitMQ的死信队列相关机制去做延迟处理。版本过低，还不支持！</td>
+</tr>
+<tr>
+<td align="center">基于JDK自带的DelayQueue</td>
+<td align="center">实时性最好，性能好，使用简单</td>
+<td align="center">消息无法持久化，一旦进程shutdown，消息将丢失。不适用于分布式环境</td>
+</tr>
+</tbody></table>
+<p>关于RabbitMQ相关的方案实践，可以参考我前些年写的文章《<a href="https://lihaohanggitee.gitee.io/passages/RabbitMQ%E4%B9%8B%E6%AD%BB%E4%BF%A1%E5%A4%84%E7%90%86%E6%96%B9%E6%A1%88/">RabbitMQ之死信处理方案</a>》</p>
+<p>回到本文的C位。DelayQueue，如上述的示例中，在运营后台管理模块对缓存的延迟删除，我认为是非常适用于DelayQueue的。首先OA系统的业务流程上通常不复杂，并发的可能性极低，即使出现并发，对于该场景而言，删除缓存是一个幂等操作。其次，该方案对实时性和性能也有所保证，实现也较为简单（不需要依赖第三方中间件）。</p>
+<h4 id="DelayQueue简介"><a href="#DelayQueue简介" class="headerlink" title="DelayQueue简介"></a>DelayQueue简介</h4><p>DelayQueue是Doug Lea老爷子主刀的一个JDK原生数据结构。它是一个<strong>无界的、阻塞的队列。队列元素必须是Delay接口实现类</strong>。</p>
+<p>把大象装入冰箱需要拆分成三步骤，那我也来简单说说它的工作原理过程：<br>1.将实现Delayed接口的元素加入队列，delayQueue.add(delayElement);<br>2.被加入的Delayed实现类，将通过getDelay方法实现堆排序，过期最久的元素将挪到队列头<br>3.delayElement=delayQueue.take();阻塞等待获取当前到期的元素</p>
+<p>使用要点：<strong>Delayed接口实现类，DelayQueue的add方法和take方法</strong></p>
+<p>元素必须是Delayed接口的实现类，需要实现该接口的getDelay方法，当前元素被add入DelayQueue的时候，getDelay方法用于计算元素什么时候到期，过期最久的元素将会被放到DelayQueue头部，优先出队（如何做到这种排序？完全二叉堆-小顶堆）。</p>
+<h4 id="快速上手使用"><a href="#快速上手使用" class="headerlink" title="快速上手使用"></a>快速上手使用</h4><p>直接看一个demo级别的使用，完整代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayQueueTest</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayImpl</span> <span class="keyword">implements</span> <span class="title">Delayed</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//定义延迟处理时间</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">long</span> delayTime;</span><br><span class="line">        <span class="comment">//计算后的过期时刻</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">long</span> expireTime;</span><br><span class="line">        <span class="comment">//任务描述</span></span><br><span class="line">        <span class="keyword">private</span> String desc;</span><br><span class="line"></span><br><span class="line">        DelayImpl(<span class="keyword">long</span> delayTime, String desc) &#123;</span><br><span class="line">            <span class="comment">//预计失效时间</span></span><br><span class="line">            <span class="keyword">this</span>.delayTime = delayTime;</span><br><span class="line">            <span class="keyword">this</span>.expireTime = delayTime + System.currentTimeMillis();</span><br><span class="line">            <span class="keyword">this</span>.desc = desc;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getDelayTime</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> delayTime;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDelayTime</span><span class="params">(<span class="keyword">long</span> delayTime)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.delayTime = delayTime;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">getDesc</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> desc;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDesc</span><span class="params">(String desc)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.desc = desc;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getExpireTime</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> expireTime;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;延迟处理事件:&quot;</span> + desc + <span class="string">&quot;,期望的时间偏差:&quot;</span> + (System.currentTimeMillis() - expireTime) + <span class="string">&quot;ms&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getDelay</span><span class="params">(TimeUnit unit)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> unit.convert(<span class="keyword">this</span>.expireTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Delayed o)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> (<span class="keyword">int</span>) (<span class="keyword">this</span>.getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        DelayImpl delayOne1 = <span class="keyword">new</span> DelayImpl(<span class="number">1000</span>, <span class="string">&quot;延迟1秒_A&quot;</span>);</span><br><span class="line">        DelayImpl delayOne2 = <span class="keyword">new</span> DelayImpl(<span class="number">1000</span>, <span class="string">&quot;延迟1秒_B&quot;</span>);</span><br><span class="line">        DelayImpl delayOne3 = <span class="keyword">new</span> DelayImpl(<span class="number">1000</span>, <span class="string">&quot;延迟1秒_C&quot;</span>);</span><br><span class="line"></span><br><span class="line">        DelayImpl delay2 = <span class="keyword">new</span> DelayImpl(<span class="number">5000</span>, <span class="string">&quot;延迟5秒&quot;</span>);</span><br><span class="line">        DelayImpl delay3 = <span class="keyword">new</span> DelayImpl(<span class="number">10000</span>, <span class="string">&quot;延迟10秒&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//定义延迟队列&amp;&amp;入队</span></span><br><span class="line">        DelayQueue&lt;DelayImpl&gt; delayQueue = <span class="keyword">new</span> DelayQueue&lt;&gt;();</span><br><span class="line">        delayQueue.add(delayOne1);</span><br><span class="line">        delayQueue.add(delayOne2);</span><br><span class="line">        delayQueue.add(delayOne3);</span><br><span class="line">        delayQueue.add(delay2);</span><br><span class="line">        delayQueue.add(delay3);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//取出使用</span></span><br><span class="line">        <span class="keyword">while</span> (!delayQueue.isEmpty()) &#123;</span><br><span class="line">            DelayImpl expireTask = delayQueue.take();</span><br><span class="line">            <span class="comment">//模拟执行</span></span><br><span class="line">            System.out.println(expireTask);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>延迟处理事件:延迟1秒_A,期望的时间偏差:11ms<br>延迟处理事件:延迟1秒_B,期望的时间偏差:6ms<br>延迟处理事件:延迟1秒_C,期望的时间偏差:10ms<br>延迟处理事件:延迟5秒,期望的时间偏差:5ms<br>延迟处理事件:延迟10秒,期望的时间偏差:10ms</p>
+</blockquote>
+<p>示例运行的结果，基本上偏差都在可接受的范围之内！实时性非常好</p>
+<h3 id="我的生产实践"><a href="#我的生产实践" class="headerlink" title="我的生产实践"></a>我的生产实践</h3><p>运行上面的代码，你会发现一个问题。在调用take方法的时候，对于整个流程而言是同步阻塞的。如果照搬这个demo方法去生产使用，一定会“卡”到爆炸。<br>所以照搬是不行的，怎么做好呢？<strong>异步大法好</strong></p>
+<p>第一种方式：通过异步方法(Spring EventPublish机制、@Async方法、等等)。然后在异步方法中调用take()</p>
+<p>第二种方式：拉起一个守护线程，监听DelayQueue是否有到期任务可以执行。</p>
+<p><strong>两种方式都可以在生产上使用，我主要讲解第二种方式。</strong></p>
+<h4 id="延迟任务类-Delayed接口实现类"><a href="#延迟任务类-Delayed接口实现类" class="headerlink" title="延迟任务类-Delayed接口实现类"></a>延迟任务类-Delayed接口实现类</h4><p>我设计了一个延迟任务类。它是一个泛型类，实现了Delayed接口。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayTask</span>&lt;<span class="title">T</span> <span class="keyword">extends</span> <span class="title">BaseDelay</span>&gt; <span class="keyword">implements</span> <span class="title">Delayed</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 延迟执行的方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Runnable callback;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 过期失效时间：当前系统时间+延迟时间增量</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> expireTime;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">DelayTask</span><span class="params">(T task, Consumer&lt;? <span class="keyword">super</span> T&gt; consumer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.callback = () -&gt; consumer.accept(task);</span><br><span class="line">        <span class="keyword">this</span>.expireTime = System.currentTimeMillis() + task.getDelayTime();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getDelay</span><span class="params">(TimeUnit unit)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> unit.convert(<span class="keyword">this</span>.expireTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Delayed o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="keyword">int</span>) (<span class="keyword">this</span>.getDelay(TimeUnit.MILLISECONDS) - o.getDelay(TimeUnit.MILLISECONDS));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Runnable <span class="title">callBack</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.callback;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>BaseDelay就是一个POJO，具体需要什么基本字段，看业务而定。比如我这边提供一些通用字段</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BaseDelay</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 默认的延迟时间,100ms</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Integer delayTime = <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">getDelayTime</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> delayTime;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDelayTime</span><span class="params">(Integer delayTime)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.delayTime = delayTime;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...其他业务常用参数</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Manager组件"><a href="#Manager组件" class="headerlink" title="Manager组件"></a>Manager组件</h4><p>DelayHandleManager组件实现了InitializingBean, DisposableBean接口，交由SpringIOC容器管理。</p>
+<p>afterPropertiesSet：在初始化bean的时候执行，主要逻辑是<strong>初始化固定大小的线程池，创建守护线程开启监听</strong></p>
+<p>destroy：当bean对象销毁后调用该方法，<strong>主要用于线程资源的销毁</strong>。我认为这里也可以有更进一步的优化：比如在回收队列的时候，如果发现有未完成的任务，可以考虑做一个持久化机制。当然，这个主要看业务取舍了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayHandleManager</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span>, <span class="title">DisposableBean</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Logger logger = LoggerFactory.getLogger(getClass());</span><br><span class="line">    <span class="keyword">private</span> DelayQueue&lt;DelayTask&gt; taskList = <span class="keyword">new</span> DelayQueue&lt;&gt;();</span><br><span class="line">    <span class="keyword">private</span> ExecutorService executor;</span><br><span class="line">    <span class="keyword">private</span> Thread deamon;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 容器初始化时，初始化守护线程</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        executor = Executors.newFixedThreadPool(<span class="number">20</span>);</span><br><span class="line">        deamon = <span class="keyword">new</span> Thread(<span class="keyword">this</span>::running);</span><br><span class="line">        deamon.setName(<span class="string">&quot;DelayTaskDeamonThread&quot;</span>);</span><br><span class="line">        deamon.setDaemon(<span class="keyword">true</span>);</span><br><span class="line">        deamon.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//释放队列</span></span><br><span class="line">        <span class="keyword">if</span> (!taskList.isEmpty()) &#123;</span><br><span class="line">            taskList.clear();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//销毁线程</span></span><br><span class="line">        <span class="keyword">if</span> (deamon.isAlive()) &#123;</span><br><span class="line">            deamon.interrupt();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//销毁线程池</span></span><br><span class="line">        <span class="keyword">if</span> (!executor.isShutdown()) &#123;</span><br><span class="line">            executor.shutdown();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">running</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">&quot;delay task deamon start...&quot;</span>);</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (taskList.isEmpty()) &#123;</span><br><span class="line">                    <span class="comment">//避免空轮询导致 CPU 100%</span></span><br><span class="line">                    Thread.sleep(<span class="number">1</span>);</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//从延迟队列中取值,如果没有对象过期则队列一直等待，</span></span><br><span class="line">                DelayTask delayTask = taskList.take();</span><br><span class="line">                <span class="comment">//获取任务的回调方法</span></span><br><span class="line">                Runnable task = delayTask.callBack();</span><br><span class="line">                <span class="keyword">if</span> (task == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//交予线程池执行</span></span><br><span class="line">                executor.execute(task);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                logger.error(<span class="string">&quot;delay task handle exception:&#123;&#125;&quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">add</span><span class="params">(DelayTask task)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> taskList.add(task);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="单元测试模拟一波"><a href="#单元测试模拟一波" class="headerlink" title="单元测试模拟一波"></a>单元测试模拟一波</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CacheDeleteDelay</span> <span class="keyword">extends</span> <span class="title">BaseDelay</span></span>&#123;</span><br><span class="line">     <span class="comment">//任务名称</span></span><br><span class="line">     <span class="keyword">private</span> String name;</span><br><span class="line">     <span class="comment">//记录入队时间戳</span></span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">long</span> initTime;</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         <span class="keyword">return</span> name;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">         <span class="keyword">this</span>.name = name;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getInitTime</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         <span class="keyword">return</span> initTime;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setInitTime</span><span class="params">(<span class="keyword">long</span> initTime)</span> </span>&#123;</span><br><span class="line">         <span class="keyword">this</span>.initTime = initTime;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="title">CacheDeleteDelay</span><span class="params">(String name, <span class="keyword">long</span> initTime)</span> </span>&#123;</span><br><span class="line">         <span class="keyword">this</span>.name = name;</span><br><span class="line">         <span class="keyword">this</span>.initTime = initTime;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>单元测试模拟,记得在单元测试@ContextConfiguration指定加载的spring配置</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> DelayHandleManager delayHandleManager;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testForDelayManager</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        CacheDeleteDelay deleteDelay=<span class="keyword">new</span> CacheDeleteDelay(<span class="string">&quot;任务_&quot;</span>+i,System.currentTimeMillis());</span><br><span class="line">        deleteDelay.setDelayTime((i+<span class="number">1</span>)*<span class="number">1000</span>);</span><br><span class="line">        DelayTask delayTask=<span class="keyword">new</span> DelayTask(deleteDelay,el-&gt;&#123;</span><br><span class="line">            String name=((CacheDeleteDelay) el).getName();</span><br><span class="line">            <span class="keyword">long</span> nowTime=System.currentTimeMillis();</span><br><span class="line">            <span class="keyword">long</span> initTime=((CacheDeleteDelay) el).getInitTime();</span><br><span class="line">            <span class="keyword">long</span> delayTime=nowTime-initTime;</span><br><span class="line">            System.out.println(<span class="string">&quot;模拟延迟任务执行，获取当前执行的任务：&quot;</span>+name+<span class="string">&quot;,延迟：&quot;</span>+delayTime);</span><br><span class="line">        &#125;);</span><br><span class="line">        delayHandleManager.add(delayTask);</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(<span class="string">&quot;===========所有延迟任务已经加入队列===========&quot;</span>);</span><br><span class="line">    <span class="comment">//单元测试，睡眠100秒，方便让延迟任务全部处理完</span></span><br><span class="line">    Thread.sleep(<span class="number">100</span>*<span class="number">1000</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>模拟结果如下：</p>
+<blockquote>
+<p>===========所有延迟任务已经加入队列===========<br>模拟延迟任务执行，获取当前执行的任务：任务_0,延迟：1006<br>模拟延迟任务执行，获取当前执行的任务：任务_1,延迟：2001<br>模拟延迟任务执行，获取当前执行的任务：任务_2,延迟：3002<br>模拟延迟任务执行，获取当前执行的任务：任务_3,延迟：4004<br>模拟延迟任务执行，获取当前执行的任务：任务_4,延迟：5002<br>模拟延迟任务执行，获取当前执行的任务：任务_5,延迟：6003<br>模拟延迟任务执行，获取当前执行的任务：任务_6,延迟：7009<br>模拟延迟任务执行，获取当前执行的任务：任务_7,延迟：8003<br>模拟延迟任务执行，获取当前执行的任务：任务_8,延迟：9001<br>模拟延迟任务执行，获取当前执行的任务：任务_9,延迟：10005</p>
+</blockquote>
+<p>基本符合预期使用</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本篇文章没有对DelayQueue进行层层剖析，更多的是分析我在项目上遇到的一些场景和实践方案梳理！关于DelayQueue其实非常值得去品一品它的源码设计，毕竟Doug Lea老爷子的水平是真的顶级。也能让人了解到关于一些二叉堆数据结构的实践。</p>
+<p>然后是上述延迟双删的方案，<strong>在大厂里的方案更多还是结合MQ中间件去做的</strong>。我这个方案在消息持久化上是有一定缺陷的，但它几乎符合了我现在所负责的业务线需要，简单，高效，不需要为了小功能引入复杂设计。毕竟嘛，杀鸡焉用牛刀。及早，过度的设计并不一定就是好事！</p>
+<p>附上一张图，可作为我目前所在业务线的一个流量示意，仅供参考。<br><img src="/.io//%E4%B8%9A%E5%8A%A1%E6%B5%81%E9%87%8F.png" alt="业务流量.png"></p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Cache-Aside-Pattern"><span class="toc-text">Cache-Aside Pattern</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E4%B8%8A%E9%9D%A2%E8%AF%B4%E7%9A%84%E4%B8%8D%E4%B8%80%E8%87%B4%E9%97%AE%E9%A2%98%E5%91%A2"><span class="toc-text">如何解决上面说的不一致问题呢</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%81%9A%E5%88%B0%E5%BB%B6%E8%BF%9F%E5%A4%84%E7%90%86"><span class="toc-text">如何做到延迟处理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#DelayQueue%E7%AE%80%E4%BB%8B"><span class="toc-text">DelayQueue简介</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B%E4%BD%BF%E7%94%A8"><span class="toc-text">快速上手使用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%88%91%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E8%B7%B5"><span class="toc-text">我的生产实践</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BB%B6%E8%BF%9F%E4%BB%BB%E5%8A%A1%E7%B1%BB-Delayed%E6%8E%A5%E5%8F%A3%E5%AE%9E%E7%8E%B0%E7%B1%BB"><span class="toc-text">延迟任务类-Delayed接口实现类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Manager%E7%BB%84%E4%BB%B6"><span class="toc-text">Manager组件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A8%A1%E6%8B%9F%E4%B8%80%E6%B3%A2"><span class="toc-text">单元测试模拟一波</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E5%B7%A5%E4%BD%9C%E4%B8%AD%E5%A6%82%E4%BD%95%E7%94%A8DelayQueue/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/"><i class="fa fa-tags"></i>延迟队列</a>
+     
+      <a href="/tags/DelayQueue/"><i class="fa fa-tags"></i>DelayQueue</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E5%A6%82%E4%BD%95%E5%8F%8B%E5%A5%BD%E7%9A%84%E8%A1%A8%E8%BE%BE%E8%B6%85%E9%95%BF%E7%9A%84%E6%95%B0%E5%80%BC/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E5%B7%A7%E7%94%A8%E4%BD%8D%E5%9B%BE/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

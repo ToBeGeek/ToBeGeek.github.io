@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>Eureka的学习笔记 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="SpringCloud,spring cloud,分布式," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2019-04-06
+    </span>
+    
+      <span>
+        | <a href="/categories/SpringCloud/"><i class="fa fa-bookmark"></i>SpringCloud</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    Eureka的学习笔记
+  </h1>
+  
+  <article class="passage-article">
+    <p>“Eureka”来自古希腊词汇，意思是“发现了！”，不得不佩服老外取名字，真有趣！！</p>
+<h3 id="为什么用Eureka"><a href="#为什么用Eureka" class="headerlink" title="为什么用Eureka"></a>为什么用Eureka</h3><p><img src="/.io//%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83.jpg" alt="软负载中心"></p>
+<p>Eureka的本质就是分布式系统中的软负载中心。在分布式系统中，总会存在服务提供者与服务调用者的节点。<br>服务调用者消费服务的时候，必然需要知道提供者所提供服务的IP,Port等信息。软负载中心能够将这些地址信息聚合，<br>且提供服务上下线状态感知。</p>
+<p>如果不通过软负载中心获取调用服务所需的信息，一切将变得灰常麻烦！举个例子，服务调用者1不得不在代码中写死服务提供者A的<br>信息，随着系统的演变这类信息的出现会变得越来越难维护，很可能服务迁移到其他服务器上的是时候多处代码都不得不调整！还有<br>一个诟病，就是IP是不友好的字符串，人们会记住<a target="_blank" rel="noopener" href="http://www.baidu.com而不会记住百度的ip地址./">www.baidu.com而不会记住百度的IP地址。</a></p>
+<p>因此Eureaka，能够通过服务名称来映射对应的地址集合！当服务注册到Eureka-service时，会将自己的服务名和IP地址等信息通过<br>RestFul API形式提交给服务注册中心(Eureka-service)，消费者服务在向注册中心注册的时候也会获取一份服务注册列表信息，消<br>费者通过这份信息上的服务名称既可以找到需要调用的服务地址！此外，Eureka可以和Ribbon结合使用，通过一定策略来进行负载均衡。</p>
+<p><img src="/.io//Eureka-Service.jpg" alt="avatar"></p>
+<h3 id="快速搭建Eureka服务"><a href="#快速搭建Eureka服务" class="headerlink" title="快速搭建Eureka服务"></a>快速搭建Eureka服务</h3><p>1：引入Eureka-Server的Maven依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--引入Eureka-Server的Maven依赖--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-eureka-server<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>2：编写对应的配置文件，YAML文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">8761</span></span><br><span class="line">  </span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">eurka-server</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#在默认情况下，Eureka-Server会向自己注册，将registerWithEureka、fetchRegistry设置为false防止自己注册自己</span></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">instance:</span></span><br><span class="line">    <span class="attr">hostname:</span> <span class="string">localhost</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">registerWithEureka:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">fetchRegistry:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">serviceUrl:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://$&#123;eureka.instance.hostname&#125;:$&#123;server.port&#125;/eureka/</span></span><br></pre></td></tr></table></figure>
+
+<p>3：编写springboot工程启动的Application类@SpringBootApplication</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//没有这个注解服务无法正常使用</span></span><br><span class="line"><span class="meta">@EnableEurekaServer</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EurekaServerApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run( EurekaServerApplication.class, args );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="编写Eureka-Client"><a href="#编写Eureka-Client" class="headerlink" title="编写Eureka Client"></a>编写Eureka Client</h3><p>1.引入Eureka-client需要的依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--引入Eureka-Client的Maven依赖--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>2.编写对应的配置文件，YAML文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">8762</span></span><br><span class="line"></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">service-hi</span></span><br><span class="line"></span><br><span class="line"><span class="attr">eureka:</span></span><br><span class="line">  <span class="attr">client:</span></span><br><span class="line">    <span class="attr">serviceUrl:</span></span><br><span class="line">      <span class="attr">defaultZone:</span> <span class="string">http://localhost:8761/eureka/</span></span><br></pre></td></tr></table></figure>
+
+<p>3.编写springboot工程启动的Application类@SpringBootApplication</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//没有这个注解服务无法正常使用</span></span><br><span class="line"><span class="meta">@EnableEurekaClient</span></span><br><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EurekaServerApplication</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run( EurekaServerApplication.class, args );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;server.port&#125;&quot;)</span></span><br><span class="line">    String port;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/hi&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">home</span><span class="params">(<span class="meta">@RequestParam(value = &quot;name&quot;, defaultValue = &quot;forezp&quot;)</span> String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;hi &quot;</span> + name + <span class="string">&quot; ,i am from port:&quot;</span> + port;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>启动Server端后，再启动Client端，输入 <a target="_blank" rel="noopener" href="http://localhost:8761/">http://localhost:8761/</a>,能够看到如下的一个界面</p>
+<p><img src="/.io//%E5%90%AF%E5%8A%A8%E6%95%88%E6%9E%9C.png" alt="启动效果"></p>
+<h3 id="Eurake的自我保护机制"><a href="#Eurake的自我保护机制" class="headerlink" title="Eurake的自我保护机制"></a>Eurake的自我保护机制</h3><p>从CAP理论来说，Eureka是一个AP系统，追求高可用而不是要求强一致性。这点与Zookeeper的初衷相反，zk是CP，以高一致性为主，所以如果使用ZK在服务发现和注册方面，可用服务信息虽然很及时，但是会出现不可用情形，造成无法克服的生产事故。Eureka则是在出现网络分区期间（无法通讯，出现需要重试的情况就是由于网络已经分区了），注册表中的信息在服务器之间不一致，自我保护(self-preservation)功能旨在最大限度地减少这种不一致性。</p>
+<h4 id="自我保护模式"><a href="#自我保护模式" class="headerlink" title="自我保护模式"></a>自我保护模式</h4><p>当有一个新的Eureka Server出现时，他尝试从相邻的Peer节点获取所有服务实例注册表信息。如果从相邻的Perr节点获取信息时出现了故障，Eureka Server会尝试其他Peer节点。如果EurekaServer能够成功获取所有的服务实例信息，则根据配置信息设置“服务续约”的阈值。如果EurekaServer接收到的服务续约次数低于配置的百分比（默认15分钟内，续约低于85%），则EurekaServer开启自我保护模式，即不再剔除注册列表的信息！</p>
+<p>为什么要这样设计呢？上面说过，Eureka是一个AP设计的服务。自我保护模式的功能设计就体现了它高可用性的一面！当EurekaServer本身出现问题而导致EurekaClient无法续约，EurekaClient的注册列表信息不再剔除，也就是说每一个client都可以进行服务消费。（简单地说就是，虽然服务端出现问题，但是只要客户端仍然存有服务实例名称与调用地址信息的映射关系，那么依然可以提供服务消费）。当故障恢复以后，Server节点会退出自我保护模式。</p>
+<h4 id="触发自我保护模式的过程演示"><a href="#触发自我保护模式的过程演示" class="headerlink" title="触发自我保护模式的过程演示"></a>触发自我保护模式的过程演示</h4><p><img src="/.io//%E5%81%A5%E5%BA%B7demo.png" alt="健康demo.png"></p>
+<p>以一个健康的系统为例子，假设上面的所有微服务都处于健康并且在Eureka服务器上注册成功。服务B调用了服务C和服务E。按照默认的配置来说，如果在15分钟内，存在续约服务低于85%的情况，就会触发自我保护模式。当前假设服务D与服务E所在的服务器出现网络问题，导致服务D和服务E需要off-line。那么情况如下图所示。</p>
+<p><img src="/.io//%E6%9C%8D%E5%8A%A1%E5%89%94%E9%99%A4.png" alt="服务剔除.png"></p>
+<p>因为接受不到服务D,E的两个实例的心跳，这时候Eureka服务会进入观察期。如在观察期(默认十五分钟)内，Eureka-Server收到的续约仍然在配置之下（默认85%）则开启自我保护模式。因服务D，E剔除，所以服务实例B不可以再调用服务E。再次假设，服务C也出现问题了！但是由于处于自我保护模式下，Eureka-Server不会剔除服务C。</p>
+<p><img src="/.io//%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E5%BC%80%E5%90%AF%E4%B8%8D%E5%86%8D%E5%89%94%E9%99%A4%E5%AE%9E%E4%BE%8B.png" alt="保护模式开启不再剔除实例.png"></p>
+<p>如果此时是Eureka服务本身接受问题，导致误杀了服务D,E。但是此时已经触发自我保护模式的开启，那么这时候不会对幸存者服务进行剔除操作了。服务A，服务B，服务C是Eureka客户端，客户端本身（SDK）也保留了从Eureka同步过来的注册列表信息。也就是说此时Eureka-Server虽然出问题，但是服务B也是可以通过这份映射表信息继续调用仍然有效的服务C</p>
+<p><img src="/.io//%E6%9C%8D%E5%8A%A1%E4%BB%8D%E7%84%B6%E5%8F%AF%E8%B0%83%E7%94%A8.png" alt="服务仍然可调用.png"></p>
+<p>自我保护背后的理由<br>注意：没有接受心跳意味着两种可能：网络故障；原实例真的下线了。如何判断这两个故障其实很难，这是分布式系统典型拜占庭将军问题，解决方式一般两个：接受现状或重试。接受现状就是允许网络故障的两端数据不一致，根据CAP定理，就是选择了AP，而如果不断重试，则是为了让两端数据尽快一致起来，实际就是选择 了CP，Dubbo的源码中使用Netty长连接以及ZoopKeeper本身的都是CA，这些都是符合人的自觉，但是Eureka选择了接受现状，选择了AP，对网络分区的容忍性提高，可用性也提高了。</p>
+<p>具体来说，由于以下两个原因，自我保护功能可以证明是合理的。</p>
+<ol>
+<li>没有接收心跳的服务器可能是由于网络分区，接受分区，保留暂时的不一致，提高可用性。</li>
+<li>即使服务器和某些客户端之间的连接丢失，客户端也可能相互连接,实例B还是具有与实例C的连接</li>
+</ol>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8Eureka"><span class="toc-text">为什么用Eureka</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BAEureka%E6%9C%8D%E5%8A%A1"><span class="toc-text">快速搭建Eureka服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E5%86%99Eureka-Client"><span class="toc-text">编写Eureka Client</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Eurake%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%9D%E6%8A%A4%E6%9C%BA%E5%88%B6"><span class="toc-text">Eurake的自我保护机制</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%87%AA%E6%88%91%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F"><span class="toc-text">自我保护模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E8%87%AA%E6%88%91%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E7%9A%84%E8%BF%87%E7%A8%8B%E6%BC%94%E7%A4%BA"><span class="toc-text">触发自我保护模式的过程演示</span></a></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/Eureka%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/spring-cloud/"><i class="fa fa-tags"></i>spring cloud</a>
+     
+      <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"><i class="fa fa-tags"></i>分布式</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/Scrapy%E4%B8%80%E5%AD%A6%E5%B0%B1%E4%BC%9A/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/LRU%E3%80%81LFU%E3%80%81W-TinyLFU%E6%B5%85%E6%9E%90%E4%BC%98%E5%8A%A3/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

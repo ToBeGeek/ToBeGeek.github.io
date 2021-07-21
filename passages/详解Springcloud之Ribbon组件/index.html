@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>详解Springcloud之Ribbon组件 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="SpringCloud,SpringCloud,微服务,负载均衡,Ribbon," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2020-03-21
+    </span>
+    
+      <span>
+        | <a href="/categories/SpringCloud/"><i class="fa fa-bookmark"></i>SpringCloud</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    详解Springcloud之Ribbon组件
+  </h1>
+  
+  <article class="passage-article">
+    <!-- TOC -->
+
+<ul>
+<li><a href="#%E5%88%9D%E8%AF%86ribbon">初识Ribbon</a></li>
+<li><a href="#%E7%BB%93%E5%90%88resttemplate%E4%BD%BF%E7%94%A8ribbon">结合RestTemplate使用Ribbon</a></li>
+<li><a href="#%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%99%A8loadbalancerclient">源码解读-负载均衡器LoadBalancerClient</a></li>
+<li><a href="#%E5%88%A8%E6%A0%B9%E9%97%AE%E5%BA%95-%E6%B7%B1%E5%85%A5%E4%BA%86%E8%A7%A3iloadbalancer">刨根问底-深入了解ILoadBalancer</a><ul>
+<li><a href="#%E5%86%B3%E5%AE%9A%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5%E7%9A%84irule%E6%8E%A5%E5%8F%A3%E7%B1%BB">决定负载均衡策略的IRule接口类</a></li>
+</ul>
+</li>
+<li><a href="#%E5%86%B3%E5%AE%9A%E6%9C%8D%E5%8A%A1%E5%AE%9E%E4%BE%8B%E6%98%AF%E5%90%A6%E5%8F%AF%E7%94%A8%E7%9A%84iping">决定服务实例是否可用的IPing</a></li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="初识Ribbon"><a href="#初识Ribbon" class="headerlink" title="初识Ribbon"></a>初识Ribbon</h3><p>Ribbon是Netflix公司开源的一个负载均衡组件。负载均衡是指将负载按照一定的策略分发到不同的单元里。负载均衡组件，一般有两种实现方式。一种是如同Nginx网关服务，它是一种独立的进程服务，当事件进入组件的时候按照一定的策略对其进行转发到不同的其他进程上。另外一种就是将负载均衡的策略逻辑封装成SDK，并且允许集成在服务消费者的客户端上，服务消费者客户端会维护一份服务提供者的信息列表，通过这个列表信息再结合负载均衡策略将请求分发到多个服务提供者。Ribbon组件属于第二种方式的实现。</p>
+<p>在SpringCloud构建的微服务集群系统中，Ribbon作为服务消费者的负载均衡器，有两种使用方式。<br>1：结合RestTemplate使用（不推荐）<br>2：使用声明式调用Feign的时候，默认集成Ribbon（推荐使用）</p>
+<p>为什么我不推荐第一种方式呢，因为第一种方式需要我们自己去实现与RestTemplate的结合使用(虽然也不少什么麻烦事情)，但是Feign默认集成ribbon省去了这些不必要的麻烦事。更胜一筹的是，feign提供了灵活的配置，方便当rest接口调用失败的重试策略，并且可以很方便的配置熔断器的处理。Feign是一种声明式、模板化的Http-client。更多关于Feign的讲解，详见<a href="/passages/%E8%AF%A6%E8%A7%A3Springcloud%E4%B9%8BFeign%E7%BB%84%E4%BB%B6/">详解SpringCloud之Feign组件</a></p>
+<h3 id="结合RestTemplate使用Ribbon"><a href="#结合RestTemplate使用Ribbon" class="headerlink" title="结合RestTemplate使用Ribbon"></a>结合RestTemplate使用Ribbon</h3><p>1:引入Ribbon的依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-ribbon<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>2:往IOC容器中注入RestTemplate的Bean，并且使用@LoadBalanced的注释。此时就可以完成RestTemplate和Ribbon的结合。用这个restTemplate实例发起的http请求将按照ribbon默认的负载均衡策略发起请求。<strong>使用@LoadBalanced注解的RestTemplate，在远程调度的时候之所以能够实现负载均衡，是因为Ribbon会维护所有被@LoadBalanced注解修饰的RestTemplate，并且给这些restTemplate对象添加拦截器，当发起远程调度的时候拦截器会将调度的执行交给Ribbon的负载均衡器(LoadBalancerClient)去处理。</strong>（后面会重点讲解一下这个负载均衡器LoadBalancerClient）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RabbionConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="meta">@LoadBalanced</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> RestTemplate <span class="title">restTemplate</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> RestTemplate();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>3:使用restTemplate，以下为示例代码片段</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> RestTemplate restTemplate;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * SERVICE-ON-EUREKA是已经挂载到eureka服务上的某个服务提供者名称，当前该服务有1，2号两个服务</span></span><br><span class="line"><span class="comment">     * 假设调用SERVICE-ON-EUREKA服务的test接口的时候，1号服务会返回“this is 1”,2号服务返回“this is 2”</span></span><br><span class="line"><span class="comment">     * 下面的结果是，轮询两个服务</span></span><br><span class="line"><span class="comment">     * &quot;this is 1&quot;,&quot;this is 2&quot;....&quot;this is 1&quot;..</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">3</span>;i++)&#123;</span><br><span class="line">        System.out.println(restTemplate.getForObject(<span class="string">&quot;http://SERVICE-ON-EUREKA/test&quot;</span>,String.class));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>从上面的第三个步骤，我们可以看出ribbon会从Eureka服务中获取“SERVICE-ON-EUREKA”对应的执行单元（即上面昵称的1号服务，2号服务）信息，并且以轮询的方式作为负载策略去依次调用方法。</p>
+<h3 id="源码解读-负载均衡器LoadBalancerClient"><a href="#源码解读-负载均衡器LoadBalancerClient" class="headerlink" title="源码解读-负载均衡器LoadBalancerClient"></a>源码解读-负载均衡器LoadBalancerClient</h3><p>其实从上面示例，我们可以猜想到ribbon从eureka-client中获取服务注册列表信息，并且该列表信息做了一份缓存。实现这个方法的核心类就是LoadBalancerClient。ribbon的引入，默认是从eureka-client中读取服务列表信息，但是也可以通过配置的方式手动关闭这个行为。但是关闭之后，必须自己维护一份服务注册列表信息。如下关闭默认读取eureka注册列表，并手动维护的配置所示</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">ribbon:</span></span><br><span class="line">    <span class="attr">eureka:</span></span><br><span class="line">        <span class="comment"># 手动关闭从eureka中获取注册服务列表信息</span></span><br><span class="line">        <span class="attr">enabled:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="attr">stores:</span></span><br><span class="line">    <span class="attr">ribbon:</span></span><br><span class="line">        <span class="comment"># 手动维护的服务列表信息，用逗号分隔多个服务</span></span><br><span class="line">        <span class="attr">listOfServers:</span> <span class="string">www.baidu.com,www.taobao.com</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>编写一个单测来看结果</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@Autowire</span></span><br><span class="line"><span class="keyword">private</span> LoadBalancerClient loadBalancer;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//获取服务实例,将从上述的配置中的listOfServers中获取</span></span><br><span class="line">    ServiceInstance instance=loadBalancer.choose(<span class="string">&quot;stores&quot;</span>);</span><br><span class="line">    System.out.println(instance.getHost);</span><br><span class="line">    <span class="comment">//打印结果是：www.baidu.com</span></span><br><span class="line">    ServiceInstance instance2=loadBalancer.choose(<span class="string">&quot;stores&quot;</span>);</span><br><span class="line">    System.out.println(instance2.getHost);</span><br><span class="line">    <span class="comment">//打印结果是：www.taobao.com</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可见LoadBalancerClient中确实提供负载均衡策略以及读取服务列表信息。来看看LoadBalancerClient这个组件的源码是如何实现获取服务实例信息，并结合RestTemplate工具执行请求的。</p>
+<p><img src="/.io//LoadBalancerClient%E7%88%B6%E7%B1%BB%E4%B8%8E%E5%AE%9E%E7%8E%B0%E7%B1%BB.png" alt="LoadBalancerClient父类与实现类.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ServiceInstanceChooser</span> </span>&#123;</span><br><span class="line">    <span class="comment">//获取指定serviceId的一个服务实例(serviceId是服务名称，例如eureka上的service-name)</span></span><br><span class="line">    <span class="function">ServiceInstance <span class="title">choose</span><span class="params">(String serviceId)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">LoadBalancerClient</span> <span class="keyword">extends</span> <span class="title">ServiceInstanceChooser</span> </span>&#123;</span><br><span class="line">    <span class="comment">//用于执行请求</span></span><br><span class="line">    &lt;T&gt; <span class="function">T <span class="title">excute</span><span class="params">(String serviceId, LoadBalancerRequest&lt;T&gt; request)</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line">    <span class="comment">//用于执行请求</span></span><br><span class="line">    &lt;T&gt; <span class="function">T <span class="title">excute</span><span class="params">(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest&lt;T&gt; request)</span> <span class="keyword">throws</span> IOException</span>;</span><br><span class="line">    <span class="comment">//用于重构Url</span></span><br><span class="line">    <span class="function">URI <span class="title">reconstructURI</span><span class="params">(ServiceInstance instance, URI original)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//执行具体操作的实现类RibbonLoadBalancerClient</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RibbonLoadBalancerClient</span> <span class="keyword">implements</span> <span class="title">LoadBalancerClient</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ServiceInstance <span class="title">choose</span><span class="params">(String serviceId)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//Step 1：调用getServer方法获取指定服务</span></span><br><span class="line">        Server server=getServer(serviceId);</span><br><span class="line">        <span class="keyword">if</span> (server == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> RibbonServer(serviceId, server, isSecure(server, serviceId),</span><br><span class="line">             serverIntrospector(serviceId).getMetaData(server));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Server <span class="title">getServer</span><span class="params">(String serviceId)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//Step 2</span></span><br><span class="line">        <span class="keyword">return</span> getServer(getLoadBalancer(serviceId));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//获取ILoadBalancer，ILoadBalancer定义了一系列对注册服务的操作方法</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> ILoadBalancer <span class="title">getLoadBalancer</span><span class="params">(String serviceId)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//从工厂中获取ILoadBalancer实例</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.clientFactory.getLoadBalancer(serviceId);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Server <span class="title">getServer</span><span class="params">(ILoadBalancer loadBalancer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (loadBalancer == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//交由ILoadBalancer去选择服务具体实例</span></span><br><span class="line">        <span class="keyword">return</span> loadBalancer.chooseServer(<span class="string">&quot;default&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>小总结：从上面，我们得知几件事情。<br>1：Ribbon能够实现负载均衡策略的前提是获取到注册服务列表信息，而获取服务列表信息则需要靠<strong>LoadBalancerClient从Eureka Client中获取服务注册列表信息，或者获取配置文件中的服务注册列表信息</strong><br>2：<strong>LoadBalancerClient是一个接口类，并且继承了ServiceInstanceChooser(ServiceInstanceChooser中定义了chooser()方法用于选择服务实例)。LoadBalancerClient中只有继承而来的chooser方法是不够的，还需要定义excute()方法（要不然怎么结合HttpClient工具发起请求）。</strong><br>3：<strong>RibbonLoadBalancerClient是LoadBalancerClient的具体实现类。通过源码分析，得知该实现类的choose方法底层是交由ILoadBalancer类去实现如何选择服务实例</strong></p>
+<h3 id="刨根问底-深入了解ILoadBalancer"><a href="#刨根问底-深入了解ILoadBalancer" class="headerlink" title="刨根问底-深入了解ILoadBalancer"></a>刨根问底-深入了解ILoadBalancer</h3><p>ILoadBalancer究竟是如何实现选择服务实例的呢？又是通过怎么样的策略去实现实例的获取？带着这个疑问，我们接着往下阅读。</p>
+<p>来看看ILoadBalancer这个类中有什么“乾坤”？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ILoadBalancer</span> </span>&#123;</span><br><span class="line">    <span class="comment">//用于初始化服务列表以及添加服务列表集合</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addServers</span><span class="params">(List&lt;Server&gt; newServers)</span></span>;</span><br><span class="line">    <span class="comment">//定义从负载均衡器中获取一个服务实例，key是一个Object，负载均衡器可能用过key来获取某个指定的服务实例。key==null时则不使用该参数</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Server <span class="title">chooseServer</span><span class="params">(Object key)</span></span>;</span><br><span class="line">    <span class="comment">//由负载均衡器的客户端调用，主动通知服务停机下线。如果不调用这个方法，LB可能会再下一次ping之前认为该服务存活</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">markServerDown</span><span class="params">(Server server)</span></span>;</span><br><span class="line">    <span class="comment">//获取LB中所有状态为可调用的注册服务列表</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;Server&gt; <span class="title">getReachableServers</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//获取所有注册服务列表信息，包括可调用与不可调用的服务信息</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;Server&gt; <span class="title">getAllServers</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>下面梳理一下ILoadBalancer及其子类的关系<br><img src="/.io//DynamicServerListLoadBalancer%E4%B8%8E%E5%85%B6%E6%8E%A5%E5%8F%A3%E7%B1%BB%E7%9A%84%E5%85%B3%E7%B3%BB.png" alt="DynamicServerListLoadBalancer与其接口类的关系.png"></p>
+<p>我们可以看出BaseLoadBalancer作为ILoadBalancer的子类，它是一个负载均衡器的基本实现类。DynamicServerListLoadBalancer继承BaseLoadBalancer,并且再此基础上加以特性。DynamicServerListLoadBalancer是一个<strong>具有使用动态获取候选服务器列表的能力</strong>的负载均衡器。在现实中，注册服务列表的信息不可能总是恒一不变的，它们在运行时可以被剔除下线或者上线。DynamicServerListLoadBalancer内部还提供了一些工具来筛选符合条件的注册服务列表信息。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DynamicServerListLoadBalancer</span>&lt;<span class="title">T</span> <span class="keyword">extends</span> <span class="title">Server</span>&gt; <span class="keyword">extends</span> <span class="title">BaseLoadBalancer</span> </span>&#123;</span><br><span class="line">    ...省略代码</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * IClientConfig是用于配置负载均衡的客户端的基本配置</span></span><br><span class="line"><span class="comment">     * IRule用于配置负载均衡的策略</span></span><br><span class="line"><span class="comment">     * IPing用于向server发送ping，来判断server是否存活</span></span><br><span class="line"><span class="comment">     * ServerList定义了获取注册服务列表信息的接口类</span></span><br><span class="line"><span class="comment">     * ServerListFilter，允许过滤配置的或动态获得的具有所需特征的候选服务器列表的接口类</span></span><br><span class="line"><span class="comment">     * ServerListUpdater是当前DynamicServerListLoadBalancer的更新策略实现类(策略模式发挥了！)</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">DynamicServerListLoadBalancer</span><span class="params">(IClientConfig clientConfig, IRule rule, IPing ping,</span></span></span><br><span class="line"><span class="params"><span class="function">                                         ServerList&lt;T&gt; serverList, ServerListFilter&lt;T&gt; filter,</span></span></span><br><span class="line"><span class="params"><span class="function">                                         ServerListUpdater serverListUpdater)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(clientConfig, rule, ping);</span><br><span class="line">        <span class="keyword">this</span>.serverListImpl = serverList;</span><br><span class="line">        <span class="keyword">this</span>.filter = filter;</span><br><span class="line">        <span class="keyword">this</span>.serverListUpdater = serverListUpdater;</span><br><span class="line">        <span class="keyword">if</span> (filter <span class="keyword">instanceof</span> AbstractServerListFilter) &#123;</span><br><span class="line">            ((AbstractServerListFilter) filter).setLoadBalancerStats(getLoadBalancerStats());</span><br><span class="line">        &#125;</span><br><span class="line">        restOfInit(clientConfig);</span><br><span class="line">    &#125;</span><br><span class="line">    ...省略其余代码</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>DynamicServerListLoadBalancer中有如下的默认配置，如列表所示</p>
+<table>
+<thead>
+<tr>
+<th align="center">具有配置属性的超类</th>
+<th align="center">默认的实现类</th>
+<th align="center">默认的配置描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">IClientConfig</td>
+<td align="center">DefaultClientConfigImpl</td>
+<td align="center">默认的负载均衡客户端基本配置</td>
+</tr>
+<tr>
+<td align="center">IRule</td>
+<td align="center">RoundRobinRule</td>
+<td align="center">RoundRobinRule是轮询的负载均衡策略</td>
+</tr>
+<tr>
+<td align="center">IPing</td>
+<td align="center">DummyPing</td>
+<td align="center">isAlive方法直接返回true，且实现了initWithNiwsConfig方法</td>
+</tr>
+<tr>
+<td align="center">ServerList</td>
+<td align="center">ConfigurationBasedServerList</td>
+<td align="center">是一个工具类，允许从配置中加载服务器列表</td>
+</tr>
+<tr>
+<td align="center">ServerListFilter</td>
+<td align="center">ZonePreferenceServerListFilter</td>
+<td align="center">待补充…</td>
+</tr>
+<tr>
+<td align="center">ILoadBalancer</td>
+<td align="center">ZoneAwareLoadBalancer</td>
+<td align="center">与区域相关的负载均衡器</td>
+</tr>
+</tbody></table>
+<p>从DynamicServerListLoadBalancer的构造器方法中，重点讲解IRule、IPing、ServerList、ServerListFilter这几个参数类型</p>
+<h4 id="决定负载均衡策略的IRule接口类"><a href="#决定负载均衡策略的IRule接口类" class="headerlink" title="决定负载均衡策略的IRule接口类"></a>决定负载均衡策略的IRule接口类</h4><p>读完IRule的源代码之后，真的是感受到设计模式的优美之处！IRule实际上就是策略模式中的Strategy接口类，它是所有行为簇的超类，定义了一系列基本算法，并且允许类的行为在运行时更改！这也为<br>用户提供了可以灵活选择的负载均衡策略，按需取用的同时也留下了很好的扩展空间！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IRule</span></span>&#123;</span><br><span class="line">    <span class="comment">//选择一个服务实例（策略的具体执行逻辑）</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Server <span class="title">choose</span><span class="params">(Object key)</span></span>;</span><br><span class="line">    <span class="comment">//设置ILoadBalancer</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLoadBalancer</span><span class="params">(ILoadBalancer lb)</span></span>;</span><br><span class="line">    <span class="comment">//获取ILoadBalancer</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ILoadBalancer <span class="title">getLoadBalancer</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>PS:在IRule中为什么需要提供ILoadBalancer的getter/setter方法，因为在一些策略实现类中需要依赖ILoadBalancer来定制一些策略！<br>通过lb.getServerList()获取服务实例列表，lb.getLoadBalancerStats()获取实例列表的一些诸如调用次数的统计数据等。</p>
+<p>我们可以先来欣赏一下Ribbon默认实现的轮询策略RoundRobinRule以及最小请求优先策略BestAvailableRule的实现逻辑</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//轮询选择server策略</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RoundRobinRule</span> <span class="keyword">extends</span> <span class="title">AbstractLoadBalancerRule</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> AtomicInteger nextServerCyclicCounter;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> AVAILABLE_ONLY_SERVERS = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">boolean</span> ALL_SERVERS = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Logger log = LoggerFactory.getLogger(RoundRobinRule.class);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">RoundRobinRule</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        nextServerCyclicCounter = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">RoundRobinRule</span><span class="params">(ILoadBalancer lb)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>();</span><br><span class="line">        setLoadBalancer(lb);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Server <span class="title">choose</span><span class="params">(ILoadBalancer lb, Object key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (lb == <span class="keyword">null</span>) &#123;</span><br><span class="line">            log.warn(<span class="string">&quot;no load balancer&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Server server = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (server == <span class="keyword">null</span> &amp;&amp; count++ &lt; <span class="number">10</span>) &#123;</span><br><span class="line">            List&lt;Server&gt; reachableServers = lb.getReachableServers();</span><br><span class="line">            List&lt;Server&gt; allServers = lb.getAllServers();</span><br><span class="line">            <span class="keyword">int</span> upCount = reachableServers.size();</span><br><span class="line">            <span class="keyword">int</span> serverCount = allServers.size();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//没有有效的server时候，直接返回null</span></span><br><span class="line">            <span class="keyword">if</span> ((upCount == <span class="number">0</span>) || (serverCount == <span class="number">0</span>)) &#123;</span><br><span class="line">                log.warn(<span class="string">&quot;No up servers available from load balancer: &quot;</span> + lb);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//获取下一个返回的server实例索引</span></span><br><span class="line">            <span class="keyword">int</span> nextServerIndex = incrementAndGetModulo(serverCount);</span><br><span class="line">            server = allServers.get(nextServerIndex);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (server == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="comment">/* Transient. */</span></span><br><span class="line">                Thread.yield();</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//仅当server存活且服务就绪状态的时候返回server实例</span></span><br><span class="line">            <span class="keyword">if</span> (server.isAlive() &amp;&amp; (server.isReadyToServe())) &#123;</span><br><span class="line">                <span class="keyword">return</span> (server);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//没有合适的server实例，将继续查询知道次数超出十次</span></span><br><span class="line">            server = <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (count &gt;= <span class="number">10</span>) &#123;</span><br><span class="line">            log.warn(<span class="string">&quot;No available alive servers after 10 tries from load balancer: &quot;</span></span><br><span class="line">                    + lb);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> server;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Inspired by the implementation of &#123;<span class="doctag">@link</span> AtomicInteger#incrementAndGet()&#125;.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> modulo The modulo to bound the value of the counter.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> The next value.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">incrementAndGetModulo</span><span class="params">(<span class="keyword">int</span> modulo)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="keyword">int</span> current = nextServerCyclicCounter.get();</span><br><span class="line">            <span class="keyword">int</span> next = (current + <span class="number">1</span>) % modulo;</span><br><span class="line">            <span class="keyword">if</span> (nextServerCyclicCounter.compareAndSet(current, next))</span><br><span class="line">                <span class="keyword">return</span> next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Server <span class="title">choose</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> choose(getLoadBalancer(), key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initWithNiwsConfig</span><span class="params">(IClientConfig clientConfig)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//请求次数最少的服务实例优先策略</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BestAvailableRule</span> <span class="keyword">extends</span> <span class="title">ClientConfigEnabledRoundRobinRule</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> LoadBalancerStats loadBalancerStats;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Server <span class="title">choose</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (loadBalancerStats == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.choose(key);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//获取注册服务列表实例信息</span></span><br><span class="line">        List&lt;Server&gt; serverList = getLoadBalancer().getAllServers();</span><br><span class="line">        <span class="keyword">int</span> minimalConcurrentConnections = Integer.MAX_VALUE;</span><br><span class="line">        <span class="keyword">long</span> currentTime = System.currentTimeMillis();</span><br><span class="line">        Server chosen = <span class="keyword">null</span>;</span><br><span class="line">        <span class="comment">//遍历服务实例，获取有效请求数量统计值最小的服务实例</span></span><br><span class="line">        <span class="keyword">for</span> (Server server: serverList) &#123;</span><br><span class="line">            ServerStats serverStats = loadBalancerStats.getSingleServerStat(server);</span><br><span class="line">            <span class="keyword">if</span> (!serverStats.isCircuitBreakerTripped(currentTime)) &#123;</span><br><span class="line">                <span class="keyword">int</span> concurrentConnections = serverStats.getActiveRequestsCount(currentTime);</span><br><span class="line">                <span class="keyword">if</span> (concurrentConnections &lt; minimalConcurrentConnections) &#123;</span><br><span class="line">                    minimalConcurrentConnections = concurrentConnections;</span><br><span class="line">                    chosen = server;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (chosen == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.choose(key);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">//返回服务实例</span></span><br><span class="line">            <span class="keyword">return</span> chosen;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLoadBalancer</span><span class="params">(ILoadBalancer lb)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.setLoadBalancer(lb);</span><br><span class="line">        <span class="keyword">if</span> (lb <span class="keyword">instanceof</span> AbstractLoadBalancer) &#123;</span><br><span class="line">            <span class="comment">//获取服务列表的统计信息</span></span><br><span class="line">            loadBalancerStats = ((AbstractLoadBalancer) lb).getLoadBalancerStats();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>IRule还有很多的实现类，以下一一列举，但是不详细说明了。</p>
+<table>
+<thead>
+<tr>
+<th align="center">行为簇(类名称)</th>
+<th align="center">策略描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">BestAvailableRule</td>
+<td align="center">最小请求优先</td>
+</tr>
+<tr>
+<td align="center">ClientConfgEnableRoundRobinRule</td>
+<td align="center">轮询策略</td>
+</tr>
+<tr>
+<td align="center">RandomRule</td>
+<td align="center">随机选择策略</td>
+</tr>
+<tr>
+<td align="center">RoundRobinRule</td>
+<td align="center"><strong>轮询选择server（Ribbon组件默认的策略）</strong></td>
+</tr>
+<tr>
+<td align="center">RetryRule</td>
+<td align="center">允许向现有的规则中加入重试逻辑</td>
+</tr>
+<tr>
+<td align="center">WeightedResponseTimeRule</td>
+<td align="center"><strong>每30秒计算一次服务器响应时间，以响应时间作为权重，响应时间越短的服务器被选中的概率越大</strong></td>
+</tr>
+<tr>
+<td align="center">ZoneAvoidanceRule</td>
+<td align="center">要求server所在的Zone可用的前提，进行轮询选择</td>
+</tr>
+</tbody></table>
+<h3 id="决定服务实例是否可用的IPing"><a href="#决定服务实例是否可用的IPing" class="headerlink" title="决定服务实例是否可用的IPing"></a>决定服务实例是否可用的IPing</h3><p>IPing接口，从名称上不难看出这是一个关乎“Ping”行为的接口类。每次我们都会用ping命令进行最快速的判断节点之间是否网络通路！实际上就是节点发起心跳包对另一个目标节点做echo请求报文，从而测试目的站点是否可达。IPing用于向server实例发起“ping”，来判断server是否有响应。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IPing</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Checks whether the given &lt;code&gt;Server&lt;/code&gt; is &quot;alive&quot; i.e. should be</span></span><br><span class="line"><span class="comment">     * considered a candidate while loadbalancing</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isAlive</span><span class="params">(Server server)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样的IPing也是基于策略模式的设计，衍生了很多子类(行为簇)</p>
+<table>
+<thead>
+<tr>
+<th align="center">行为簇(类名称)</th>
+<th align="center">策略描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">PingUrl</td>
+<td align="center">向真实的URL发起ping，并判断是否可用</td>
+</tr>
+<tr>
+<td align="center">PingConstant</td>
+<td align="center">固定某个服务可用，即默认该服务可用</td>
+</tr>
+<tr>
+<td align="center">NoOpPing</td>
+<td align="center">不进行ping，直接默认服务可以用，直接返回true</td>
+</tr>
+<tr>
+<td align="center">DummyPing</td>
+<td align="center">默认的简单实现类，直接返回true并实现initWithNiwsConfig方法</td>
+</tr>
+<tr>
+<td align="center">NIWSDiscoveryPing</td>
+<td align="center">不通过真正意义上的ping去判断server是否可用，而是通过DiscoveryEnabledServer的InstanceStatus.UP状态来判断是否可用</td>
+</tr>
+</tbody></table>
+<p>我们来看看NIWSDiscoveryPing的具体实现逻辑！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NIWSDiscoveryPing</span> <span class="keyword">extends</span> <span class="title">AbstractLoadBalancerPing</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">BaseLoadBalancer lb = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">NIWSDiscoveryPing</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> BaseLoadBalancer <span class="title">getLb</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> lb;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * Non IPing interface method - only set this if you care about the &quot;newServers Feature&quot;</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@param</span> lb</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLb</span><span class="params">(BaseLoadBalancer lb)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.lb = lb;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isAlive</span><span class="params">(Server server)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">boolean</span> isAlive = <span class="keyword">true</span>;</span><br><span class="line">            <span class="keyword">if</span> (server!=<span class="keyword">null</span> &amp;&amp; server <span class="keyword">instanceof</span> DiscoveryEnabledServer)&#123;</span><br><span class="line">                DiscoveryEnabledServer dServer = (DiscoveryEnabledServer)server;</span><br><span class="line">                InstanceInfo instanceInfo = dServer.getInstanceInfo();</span><br><span class="line">                <span class="keyword">if</span> (instanceInfo!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                    InstanceStatus status = instanceInfo.getStatus();</span><br><span class="line">                    <span class="keyword">if</span> (status!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                        <span class="comment">//根据服务实例的状态InstanceStatus.UP判断是否服务实例可用</span></span><br><span class="line">                        isAlive = status.equals(InstanceStatus.UP);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> isAlive;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initWithNiwsConfig</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">                IClientConfig clientConfig)</span> </span>&#123;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E8%AF%86Ribbon"><span class="toc-text">初识Ribbon</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E5%90%88RestTemplate%E4%BD%BF%E7%94%A8Ribbon"><span class="toc-text">结合RestTemplate使用Ribbon</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%99%A8LoadBalancerClient"><span class="toc-text">源码解读-负载均衡器LoadBalancerClient</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A8%E6%A0%B9%E9%97%AE%E5%BA%95-%E6%B7%B1%E5%85%A5%E4%BA%86%E8%A7%A3ILoadBalancer"><span class="toc-text">刨根问底-深入了解ILoadBalancer</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%B3%E5%AE%9A%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5%E7%9A%84IRule%E6%8E%A5%E5%8F%A3%E7%B1%BB"><span class="toc-text">决定负载均衡策略的IRule接口类</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%B3%E5%AE%9A%E6%9C%8D%E5%8A%A1%E5%AE%9E%E4%BE%8B%E6%98%AF%E5%90%A6%E5%8F%AF%E7%94%A8%E7%9A%84IPing"><span class="toc-text">决定服务实例是否可用的IPing</span></a></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E8%AF%A6%E8%A7%A3Springcloud%E4%B9%8BRibbon%E7%BB%84%E4%BB%B6/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/SpringCloud/"><i class="fa fa-tags"></i>SpringCloud</a>
+     
+      <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"><i class="fa fa-tags"></i>微服务</a>
+     
+      <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/"><i class="fa fa-tags"></i>负载均衡</a>
+     
+      <a href="/tags/Ribbon/"><i class="fa fa-tags"></i>Ribbon</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E8%AF%A6%E8%A7%A3Springcloud%E4%B9%8BFeign%E7%BB%84%E4%BB%B6/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E8%B0%88%E4%B8%80%E8%B0%88%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

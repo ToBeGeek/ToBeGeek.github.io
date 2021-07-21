@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>Java基础总结 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="Java基础,Java基础,个人总结," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2017-11-19
+    </span>
+    
+      <span>
+        | <a href="/categories/Java%E5%9F%BA%E7%A1%80/"><i class="fa fa-bookmark"></i>Java基础</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    Java基础总结
+  </h1>
+  
+  <article class="passage-article">
+    <!-- TOC -->
+
+<ul>
+<li><a href="#%E5%86%99%E4%B8%8B%E8%BF%99%E7%AF%87%E6%80%BB%E7%BB%93%E5%B8%96%E7%9A%84%E5%88%9D%E8%A1%B7">写下这篇总结帖的初衷</a></li>
+<li><a href="#%E9%9D%A2%E5%90%91%E8%BF%87%E7%A8%8Bor%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1">面向过程or面向对象</a><ul>
+<li><a href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%9A%84%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7%E4%B8%8E%E4%BA%94%E5%A4%A7%E5%9F%BA%E6%9C%AC%E5%8E%9F%E5%88%99">面向对象的三大特性与五大基本原则</a><ul>
+<li><a href="#%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7%E5%B0%81%E8%A3%85%E7%BB%A7%E6%89%BF%E5%A4%9A%E6%80%81">三大特性：封装、继承、多态</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%94%E5%A4%A7%E5%9F%BA%E6%9C%AC%E5%8E%9F%E5%88%99">五大基本原则</a></li>
+</ul>
+</li>
+<li><a href="#java%E7%9A%84%E5%B9%B3%E5%8F%B0%E6%97%A0%E5%85%B3%E6%80%A7">Java的平台无关性</a><ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%B9%B3%E5%8F%B0%E6%97%A0%E5%85%B3%E6%80%A7">什么是平台无关性</a></li>
+<li><a href="#%E5%B9%B3%E5%8F%B0%E6%97%A0%E5%85%B3%E6%80%A7%E7%9A%84%E5%AE%9E%E7%8E%B0">平台无关性的实现</a></li>
+</ul>
+</li>
+<li><a href="#jdk%E4%B8%8Ejre%E6%98%AF%E4%BB%80%E4%B9%88%E7%8E%A9%E6%84%8F">JDK与JRE是什么玩意</a></li>
+<li><a href="#java%E4%B8%AD%E7%9A%84%E7%B1%BB">Java中的类</a><ul>
+<li><a href="#%E6%8E%A5%E5%8F%A3%E5%92%8C%E6%8A%BD%E8%B1%A1%E7%B1%BB">接口和抽象类</a><ul>
+<li><a href="#%E6%8A%BD%E8%B1%A1%E7%B1%BB%E5%92%8C%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%8C%BA%E5%88%AB%E7%82%B9">抽象类和接口的区别点</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E5%AD%97%E7%AC%A6%E5%9E%8B%E5%B8%B8%E9%87%8F%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%B8%E9%87%8F%E7%9A%84%E5%8C%BA%E5%88%AB">字符型常量和字符串常量的区别</a></li>
+<li><a href="#finalfinallyfinalize%E7%9A%84%E5%8C%BA%E5%88%AB">final,finally,finalize的区别</a></li>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%87%8D%E8%BD%BDoverload%E5%92%8C%E9%87%8D%E5%86%99override">什么是重载(overload)和重写(override)</a><ul>
+<li><a href="#override">override</a></li>
+<li><a href="#overload">overload</a></li>
+<li><a href="#%E9%87%8D%E5%86%99%E4%B8%8E%E9%87%8D%E8%BD%BD%E7%9A%84%E5%8C%BA%E5%88%AB">重写与重载的区别</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9E%84%E9%80%A0%E5%99%A8%E6%98%AF%E5%90%A6%E5%8F%AF%E4%BB%A5%E8%A2%AB%E7%BB%A7%E6%89%BF">构造器是否可以被继承</a></li>
+<li><a href="#int%E5%92%8Cinteger%E7%9A%84%E5%8C%BA%E5%88%AB">int和Integer的区别</a></li>
+<li><a href="#stringstringbufferstringbuilder">String、StringBuffer、StringBuilder</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B">数据类型</a><ul>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B">基本数据类型</a></li>
+<li><a href="#%E5%8C%85%E8%A3%85%E7%B1%BB%E5%9E%8B">包装类型</a><ul>
+<li><a href="#%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E5%92%8C%E6%8B%86%E7%AE%B1">自动装箱和拆箱</a></li>
+</ul>
+</li>
+<li><a href="#string%E8%AF%A6%E8%A7%A3">String详解</a></li>
+</ul>
+</li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">数据结构</a><ul>
+<li><a href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E5%88%86%E7%B1%BB">数据结构的分类</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6%E9%97%AE%E9%A2%98">数据结构的复杂度问题</a></li>
+<li><a href="#java%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">Java中的数据结构</a><ul>
+<li><a href="#list%E9%9B%86%E5%90%88">List集合</a></li>
+<li><a href="#queue%E9%9B%86%E5%90%88">Queue集合</a></li>
+<li><a href="#map%E9%9B%86%E5%90%88">Map集合</a></li>
+<li><a href="#set%E9%9B%86%E5%90%88">Set集合</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="写下这篇总结帖的初衷"><a href="#写下这篇总结帖的初衷" class="headerlink" title="写下这篇总结帖的初衷"></a>写下这篇总结帖的初衷</h3><p>14年进入大学，就读软件工程专业。我还记得我是班上最早开始学习Java的那个人（大二才开始的课程）。有点怀念那个时候在图书馆借着一本《Java完全参考手册》一直啃的岁月。有时候经常也会关注一些博文去review一些Java基础知识的东西，零零散散也会手写下来。突然有个想法，把这些零零散散的东西用自己的思考去重温。老是羡慕别人做总结，不如自个动手搞一篇自己的长帖！再次出发！</p>
+<p><img src="/.io//%E7%96%AF%E7%8B%82%E5%AD%A6%E4%B9%A0.jpg" alt="疯狂学习"></p>
+<h3 id="面向过程or面向对象"><a href="#面向过程or面向对象" class="headerlink" title="面向过程or面向对象"></a>面向过程or面向对象</h3><p>为什么要说这个话题呢，因为学习Java编程是离不开“面向对象”的。“面向对象”与“面向过程”其实是编程界的两种哲学思想。说到哲学，就不可避免地探讨“宏观”与“微观”。在宏观上，我们在编写Java应用地时候，更多地考虑如何用“对象”来描述复杂事务之间的关系。在微观上，我们会去思考一个“对象”具体的行为过程。<strong>“面向过程”强调的是自顶向下的解决过程，以解决事件为中心，分析问题的解决步骤并依次调用</strong>。<strong>“面向对象”强调以对象为中心，将复杂的事物高度抽象化，描述“对象”能做什么事情，具有怎么样的属性。</strong></p>
+<p>借鉴网络上特别生动的一个举例。将“面向过程”与“面向对象”分别比喻成，“蛋炒饭”与“盖浇饭”。虽然蛋炒饭这道菜入味均匀，蛋与饭的耦合度极高，如果你不想吃到鸡蛋的话，你只能选择重做一道。但是盖浇饭就不同了，饭和菜是分离的，如果你不想吃菜的话，可以换菜，不想吃饭可以换面。从软件工程的角度来看，“盖浇饭”的“灵活性高”，“扩展性强”，“耦合度低”，这也是面向对象的优势所在。</p>
+<p>总结：<strong>面向对象相比面向过程开发，使得工程更易维护，易复用，易扩展，更加灵活。</strong></p>
+<h4 id="面向对象的三大特性与五大基本原则"><a href="#面向对象的三大特性与五大基本原则" class="headerlink" title="面向对象的三大特性与五大基本原则"></a>面向对象的三大特性与五大基本原则</h4><p>为什么要和你扯这“三大特性”和“五大基本原则”。因为如上所述，Java离不开面向对象。</p>
+<h5 id="三大特性：封装、继承、多态"><a href="#三大特性：封装、继承、多态" class="headerlink" title="三大特性：封装、继承、多态"></a>三大特性：封装、继承、多态</h5><p>封装：<strong>封装是对客观事物封装成抽象的类，并且类可以把自己的数据和方法只让可信的类或者对象操作，对不可信的进行信息隐藏。</strong>通过这种方式，对象内部数据提供了不同级别的保护，能够防止程序中无关的部分意外的改变或者错误的使用对象的私有部分。</p>
+<p>继承：<strong>继承是指某个类型的对象获得另一个类型的对象的属性和方法，并且在关系上是父子关系。</strong>通过继承创建的新类称为“子类”或者“派生类”，被继承的类被称为“基类”，“父类”或者“超类”。继承的过程，就是从一般到特殊的过程（也有说是从抽象到实现）。继承的实现方式包括两类方式。继承概念的实现方式有二类：实现继承与接口继承。实现继承是指直接使用基类的属性和方法而无需额外编码的能力；接口继承是指仅使用属性和方法的名称、但是子类必须提供实现的能力。</p>
+<p>关于继承有如下3点需要注意<br>1：子类拥有父类对象所有的属性和方法（包括私有属性和私有方法），但是父类中的私有属性和方法子类无法访问，只是拥有。<br>2：子类可以对父类进行扩展<br>3：子类可以用自己的方式实现父类的方法</p>
+<p>多态：<strong>多态是指一个类的实例的相同方法在不同情形有不同的表现形式。</strong>对面向对下个来说，多态分为编译时多态和运行时多态。其中编译时多态是静态的，主要指方法的重载，它是根据参数列表的不同来区分不同的方法。运行时多态是动态的，通过动态绑定来实现。Java中有两种形式实现多态，继承（多个子类对同一方法的重写）与接口（实现接口并覆盖接口中同一方法）。<strong>Java中能够实现多态的三个必要条件是：继承、重写和向上转型。</strong></p>
+<h4 id="五大基本原则"><a href="#五大基本原则" class="headerlink" title="五大基本原则"></a>五大基本原则</h4><p>单一职责原则、开放封闭原则、里氏替换原则、依赖倒置原则、接口隔离原则<br>具体的描述，可以参考我补充的文章<a href="/passages/%E7%90%86%E8%A7%A3%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%83%E5%A4%A7%E5%8E%9F%E5%88%99">《设计模式的七大原则》</a></p>
+<h3 id="Java的平台无关性"><a href="#Java的平台无关性" class="headerlink" title="Java的平台无关性"></a>Java的平台无关性</h3><p>相信很多童鞋一定听说过一句话。Write Once,Run Anywhere!这可是Java成为巨人的根基所在啊。</p>
+<h4 id="什么是平台无关性"><a href="#什么是平台无关性" class="headerlink" title="什么是平台无关性"></a>什么是平台无关性</h4><p><strong>平台无关性就是指一种语言在计算机上的运行不受平台的约束，一次编译，到处执行</strong>。Java作为一门平台无关性语言，Java程序可以在各种各样的设备上运行，甚至是一些嵌入式设备，如打印机、扫描仪等。</p>
+<h4 id="平台无关性的实现"><a href="#平台无关性的实现" class="headerlink" title="平台无关性的实现"></a>平台无关性的实现</h4><p>在计算机世界中，计算机只认识0和1，通过编译原理我们知道程序的执行实际上是计算机对二进制文件的执行(由0和1组成)。我们日常使用的C++,Java，C，Go，Python都是高级编程语言，而非二进制语言。诸如此类的高级语言要想让计算机认识我们写出来的代码，就需要对它们进行“翻译”成二级制文件，这个过程称之为编译。负责编译的处理工具就叫做编译器。</p>
+<p>Java文件要编译成二进制文件，编译过程分成两步骤<strong>前端编译和后端编译。前端编译主要是指与原语言(Java)有关但与目标机无关的编译过程。后端编译是指将前端编译后生成的“中间代码”进行再次编译成机器语言的过程</strong>！我们熟悉的<strong>javac(Java Compiler)就是前端编译的编译器，主要功能是将Java代码转成class代码。</strong></p>
+<p>整个过程中有三个重要的概念。Java语法规范，Class文件，JVM。<br>没有严谨的Java语法规范，javac无法高效地将Java文件编译成class文件，Java语言规范规定了Java语言中地基本数据类型地取值范围和行为。其次，前端编译器会将所有地Java文件编译成中间文件class文件。然后JVM会加载class文件并转换成二进制文件。<br><img src="/.io//Java%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B.png" alt="Java编译过程.png"></p>
+<p>从上面的图片简单表达了Java程序的编译过程以及如何实现平台无关性。JVM屏蔽了底层操作系统和硬件的差异，也就是说Java的平台无关性离不开JVM平台有关系基础的支持。因为JVM能够向上提供平台无关性的基础，这些年在JVM平台之上衍生了很多新语言如Scala，Groovy，Kotlin等，他们也是平台无关语言。其原理上是一样的。</p>
+<p>更多的内容推荐大家去阅读这本书《深入理解Java虚拟机》或者阅读我的这篇文章<a href="/passages/Java%E6%98%AF%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91%E7%9A%84">《Java是如何编译的》</a></p>
+<h3 id="JDK与JRE是什么玩意"><a href="#JDK与JRE是什么玩意" class="headerlink" title="JDK与JRE是什么玩意"></a>JDK与JRE是什么玩意</h3><p>JDK的全程是Java Development Kit，看名字就知道是JavaSDK。它包含了JRE和Javac和其他工具(如javadoc)。<strong>用于创建和编译程序</strong></p>
+<p>JRE是指Java Runtime Environment,即Java程序运行时环境。它具有已经编译好的Java程序所有可运行的基础内容，比如JVM和Java基础类库以及Java命令等。<strong>能够运行程序，但不能创建程序</strong></p>
+<h3 id="Java中的类"><a href="#Java中的类" class="headerlink" title="Java中的类"></a>Java中的类</h3><p>从宏观上来看，一个Java类的组成主要又两部分：成员和方法。但是如果说细致点，类的定义包含了访问级别，类名，是否抽象，是否静态，泛型标识，继承和实现关键字，父类或接口名称等组成。</p>
+<h4 id="接口和抽象类"><a href="#接口和抽象类" class="headerlink" title="接口和抽象类"></a>接口和抽象类</h4><p>抽象是面向对象四大特性之一，我们对类的定义就是一个抽象建模的过程，而抽象类和接口是在此之上的进一步抽象。要记住，<strong>抽象类强在被继承的时候体现“is-a”关系，接口类在被实现的时候体现“can-do”关系</strong>。抽象类是对类的一种抽象，是一种模板式的设计。而接口对行为的一种抽象，是一种契约式的设计，是行为的一种规范。与接口类相比，抽象类是对一系列具有相同特征的事物的具体抽象，通常包含抽象方法、实体方法，属性变量。一个抽象类如果仅有抽象方法，无异于一个接口。</p>
+<p>“is-a”的关系要符合里氏替换原则，如“Eagle（子类） is a Bird（父类）。Bird is an Object and Eagle is an Object”,即父类可以出现的地方，子类也能出现！<br>“can-do”关系要符合接口隔离原则，实现类要有能力去实现并执行接口中定义的行为。（关于面向对象的设计原则可以参考我的这篇文章总结<a href="/passages/%E7%90%86%E8%A7%A3%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%83%E5%A4%A7%E5%8E%9F%E5%88%99">《理解设计模式的七大原则》</a>）</p>
+<h5 id="抽象类和接口的区别点"><a href="#抽象类和接口的区别点" class="headerlink" title="抽象类和接口的区别点"></a>抽象类和接口的区别点</h5><ol>
+<li>接口中定义的方法默认都是public（JDK9中，接口方法允许是private的），抽象方法要求方法不能为private(因为继承关系要求子类继承的方法不能低于父类访问权限)</li>
+<li>接口中的方法在JDK8之前是不允许有实现的（JDK8允许接口方法有默认实现），抽象类中的可以有具体实现的方法</li>
+<li>接口中的定义的变量只能是static final的，而抽象类中不一定</li>
+<li>一个类可以实现多个接口，但是只能继承一个抽象类</li>
+<li>从设计层面来说，抽象是对类的抽象，接口是对行为的抽象。抽象类是一种模板设计，强调“is-a”。接口是一种契约式设计，强调“can-do”，是一种行为的规范。</li>
+</ol>
+<h3 id="字符型常量和字符串常量的区别"><a href="#字符型常量和字符串常量的区别" class="headerlink" title="字符型常量和字符串常量的区别"></a>字符型常量和字符串常量的区别</h3><p>字符常量是单引号引起的一个字符，相当于一个整型值(ASCII值)，能够用于表达式运算；字符串常量是双引号引起的若干个字符，代表内存中的一个地址值（指向实际内容在内存中的位置）。字符常量没有自己的属性和方法，它是Java中定义的基本类型。字符串常量有自己的方法属性，它是一个对象。char在Java中占两个字节，16bit</p>
+<h3 id="final-finally-finalize的区别"><a href="#final-finally-finalize的区别" class="headerlink" title="final,finally,finalize的区别"></a>final,finally,finalize的区别</h3><p>final：是用于声明属性，方法和类的关键字。分别表示属性不可改变，方法不可覆盖，类不可以继承。<a href="wwww.baidu.com">final与常量折叠</a></p>
+<p>finally：这个关键字是用于异常处理语句的组成(可选的组成)，即在异常处理后一定会执行的语句，通常用来做一些资源的closed处理。</p>
+<p>finalize：是Object类的一个方法，所有的事物都会有消亡的时候，该方法是在垃圾收集器进行GC的时确定了这个对象需要回收时候才调用finalize()</p>
+<h3 id="什么是重载-overload-和重写-override"><a href="#什么是重载-overload-和重写-override" class="headerlink" title="什么是重载(overload)和重写(override)"></a>什么是重载(overload)和重写(override)</h3><h4 id="override"><a href="#override" class="headerlink" title="override"></a>override</h4><p>重写是指子类对父类允许访问的方法的实现逻辑(方法体)进行重新编写，返回值和形参都不能改变。通过方法的重写，子类可以根据自己的需要修改从父类继承而来的方法的实现，扩展自己的行为。有如下几个注意要点：</p>
+<p>1.参数列表和函数名称必须完全与被重写的父类方法相同<br>2.<strong>返回类型与被重写的方法返回类型可以不相同，但是必须是父类返回值的派生类，JDK7版本后可以不同，JDK5及早期版本要求一致</strong><br>3.访问权限不能低于父类中被重写的方法的访问权限。例如：如果父类的一个方法被声明public，那么子类在重写这个方法的时候，权限不能&lt;=protected，也就是必须是public<br>4.<strong>重写方法不能抛出被重写方法中未申明的检查异常(也叫做强制性异常CheckedException)，也不能抛出比被重写方法申明的异常的超类。</strong>假设被重写方法申明抛出IOException，重写方法中不能抛出Exception，因为Exception是IOException的超类。<br>5.不能被继承的方法，不能被重写。例如父类中被final声明的方法就不可以被重写<br>6.被声明为static的方法不能被重写，但是能够再次声明<br>7.构造器不能被重写<br>8.重写的方法中能够抛出任何非强制性异常(Java中除了RuntimeException以外都是强制性异常)，无论被重写的方法中是否抛出异常。但是不能抛出就新的强制性异常或者更广泛的强制性异常<br>9.子类中需要调用父类中的被重写方法的时候，可以通过super关键字访问</p>
+<h4 id="overload"><a href="#overload" class="headerlink" title="overload"></a>overload</h4><p>重载是指同个类中，允许出现方法名称相同，但是参数列表不同（返回类型可以不同-非强制）。有如下几个规则</p>
+<p>1.被重载的方法必须有不同的参数列表(参数个数或者类型不同)<br>2.被重载的方法允许有不同的返回类型，但返回类型的不同并不是重载函数的区分标准<br>3.被重载的方法可以改变访问修饰符<br>4.被重载的方法允许声明新的或者更广的强制性异常(CheckedException)<br>5.方法也可以在子类中被重载</p>
+<h4 id="重写与重载的区别"><a href="#重写与重载的区别" class="headerlink" title="重写与重载的区别"></a>重写与重载的区别</h4><table>
+<thead>
+<tr>
+<th align="center">区别点</th>
+<th align="center">重载</th>
+<th align="center">重写</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">参数列表</td>
+<td align="center">必须修改</td>
+<td align="center">必须一致</td>
+</tr>
+<tr>
+<td align="center">返回类型</td>
+<td align="center">可以修改-但不作为区分标准</td>
+<td align="center">必须一致</td>
+</tr>
+<tr>
+<td align="center">异常</td>
+<td align="center">可以声明新的或者更广的强制性异常</td>
+<td align="center">可以减少或删除，但是不能抛出新的或者更广的强制性异常(非强制性异常，如RuntimeException不约束)</td>
+</tr>
+<tr>
+<td align="center">访问权限</td>
+<td align="center">允许修改</td>
+<td align="center">不能比被重写的方法权限低</td>
+</tr>
+</tbody></table>
+<p>总结：不论是方法的重写还是重载，都是Java的多态性的不同表现。重写是父类与子类之间多态性的表现，重载是一个类的多态性表现</p>
+<p>借用一个趣图加深印象!<br><img src="/.io//%E9%87%8D%E8%BD%BD%E4%B8%8E%E9%87%8D%E5%86%99.jpg" alt="重载与重写.jpg"></p>
+<h3 id="构造器是否可以被继承"><a href="#构造器是否可以被继承" class="headerlink" title="构造器是否可以被继承"></a>构造器是否可以被继承</h3><p>构造器(Constructor)是不能被继承的，因为每个类的类名称都不同，而构造器名称与类名相同，因此也不能被重写(override)，只能在同一个类中对其进行重载(overload)。</p>
+<h3 id="int和Integer的区别"><a href="#int和Integer的区别" class="headerlink" title="int和Integer的区别"></a>int和Integer的区别</h3><p>···· 等我看完《码出高效》再回来补充这个问题</p>
+<h3 id="String、StringBuffer、StringBuilder"><a href="#String、StringBuffer、StringBuilder" class="headerlink" title="String、StringBuffer、StringBuilder"></a>String、StringBuffer、StringBuilder</h3><p>先来看看源码的片段：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">String</span></span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span>, <span class="title">Comparable</span>&lt;<span class="title">String</span>&gt;, <span class="title">CharSequence</span> </span>&#123;</span><br><span class="line">    <span class="comment">/** The value is used for character storage. */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">char</span> value[];</span><br><span class="line">    ...省略其他</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//展示StringBuilder中的部分方法，append方法，用于和StringBuffer对比</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">StringBuilder</span></span></span><br><span class="line"><span class="class">    <span class="keyword">extends</span> <span class="title">AbstractStringBuilder</span></span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span>, <span class="title">CharSequence</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> StringBuilder <span class="title">append</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">       ...省略方法内容</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> StringBuilder <span class="title">append</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">       ...省略方法内容</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">//展示StringBuffer中部分继承并重写的方法片段</span></span><br><span class="line"> <span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">StringBuffer</span></span></span><br><span class="line"><span class="class">    <span class="keyword">extends</span> <span class="title">AbstractStringBuilder</span></span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span>, <span class="title">CharSequence</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> StringBuffer <span class="title">append</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">        ...省略方法内容</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> StringBuffer <span class="title">append</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">        ...省略方法内容</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//StringBuilder与StringBuffer都继承AbstractStringBuilder</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractStringBuilder</span> <span class="keyword">implements</span> <span class="title">Appendable</span>, <span class="title">CharSequence</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * The value is used for character storage.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">char</span>[] value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上面可以看出几个信息。</p>
+<p>1.<strong>String类中定义的value属性是由final定义的</strong>，这也是为什么我们说<strong>String是不可变的</strong>。而<strong>StringBuilder和StringBuffer中的value属性从AbstractStringBuilder中继承而来，可以看到AbstractStringBuilder中的value并没有使用final修饰。因此我们说StringBuffer与StringBuilder是可变长的。</strong></p>
+<p>2.<strong>String中的对象是不可更改的，即可认为是常量，因此线程安全</strong>。仔细看看上诉代码中的StringBuilder和StringBuffer的源码片段，不难发现StringBuffer在重写append方法的时候其实对整个方法进行synchronized加锁做同步，来保证多线程的情况下方法调用的线程安全！对比StringBuilder对片段，发现<strong>StringBuilder并没有使用synchronized加锁，也就是线程不安全</strong>。（当然StringBuffer不仅仅对append方法做synchronized处理，还有别的常用方法我就不举例了）</p>
+<p>3.实际上，我们<strong>每次对String变量的重新赋值，本质上是生成一个新的String对象，然后将指针指向新的String对象</strong>。StringBuffer与StringBuilder是对其本身的value做出修改，但是由于StringBuffer的方法中采用synchronized修饰，使得StringBuffer在性能上低于StringBuilder（10%~15%）。凡是都有两面性，StringBuilder在多线程下是不安全的。</p>
+<h3 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h3><p>Java中的数据类型可以分成三种，基本数据类型(boolean,byte,char.short,long,int,float,double,<strong>refvar</strong>)，包装类型(基本数据类型对应的包装器)，字符串</p>
+<h4 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h4><p><strong>基本数据类型是指不可再分的原子数据类型，内存中直接存储此类型的值，通过内存地址既可以直接访问到的数据</strong>。</p>
+<p>Java中的9种基本数据类型包括了boolean,byte,char.short,long,int,float,double,<strong>refvar</strong>。refvar是指引用变量，也叫引用句柄（学过C语言的同学应该指针，其实就是一种指针结构）</p>
+<table>
+<thead>
+<tr>
+<th align="center">类型名称</th>
+<th align="center">默认值</th>
+<th align="center">大小</th>
+<th align="center">最小值</th>
+<th align="center">最大值</th>
+<th align="center">包装类</th>
+<th align="center">缓存区间</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">boolean</td>
+<td align="center">false</td>
+<td align="center">1 B</td>
+<td align="center">0 (false)</td>
+<td align="center">1 (true)</td>
+<td align="center">Boolean</td>
+<td align="center">无</td>
+</tr>
+<tr>
+<td align="center">byte</td>
+<td align="center">0(byte)</td>
+<td align="center">1 B</td>
+<td align="center">-128</td>
+<td align="center">127</td>
+<td align="center">Byte</td>
+<td align="center">-128 ~ 127</td>
+</tr>
+<tr>
+<td align="center">char</td>
+<td align="center">‘\u0000’</td>
+<td align="center">2 B</td>
+<td align="center">‘\u0000’</td>
+<td align="center">‘\uFFFF’</td>
+<td align="center">Character</td>
+<td align="center">(char)0 ~ (char)127</td>
+</tr>
+<tr>
+<td align="center">short</td>
+<td align="center">(short)0</td>
+<td align="center">2 B</td>
+<td align="center">-2^15</td>
+<td align="center">2^15-1</td>
+<td align="center">Short</td>
+<td align="center">-128 ~ 127</td>
+</tr>
+<tr>
+<td align="center">int</td>
+<td align="center">0</td>
+<td align="center">4 B</td>
+<td align="center">-2^31</td>
+<td align="center">2^31-1</td>
+<td align="center">Integer</td>
+<td align="center">-128 ~ 127</td>
+</tr>
+<tr>
+<td align="center">long</td>
+<td align="center">0L</td>
+<td align="center">8 B</td>
+<td align="center">-2^63</td>
+<td align="center">2^63-1</td>
+<td align="center">Long</td>
+<td align="center">-128 ~ 127</td>
+</tr>
+<tr>
+<td align="center">float</td>
+<td align="center">0.0f</td>
+<td align="center">4 B</td>
+<td align="center">1.4e-45</td>
+<td align="center">3.4e+38</td>
+<td align="center">Float</td>
+<td align="center">无</td>
+</tr>
+<tr>
+<td align="center">double</td>
+<td align="center">0.0d</td>
+<td align="center">8 B</td>
+<td align="center">4.9e-324</td>
+<td align="center">1.798e+308</td>
+<td align="center">Double</td>
+<td align="center">无</td>
+</tr>
+</tbody></table>
+<p>可以发现，除了float和double类型，他们对应的包装类并没有缓存任何数据。(主要原因是精度过细，设计缓存的意义不大！)</p>
+<p>在孤尽大神的《码出高效》中，还提到了另外数据类型<strong>refvar</strong>。引用分成两种数据类型，引用变量本身（Reference Variable即简写：refvar）和引用指向的对象(Reference Object即简写：refobj)。refvar是基本的数据类型，默认值NULL，存储refobj的首地址，可以直接使用==进行等值判断。而平时使用refvar.hashCode()返回的值，只是对象的哈希计算值，可能与地址有关，与refvar本身存储的内存单元地址是两回事。作为一个引用变量，不管它是指向包装类、集合类、字符串类还是其他Object，引用变量本身只占内存的4B空间。真正的对象refobj最小的占用空间是12<strong>B</strong>（用于存储基本信息，即对象头），但是由于存储空间分配必须是8<strong>B</strong>的倍数,所以说初始分配refobj的空间至少是16<strong>B</strong></p>
+<h4 id="包装类型"><a href="#包装类型" class="headerlink" title="包装类型"></a>包装类型</h4><p>为什么需要包装类型？因为Java作为一种典型的面向对象开发语言，本着一切皆对象的理念，在很多的情况下，需要以对象的形式进行操作。包装类的存在解决了基本数据类型无法做到的事情，比如：泛型类型参数、序列化、类型转换、<strong>高频区间缓存</strong>。什么是高频区间缓存，就是对常用的频率较高的对象进行缓存，这样做的好处是对已有对象进行复用，提升了读取性能。例如上面表格中描述的，Integer的缓存区间在于 -128 ~ 127，这个区间内的Integer对象由IntegerCache.cache产生。也就是说这个区间内的Integer值可以直接使用==进行等值比较，但是超出缓存区间外的对象会在堆上进行分配，并不会复用已有的对象，因此也不能通过==比较而是要通过equals()方法比较。所以对包装器之间的值比较，我们建议全部使用equals()方法进行比较是最稳妥的方式！</p>
+<p>来看看各个包装类的缓存区间</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//Integer 缓存默认区间是 -128~127</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Integer</span> <span class="keyword">extends</span> <span class="title">Number</span> <span class="keyword">implements</span> <span class="title">Comparable</span>&lt;<span class="title">Integer</span>&gt; </span>&#123;</span><br><span class="line">    ...省略代码</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Integer <span class="title">valueOf</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (i &gt;= IntegerCache.low &amp;&amp; i &lt;= IntegerCache.high)</span><br><span class="line">            <span class="keyword">return</span> IntegerCache.cache[i + (-IntegerCache.low)];</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Integer(i);</span><br><span class="line">    &#125;</span><br><span class="line">    ...省略代码</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Boolean 没有缓存区间，只有静态值TRUE、FALSE</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Boolean</span> <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span>,</span></span><br><span class="line"><span class="class">                                      <span class="title">Comparable</span>&lt;<span class="title">Boolean</span>&gt;</span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Boolean TRUE = <span class="keyword">new</span> Boolean(<span class="keyword">true</span>);</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Boolean FALSE = <span class="keyword">new</span> Boolean(<span class="keyword">false</span>);</span><br><span class="line">    ...省略代码</span><br><span class="line">    <span class="comment">//返回上述定义的静态值TRUE、FALSE</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Boolean <span class="title">valueOf</span><span class="params">(<span class="keyword">boolean</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (b ? TRUE : FALSE);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Byte 缓存区间 -128~127</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Byte</span> <span class="keyword">extends</span> <span class="title">Number</span> <span class="keyword">implements</span> <span class="title">Comparable</span>&lt;<span class="title">Byte</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">//定义cache</span></span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ByteCache</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="title">ByteCache</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">final</span> Byte cache[] = <span class="keyword">new</span> Byte[-(-<span class="number">128</span>) + <span class="number">127</span> + <span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">static</span> &#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; cache.length; i++)</span><br><span class="line">                cache[i] = <span class="keyword">new</span> Byte((<span class="keyword">byte</span>)(i - <span class="number">128</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ...省略代码</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Byte <span class="title">valueOf</span><span class="params">(<span class="keyword">byte</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> offset = <span class="number">128</span>;</span><br><span class="line">        <span class="keyword">return</span> ByteCache.cache[(<span class="keyword">int</span>)b + offset];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Short 缓存区间 -128~127</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Short</span> <span class="keyword">extends</span> <span class="title">Number</span> <span class="keyword">implements</span> <span class="title">Comparable</span>&lt;<span class="title">Short</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Short <span class="title">valueOf</span><span class="params">(<span class="keyword">short</span> s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> offset = <span class="number">128</span>;</span><br><span class="line">        <span class="keyword">int</span> sAsInt = s;</span><br><span class="line">        <span class="keyword">if</span> (sAsInt &gt;= -<span class="number">128</span> &amp;&amp; sAsInt &lt;= <span class="number">127</span>) &#123; <span class="comment">// must cache</span></span><br><span class="line">            <span class="keyword">return</span> ShortCache.cache[sAsInt + offset];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Short(s);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Character 缓存区间 0~127</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Character</span> <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span>, <span class="title">Comparable</span>&lt;<span class="title">Character</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">//缓存0-127的值</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">CharacterCache</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="title">CharacterCache</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">final</span> Character cache[] = <span class="keyword">new</span> Character[<span class="number">127</span> + <span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">static</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; cache.length; i++)</span><br><span class="line">                cache[i] = <span class="keyword">new</span> Character((<span class="keyword">char</span>)i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ...省略代码</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Character <span class="title">valueOf</span><span class="params">(<span class="keyword">char</span> c)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (c &lt;= <span class="number">127</span>) &#123; <span class="comment">// must cache</span></span><br><span class="line">            <span class="keyword">return</span> CharacterCache.cache[(<span class="keyword">int</span>)c];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Character(c);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Long 缓存范围-128~127</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Long</span> <span class="keyword">extends</span> <span class="title">Number</span> <span class="keyword">implements</span> <span class="title">Comparable</span>&lt;<span class="title">Long</span>&gt; </span>&#123;</span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LongCache</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="title">LongCache</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">final</span> Long cache[] = <span class="keyword">new</span> Long[-(-<span class="number">128</span>) + <span class="number">127</span> + <span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">static</span> &#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; cache.length; i++)</span><br><span class="line">                cache[i] = <span class="keyword">new</span> Long(i - <span class="number">128</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ...省略代码</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Long <span class="title">valueOf</span><span class="params">(<span class="keyword">long</span> l)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> offset = <span class="number">128</span>;</span><br><span class="line">        <span class="keyword">if</span> (l &gt;= -<span class="number">128</span> &amp;&amp; l &lt;= <span class="number">127</span>) &#123; <span class="comment">// will cache</span></span><br><span class="line">            <span class="keyword">return</span> LongCache.cache[(<span class="keyword">int</span>)l + offset];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Long(l);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>还有一点Integer和其他包装类型的不同，**Integer是唯一可以修改缓存区间的包装类，但是需要在VM options中加入-XX:AutoBoxCacheMax=**7777,既可以设置最大缓存值为7777</p>
+<p>什么时候使用包装类型以及什么时候用基本数据类型：<br>1.所有的POJO类属性必须使用包装数据类型。<br>2.RPC方法的返回值和参数必须使用包装数据类型。<br>3.所有的局部变量推荐使用基本数据类型</p>
+<h5 id="自动装箱和拆箱"><a href="#自动装箱和拆箱" class="headerlink" title="自动装箱和拆箱"></a>自动装箱和拆箱</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//装箱：将基本类型用他们对应的包装类型包装起来</span></span><br><span class="line">Integer a=<span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//拆箱：将包装类型转换成基本数据类型</span></span><br><span class="line"><span class="keyword">int</span> b=a;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>JDK5后，提供了自动装箱和拆箱的功能。装箱过程是通过调用包装器的valueOf方法实现的，而拆箱过程是通过调用包装器的 xxxValue方法实现的。（xxx代表对应的基本数据类型）。</p>
+<h4 id="String详解"><a href="#String详解" class="headerlink" title="String详解"></a>String详解</h4><p>字符串类型是常用的数据类型，JVM对字符串也做了特殊处理。String是在堆上进行分配的。字符串相关类型主要如上述说的三种。String,StringBuilder,StringBuffer。String是只读字符串，典型的immutable对象，对它的任何改动，其实都是创建一个新对象，再把对象引用指向该对象。String对象赋值操作后，会在常量池中进行缓存，当下次申请创建对象的时候，会检查缓存中是否已存在，若存在则直接返回相应引用给创建者。</p>
+<p>在非基本数据类型的对象中，String是仅支持直接使用“+”进行连接操作的对象。但是“+”连接操作的原理是，创建了一个StringBuilder()对象，并且调用其append()方法进行字符串拼接，最后调用toString()方法返回拼接好的字符串。示例如下：</p>
+<p>//反编译-示例代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 测试代码</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">10</span>;</span><br><span class="line">        String s = <span class="string">&quot;abc&quot;</span>;</span><br><span class="line">        System.out.println(s + i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 反编译后</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">        <span class="keyword">byte</span> byte0 = <span class="number">10</span>;</span><br><span class="line">        String s = <span class="string">&quot;abc&quot;</span>;</span><br><span class="line">        System.out.println((<span class="keyword">new</span> StringBuilder()).append(s).append(byte0).toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这也是为什么在循环中，应该采用循环体外的StringBuilder来代替循环体中不断使用“+”拼接字符串的原因。因为在循环中过多的创建StringBuilder实在是浪费内存资源，而且性能也差了！</p>
+<h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><p>数据结构是指逻辑意义上的数据组织方式及其对应的处理方式。说白了就是，一种抽象的结构，它解决了两个问题，1：数据如何存储，2：数据的CRUD处理</p>
+<h4 id="数据结构的分类"><a href="#数据结构的分类" class="headerlink" title="数据结构的分类"></a>数据结构的分类</h4><p>从单个数据节点出发，根据该点的直接前继和直接后继作为区分维度，可以分类出如下的几种数据结构。</p>
+<p><img src="/.io//%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%88%86%E7%B1%BB.png" alt="数据结构分类.png"></p>
+<h4 id="数据结构的复杂度问题"><a href="#数据结构的复杂度问题" class="headerlink" title="数据结构的复杂度问题"></a>数据结构的复杂度问题</h4><p>不同的数据组织方式和处理方式带来了一个新的问题，如何衡量数据处理的性能。数据结构的复杂的分成<strong>空间复杂度和时间复杂度</strong>。随着存储设备成本的降低，时间复杂度成为重点考量因素。</p>
+<p>算法的时间复杂度是一种衡量计算性能的指标，反映了程序执行时间随着输入规模增长而增长的<strong>量级</strong>，在很大的程度上可以反映这个算法的性能。一般用大写的O和一个函数表示。从最好到最坏的算法复杂度排序如下：</p>
+<p>常数级<strong>O(1)<strong>、对数级</strong>O(logn)<strong>、线性级</strong>O(n)<strong>、线性对数级</strong>O(nlogn)<strong>、平方级</strong>O(n^2)<strong>、立方级</strong>O(n^3)<strong>、指数级</strong>O(2^n)</strong></p>
+<p>不要觉得日常生活的数据有限就不去纠结考量算法复杂度，因为数据是并非静止的，而程序的算法是静止的。优秀的程序实现不会因为数据规模的急剧上升导致程序的性能急剧下降。</p>
+<h4 id="Java中的数据结构"><a href="#Java中的数据结构" class="headerlink" title="Java中的数据结构"></a>Java中的数据结构</h4><p>Java中的集合是用于存储对象和工具类容器，它实现类常用的数据结构。提供了一系列公开的方法用于CRUD和遍历数据，降低日常开发成本。</p>
+<p>根据存储的元素列数可以分成两类。第一类是按照单个元素存储的Collection，在继承树中，List和Set都是单列存储，并且都实现了Collection接口。第二类是按照Key-Value存储的Map结构，它是两列元素存储的结构。</p>
+<h5 id="List集合"><a href="#List集合" class="headerlink" title="List集合"></a>List集合</h5><p>List集合是线性数据结构的主要实现，集合元素通常存在明确的上一个元素和下一个元素。，也存在首位元素和尾部元素。List集合最常用的两个实现类就是<a href="/passages/%E6%B7%B1%E5%85%A5%E4%BA%86%E8%A7%A3Java%E4%B8%AD%E7%9A%84ArrayList/">ArrayList</a>和<a href="/passages/%E6%B7%B1%E5%85%A5%E4%BA%86%E8%A7%A3Java%E4%B8%AD%E7%9A%84LinkedList/">LinkedList</a>。</p>
+<p><strong>ArrayList是容量可变的非线程安全的线性结构的数据集合。</strong>内部的实现是使用数组进行value的存储，在集合进行扩容的时候会创建更大的数组空间，再将原有数据进行复制迁移到新扩容的数组中。ArrayList支持快速随机访问，但是insert和delete时候的速度通常很慢，因为这个过程涉及到对其他元素的移动。</p>
+<p><strong>LinkedList的本质是双向链表</strong>。与ArrayList相比，LinkedList的插入和删除速度要明显更优！但是其随机访问的速度则慢于ArrayList。测试表明，在10W条数据下，LinkedList相比ArrayList在随机访问元素时候存在百倍的差距。LinkedList的有点在于可以将零散的内存单元通过附加引用的方式从逻辑上关联起来，形成按照链路顺序查找的线性结构，简单说就是有更高的内存利用率。LinkedList同时也实现了DeQue接口，即double-ended queue。这个接口同时具有队列（FIFO），栈（LIFO）的性质。</p>
+<h5 id="Queue集合"><a href="#Queue集合" class="headerlink" title="Queue集合"></a>Queue集合</h5><p>Queue是一种先进先出的数据结构，队列是一种特殊的线性表。只允许在表的一段进行获取操作，在表的另外一端进行插入操作。就像生活中的排队一样，（不准插队的前提下）只能跟在队伍后面，队伍前面的人优先进行处理。自从BlockingQueue（阻塞队列）问世以来，队列的地位得到极大的提升，在各种高并发编程场景中，由于其本身的FIFO特性和阻塞操作的特点，经常被当作Buffer使用。</p>
+<h5 id="Map集合"><a href="#Map集合" class="headerlink" title="Map集合"></a>Map集合</h5><p>Map集合是以Key-Value键值对作为存储元素实现的哈希结构，Key按某种哈希函数计算后得到唯一的散列值，Value则是运行重复的（所在的存储单元不同，但是内容是可以相同的）。Map类提供三种Collection视图。Map运行使用keySet()获取所有的Key，使用values()查看所有的存入值，使用entrySet()查看所有的键值对。</p>
+<h5 id="Set集合"><a href="#Set集合" class="headerlink" title="Set集合"></a>Set集合</h5><p>Set是不允许出现重复元素的集合类型。Set体系最常用的是HashSet、TreeSet和LinkedHashSet三个集合类。HashSet从源码分析是使用HashMap来实现的，只是Value固定为一个静态对象，使用Key保证集合元素的唯一性，但是它不保证集合元素的顺序。</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E4%B8%8B%E8%BF%99%E7%AF%87%E6%80%BB%E7%BB%93%E5%B8%96%E7%9A%84%E5%88%9D%E8%A1%B7"><span class="toc-text">写下这篇总结帖的初衷</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%A2%E5%90%91%E8%BF%87%E7%A8%8Bor%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1"><span class="toc-text">面向过程or面向对象</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%9A%84%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7%E4%B8%8E%E4%BA%94%E5%A4%A7%E5%9F%BA%E6%9C%AC%E5%8E%9F%E5%88%99"><span class="toc-text">面向对象的三大特性与五大基本原则</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%89%E5%A4%A7%E7%89%B9%E6%80%A7%EF%BC%9A%E5%B0%81%E8%A3%85%E3%80%81%E7%BB%A7%E6%89%BF%E3%80%81%E5%A4%9A%E6%80%81"><span class="toc-text">三大特性：封装、继承、多态</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%94%E5%A4%A7%E5%9F%BA%E6%9C%AC%E5%8E%9F%E5%88%99"><span class="toc-text">五大基本原则</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java%E7%9A%84%E5%B9%B3%E5%8F%B0%E6%97%A0%E5%85%B3%E6%80%A7"><span class="toc-text">Java的平台无关性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%B9%B3%E5%8F%B0%E6%97%A0%E5%85%B3%E6%80%A7"><span class="toc-text">什么是平台无关性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B9%B3%E5%8F%B0%E6%97%A0%E5%85%B3%E6%80%A7%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-text">平台无关性的实现</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JDK%E4%B8%8EJRE%E6%98%AF%E4%BB%80%E4%B9%88%E7%8E%A9%E6%84%8F"><span class="toc-text">JDK与JRE是什么玩意</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java%E4%B8%AD%E7%9A%84%E7%B1%BB"><span class="toc-text">Java中的类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%A5%E5%8F%A3%E5%92%8C%E6%8A%BD%E8%B1%A1%E7%B1%BB"><span class="toc-text">接口和抽象类</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8A%BD%E8%B1%A1%E7%B1%BB%E5%92%8C%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%8C%BA%E5%88%AB%E7%82%B9"><span class="toc-text">抽象类和接口的区别点</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E5%9E%8B%E5%B8%B8%E9%87%8F%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%B8%B8%E9%87%8F%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">字符型常量和字符串常量的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#final-finally-finalize%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">final,finally,finalize的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%87%8D%E8%BD%BD-overload-%E5%92%8C%E9%87%8D%E5%86%99-override"><span class="toc-text">什么是重载(overload)和重写(override)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#override"><span class="toc-text">override</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#overload"><span class="toc-text">overload</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%87%8D%E5%86%99%E4%B8%8E%E9%87%8D%E8%BD%BD%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">重写与重载的区别</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E5%99%A8%E6%98%AF%E5%90%A6%E5%8F%AF%E4%BB%A5%E8%A2%AB%E7%BB%A7%E6%89%BF"><span class="toc-text">构造器是否可以被继承</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#int%E5%92%8CInteger%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">int和Integer的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#String%E3%80%81StringBuffer%E3%80%81StringBuilder"><span class="toc-text">String、StringBuffer、StringBuilder</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-text">数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-text">基本数据类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8C%85%E8%A3%85%E7%B1%BB%E5%9E%8B"><span class="toc-text">包装类型</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E5%92%8C%E6%8B%86%E7%AE%B1"><span class="toc-text">自动装箱和拆箱</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#String%E8%AF%A6%E8%A7%A3"><span class="toc-text">String详解</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-text">数据结构的分类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6%E9%97%AE%E9%A2%98"><span class="toc-text">数据结构的复杂度问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Java%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-text">Java中的数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#List%E9%9B%86%E5%90%88"><span class="toc-text">List集合</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Queue%E9%9B%86%E5%90%88"><span class="toc-text">Queue集合</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Map%E9%9B%86%E5%90%88"><span class="toc-text">Map集合</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Set%E9%9B%86%E5%90%88"><span class="toc-text">Set集合</span></a></li></ol></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/Java%E5%9F%BA%E7%A1%80%E6%80%BB%E7%BB%93/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/Java%E5%9F%BA%E7%A1%80/"><i class="fa fa-tags"></i>Java基础</a>
+     
+      <a href="/tags/%E4%B8%AA%E4%BA%BA%E6%80%BB%E7%BB%93/"><i class="fa fa-tags"></i>个人总结</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/Java%E4%B8%AD%E7%9A%84IO%E3%80%81NIO%E6%B5%85%E6%9E%90/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E5%9C%A8GitHub%E4%B8%8A%E6%90%AD%E5%BB%BAHexo%E5%8D%9A%E5%AE%A2/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

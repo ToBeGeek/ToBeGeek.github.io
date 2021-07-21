@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>认识消息中间件 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="分布式系统,分布式,消息中间件," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2019-10-23
+    </span>
+    
+      <span>
+        | <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"><i class="fa fa-bookmark"></i>分布式系统</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    认识消息中间件
+  </h1>
+  
+  <article class="passage-article">
+    <h2 id="什么是消息中间件（原文）"><a href="#什么是消息中间件（原文）" class="headerlink" title="什么是消息中间件（原文）"></a>什么是消息中间件（<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/13202200/message-broker-vs-mom-message-oriented-middleware?r=SearchResults">原文</a>）</h2><p>引用StackOverflow的一段讨论：<br>Message-Oriented-Middleware - is an approach, an architecture for distributed system i.e. a middle layer for the whole distributed system, where there’s lot of internal communication so components have to share info/data among them。此处省略….。 The biggest advantage of MOM architecture/decision is decoupling of the components。</p>
+<p>原文大致的意思是：<br>消息中间是为了解决分布式系统中的应用组件之间共享数据的一种方法、是一种架构。它带来的最大好处是使得组件彼此解耦。</p>
+<h3 id="消息中间件如何解耦服务调用"><a href="#消息中间件如何解耦服务调用" class="headerlink" title="消息中间件如何解耦服务调用"></a>消息中间件如何解耦服务调用</h3><p>举个栗子，现在的APP很多都是短信便捷注册账户的方式实现获客。当系统用户少且系统流量不大的时候，我们一般都采取如下的设计方案：<br><img src="/.io//%E5%8D%95%E4%BD%93%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E6%B3%A8%E5%86%8C%E6%B5%81%E7%A8%8B.png" alt="单体模式下的注册流程"></p>
+<p>以上这个方案是很多小型团队的解决方案。不难看出，所有业务模块都集中在一个单体中，耦合高。随着业务的发展，往往会把系统进行垂直拆分，解耦注册模块与短信服务模块。这个时候就可以体现出消息中间件引入的核心价值了，解耦！如下图所示：<br><img src="/.io//%E5%BC%95%E5%85%A5%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E8%A7%A3%E8%80%A6.png" alt="单体模式下的注册流程"></p>
+<p>消息中间件的引入，使得系统应用之间解耦、操作异步，各个应用仅需要关注如何把业务信息发送给中间件，如何从中间件订阅消息即可，不需要自己去实现通信的过程。同时，一个低耦合的分布式系统，会给系统整体带来非常好的可扩展性。</p>
+<h3 id="一致性问题和解决方案"><a href="#一致性问题和解决方案" class="headerlink" title="一致性问题和解决方案"></a>一致性问题和解决方案</h3><p>引入了消息中间件在带来组件解耦的同时，也引入了分布式事务一致性的问题，和消息一致性问题。对于一个用户来说，所感知的事务是一个整体，是原子的。但是由于分布式系统，数据在不同的组件中所对的数据库（或者其他存储方式）中存储，数据的存储是“分布”的，“业务”是整体的。解决分布式事务的一致性说白了要使得数据系统中每个组件的本地事务和“业务”一致。同样的，引入消息中间后就不得不保证“业务操作”与消息发送保持一致。比如，韩梅梅成功注册用户这个业务操作在注册服务成功执行，但是短信却没有发送成功，那么就是消息不一致。或者，韩梅梅并没有完成注册，却把短信提示发送出去了，这也是消息不一致。</p>
+<h4 id="解决分布式事务的一致性"><a href="#解决分布式事务的一致性" class="headerlink" title="解决分布式事务的一致性"></a>解决分布式事务的一致性</h4><ul>
+<li>分布式事务（基于DTP模型）</li>
+<li>依赖可靠消息服务的分布式事务</li>
+<li>最大努力通知（发起定期校对）</li>
+<li>TCC方案（Try/Confirm/Cancel）</li>
+</ul>
+<p>以上的方案可以粗略的划分成“刚性事务”和“柔性事务”。简单点理解就是，刚性事务是依赖于数据库自身实现的事务机制，最显著的特点是ACID四大特性。而柔性事务是不追求强一致性，而是追求最终一致性，通过重试（补偿机制）与幂等实现。</p>
+<h4 id="实现消息传递的一致性"><a href="#实现消息传递的一致性" class="headerlink" title="实现消息传递的一致性"></a>实现消息传递的一致性</h4><p>方案一：先执行业务逻辑再发送消息的代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def sign_up(self):</span><br><span class="line">    # 业务操作</span><br><span class="line">    self.do_service()</span><br><span class="line">    # 发送信息</span><br><span class="line">    self.send_msg()</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>业务操作</th>
+<th>发送信息操作</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>成功</td>
+<td>失败</td>
+<td>业务操作成功，但是消息发送失败。</td>
+</tr>
+</tbody></table>
+<p>方案二：先发送消息再执行业务逻辑的代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def sign_up(self):</span><br><span class="line">    # 发送信息</span><br><span class="line">    self.send_msg()</span><br><span class="line">    # 业务操作</span><br><span class="line">    self.do_service()</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>发送信息操作</th>
+<th>业务操作</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>成功</td>
+<td>失败</td>
+<td>出现这种结果就很尴尬了，先发送消息，但没有执行业务操作成功</td>
+</tr>
+</tbody></table>
+<p>上述的方案，都不能避免出现消息的不一致。采用JMS规范的MQ可以实现消息的一致性，但是必须使用JMS中的XA接口(基于两阶段提交的全局事务型接口)。这个方案引入了分布式事务，会带来开销的增加，并且代码复杂性。并且业务操作的资源必须支持XA协议才能完成分布式事务。为了强一致性，使得整体业务效率低下，有悖于柔性事务的初衷。</p>
+<h4 id="最终一致性的方案"><a href="#最终一致性的方案" class="headerlink" title="最终一致性的方案"></a>最终一致性的方案</h4><p>我们以之前的“注册用户”为例子，来看看几个最终一致性的方案：</p>
+<p>方案一：<br><img src="/.io//%E5%BC%BA%E4%BE%9D%E8%B5%96%E7%9A%84%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E6%96%B9%E6%A1%88.png" alt="强依赖的最终一致性方案.png"><br>这个方案可以有效的解决引入分布式事务的痛点，实现柔性事务和消息的最终一致性。此外在，这个方案中也有不少问题。<br>过多的业务状态处理依赖于消息中间件，这和引入的消息中间件的解耦目的有悖。</p>
+<p>方案二：<br><img src="/.io//%E4%B8%9A%E5%8A%A1%E7%B3%BB%E7%BB%9F%E5%92%8C%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%93%8D%E4%BD%9C%E5%90%8C%E4%B8%AA%E6%B6%88%E6%81%AF%E8%A1%A8%E6%96%B9%E6%A1%88.jpg" alt="业务系统和中间件操作同个消息表方案.jpg"><br>根据这个方案，我们把消息中间件中的消息表与业务数据表放在一个业务数据库中，在通过应用服务的本地事务来控制业务数据与消息数据状态在一个本地事务中完成，从而保证了数据一致，不需要再像方案一那样在发起者和消息中间件中来回确认消息状态。只要发起者的业务执行成功，消息则写入成功。注意生产者到消息中间件之间的投递是虚线，也就是非必须的，因为消息中间件可以通过直接访问业务库的消息表获知消息！这个方案也存在如下缺点：</p>
+<p>1：业务数据库需要承载消息表记录<br>2：消息中间件需要高频访问业务数据库<br>3：数据库需要支持事务，且能够支持消息中间件的需求</p>
+<p>方案三：<br><img src="/.io//%E4%B8%9A%E5%8A%A1%E7%B3%BB%E7%BB%9F%E5%90%84%E8%87%AA%E7%BB%B4%E6%8A%A4%E6%B6%88%E6%81%AF%E8%A1%A8%E7%9A%84%E6%96%B9%E6%A1%88.png" alt="业务系统各自维护消息表的方案.jpg"><br>在这个方案中，消息中间件不在直接与业务库中的消息表打交道，对消息状态的维护交由生产者（业务系统），从而降低了消息中间件与业务的耦合。消息中间件仅需要关注消息投递与接收本身。这个方案已经是非常不错的选择了，有没有更好的方案呢？答案是有的！上述方案二和方案三都需要数据库保证业务操作是刚性事务，即保证对数据库的操作是支持事务的。在生产者频繁投递的情境下，会使得数据库的I/O操作变多，系统整体的吞吐量下降。我可以考虑用本地磁盘读写结合数据库读写的方式，来降低IO消耗。</p>
+<p>方案四：<br><img src="/.io//%E4%B8%AD%E9%97%B4%E4%BB%B6%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E6%B6%88%E6%81%AF%E7%9A%84%E6%96%B9%E6%A1%88.png" alt="中间件客户端磁盘存储消息的方案.png"><br>当消息中间件不可用的时候，中间件客户端将消息存储入本地磁盘，当消息中间件恢复时再把消息从磁盘中读取并且推送到消息中间件。消息的管理在该方案下还是交由消息中间件（包括客户端）处理，但是客户端本地磁盘的使用可以保证业务应用上发送消息一定成功。</p>
+<p>这个方案也是比较成熟的方案了，我们可以使用支持消息持久化方式为磁盘的消息队列来实现。比如RabbitMQ就支持磁盘文件方式的持久化！</p>
+<p>没有绝对完美的方案，这个方案也存有一些弊端，只是发生的概率不高。仅当消息中间件宕机并且磁盘信息丢失的时候会造成消息的丢失，这种情况下，只能通过业务数据来补发/恢复消息了。</p>
+<p>将本地磁盘作为消息存储的方式有如下两种用法：<br>1：作为一致性<strong>发送消息</strong>的解决方案的容灾手段，仅当出现异常的时候才切换到该方式上，平时不工作！<br>2：直接用于工作，这样可以控制业务操作本身调用发送消息接口的处理时间，并且使得业务应用与消息中间件之间做一些批处理工作。</p>
+<p><strong>总结：</strong><br>上述方案中有两点限制。一，所有消息发送内容都必须在业务操作之前标记成“待处理状态”，这要求先能确定消息内容。其次，引入了对业务操作的多次确认检查。</p>
+<h3 id="消息模型有哪些"><a href="#消息模型有哪些" class="headerlink" title="消息模型有哪些"></a>消息模型有哪些</h3><p>消息模型中常用的两种方式,P2P方式、Pub/Sub方式</p>
+<h4 id="P2P模型（Queue模型）"><a href="#P2P模型（Queue模型）" class="headerlink" title="P2P模型（Queue模型）"></a>P2P模型（Queue模型）</h4><p>P2P模型中有几个主要的成员:消息队列(Queue)、发送者(Sender)、接收者(Receiver)。具有如下几个特点：</p>
+<p>1：每个消息有且只有一个消费者(Consumer)，一旦被消费，消息不再存于消息队列(Queue)中<br>2：发送者和接收者之间依赖低，发送者一旦送出信息后，无论接收者是否正在运行，都不会影响消息发送到消息队列中<br>3：接收者在成功接收消息之后需要向消息队列(Queue)返回应答</p>
+<p><img src="/.io//P2P%E6%A8%A1%E5%9E%8B.png" alt="P2P模型.png"></p>
+<h4 id="Pub-Sub模型-Topic模型"><a href="#Pub-Sub模型-Topic模型" class="headerlink" title="Pub/Sub模型 (Topic模型)"></a>Pub/Sub模型 (Topic模型)</h4><p>Pub/Sub模型（也叫Topic模型）中有几个主要成员：主题(Topic)、发布者(Publisher)、订阅者(Subscriber)<br>多个发布者将消息发送到主题(Topic)，系统将这些消息传递给多个订阅者，即完成发布-订阅。该模型与P2P模型最大的区别在于消息接收的部分，Pub/Sub模型允许每个消息有多个消费者。消息首先由消息生产者发布至消息服务器中特定的主题中，然后由消息服务器将消息广播给所有已订阅该主题的消费者。主题目标也支持长期订阅。长期订阅表示消费者已注册了主题目标，但在消息到达目标时该消费者可以处于非活动状态。当消费者再次处于活动状态时，将会接收该消息。一般来说Topic的数据是不落地的，</p>
+<p><img src="/.io//Topic%E6%A8%A1%E5%9E%8B.png" alt="Topic模型"></p>
+<p>两种模型的区别如下：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>P2P模型</th>
+<th>Pub/Sub模型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据持久化</td>
+<td>Queue数据默认会在mq服务器上以文件形式保存，但是也有一些MQ支持DB存储</td>
+<td>Topic的数据<strong>一般不落地，是无状态的</strong></td>
+</tr>
+<tr>
+<td>完整性保障</td>
+<td>Queue的数据保证一定会给能给接收者接收</td>
+<td>不能保证每次发布的数据都能被订阅者接收。一般来说publisher发布消息到某一个topic时，只有正在监听该topic地址的sub能够接收到消息；如果没有sub在监听，该topic就丢失了。</td>
+</tr>
+<tr>
+<td>发布接收策略</td>
+<td>一对一的消息发布接收策略，每条信息只能给特定一个Receiver接收，Receiver接收消息后通知MQ服务器对数据进行删除或者其他操作</td>
+<td>一对多的消息发布接收策略，监听同一个topic地址的多个订阅者都能收到发布者发布的消息，Sub接收完消息后也通知mq服务器</td>
+</tr>
+</tbody></table>
+<h3 id="持久订阅和非持久订阅"><a href="#持久订阅和非持久订阅" class="headerlink" title="持久订阅和非持久订阅"></a>持久订阅和非持久订阅</h3><p>消息订阅关系是指消息发送的上下游的映射关系（消息中间件中主要是指消息中间件与消息接收者的映射关系）。</p>
+<p><strong>持久订阅</strong>是指消息订阅者和消息中间件之间的消息订阅关系持久，与消息接收者是否处于运行状态没有关系，即使消息接收者宕机也不会影响订阅关系。除非消息订阅者显示取消这种订阅关系，否则只要这种订阅关系一旦建立都一直存在。</p>
+<p><strong>非持久订阅</strong>则恰恰相反，消息接收者和消息中间件的订阅关系与接收者本身的运行状态直接相关，当消息接收者正常运行则建立订阅关系并能够接收消息中间件的消息。反之，当消息接收者不在线或不正常运行时，订阅关系断开，此时无法接收消息中间件消息，仅当重启的时候重新建立订阅关系才能接收后续的消息。</p>
+<p><strong>总结：</strong>如果要做到消息的可靠保证，应该采用持久化订阅方式。</p>
+<h3 id="消息可靠性的保证"><a href="#消息可靠性的保证" class="headerlink" title="消息可靠性的保证"></a>消息可靠性的保证</h3><p>消息从发送者到接收端应用，中间有三个阶段，分别是：<br>1:消息发送者发送消息到消息中间件<br>2:消息中间件接收消息并且在消息中间件消息存储<br>3:消息中间件向消息接收者投递消息</p>
+<p>只要保证了这三个环节都是可靠的，就能保证最终消息的可靠。</p>
+<h3 id="消息发送的可靠性"><a href="#消息发送的可靠性" class="headerlink" title="消息发送的可靠性"></a>消息发送的可靠性</h3><p>消息的投递发生在第一和第二阶段。如何保证消息投递的可靠性？我认为主要围绕两个机制。<br>1:<strong>补偿机制</strong><br>2:<strong>确认应答机制</strong></p>
+<p>在第一阶段中，发送端可以通过将数据存入本地磁盘或者DB中，并提供有效的补偿重试机制来保证消息可以重发。消息从发送者到消息中间件，只有当中间件及时、明确地返回成功信号，才能确认消息可靠地到达消息中间件，返回错误、出现异常等情况都表示发送失败。此情况下，发送端要针对异常进行处理，必要时重发消息。</p>
+<p>最后的消息投递阶段和第一阶段的处理非常相似。但需要特别注意的是，消息发送的目的是为了给消费者消费，因此消息中间件需要显式地收到接收者确认消息处理完成地信号才能剔除消息，即消息接收者需要从应用层的响应返回确认应答。</p>
+<h3 id="消息存储可靠性"><a href="#消息存储可靠性" class="headerlink" title="消息存储可靠性"></a>消息存储可靠性</h3><p>这里说的消息存储主要是指消息到达消息中间件后的可靠存储。有如下几种方式实现</p>
+<p>1：<strong>基于数据库作为消息存储</strong><br>这种方式完全依赖于数据库本身的一些事务来保证数据的完整性。只需要考虑好如何设计合理的表结构即可实现，实现过程相对简单。但是这个方式也带来了不少弊端，在中间件集群数量较多或者消息订阅集群大时，对数据库的操作会十分频繁，所有的压力集中在数据库层面，容易造成性能下降</p>
+<p>2：<strong>基于文件作为消息存储</strong><br>这种方式的IO消耗要比数据库方式低，可以有效的提高吞吐量，但是实现难度相对上面的方式要难。在消息完成消费后的剔除过程中，容易使得数据文件产生空洞（即部分数据有效，部分数据无效）。要消除空洞则需要把保留数据写入新文件，然后直接删除原来的文件（类似JVM发生GC时的一种复制-清除算法），但是这个方案会增加写负担。</p>
+<p>3：<strong>基于双机内存的消息存储</strong><br>我们知道内存的速度是远远超出磁盘的，采用对内存的读写替代上述两种方式中对磁盘的读写，将能够大大地提高吞吐量。但是由于内存的存储是易失性存储，即断电会丢失数据，因此通过多节点的方式来保证数据的可靠。在双击内存存储方式下，通常来说不会持久化消息数据。仅当其中一个机器发生故障的时候，通知另一台机器对当前内存中的数据进行落盘，持久化存储。</p>
+<h3 id="pull-push方式对比"><a href="#pull-push方式对比" class="headerlink" title="pull/push方式对比"></a>pull/push方式对比</h3><p>消息中间件的实现方式分为两种模式，推模式(push)和拉模式(pull)。推模式下，消息中间件将主动把存储在中间件服务端的数据推送给接收者。拉模式下，接收者将主动从中间件服务端获取数据。具体比较如下表格所示</p>
+<table>
+<thead>
+<tr>
+<th>模式类型</th>
+<th>推模式(PUSH)</th>
+<th>拉模式(PULL)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据流向</td>
+<td>消息中间件主动将数据推送给接收者</td>
+<td>接收者主动向消息中间件拉取消息</td>
+</tr>
+<tr>
+<td>实时性</td>
+<td>实时性高，消息中间件获取消息后，即可向接收者推送消息</td>
+<td>基于短轮询方式的实时性取决于接收者的定时拉取策略（Pull时间间隔），基于长轮询方式的实时性与push一致。</td>
+</tr>
+<tr>
+<td>服务端状态</td>
+<td>中间件服务端需要维护消息状态</td>
+<td>服务端无状态</td>
+</tr>
+<tr>
+<td>客户端状态</td>
+<td>客户端不需要保存数据</td>
+<td>客户端需要保存拉取的数据，以便于自身故障时候保证数据可用</td>
+</tr>
+<tr>
+<td>数据保存</td>
+<td>推模式下的消息数据是集中存储在消息中间件服务端的</td>
+<td>拉模式下的消息数据是保存在接收者端的</td>
+</tr>
+<tr>
+<td>可靠性保证</td>
+<td>数据传输失败的时候，中间件服务端负责重试，因此数据及其状态都在中间件服务端维护</td>
+<td>数据传输失败的时候，由客户端负责重试</td>
+</tr>
+<tr>
+<td>流量控制</td>
+<td>因为数据流是从服务端推向客户端的，因此需要中间件服务端实现可靠的流控机制</td>
+<td>接收者根据自身消费能力决定是否pull消息</td>
+</tr>
+<tr>
+<td>缺点</td>
+<td>服务端需要做好流控，以避免当消费者消费能力不足或者承压较弱的时候，一次推送的流量过大造成消费者处理不过来。另外，消息的集中存储也是一个难点</td>
+<td>pull模式下，实时性较差，对服务端的数据更新感知较差，需要依赖自身的拉取策略获取最新数据。并且当服务端无数据时，无效的请求容易使得宽带资源浪费和服务器资源浪费。</td>
+</tr>
+</tbody></table>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%EF%BC%88%E5%8E%9F%E6%96%87%EF%BC%89"><span class="toc-text">什么是消息中间件（原文）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E5%A6%82%E4%BD%95%E8%A7%A3%E8%80%A6%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8"><span class="toc-text">消息中间件如何解耦服务调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98%E5%92%8C%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-text">一致性问题和解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-text">解决分布式事务的一致性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-text">实现消息传递的一致性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E6%96%B9%E6%A1%88"><span class="toc-text">最终一致性的方案</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E6%A8%A1%E5%9E%8B%E6%9C%89%E5%93%AA%E4%BA%9B"><span class="toc-text">消息模型有哪些</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#P2P%E6%A8%A1%E5%9E%8B%EF%BC%88Queue%E6%A8%A1%E5%9E%8B%EF%BC%89"><span class="toc-text">P2P模型（Queue模型）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Pub-Sub%E6%A8%A1%E5%9E%8B-Topic%E6%A8%A1%E5%9E%8B"><span class="toc-text">Pub&#x2F;Sub模型 (Topic模型)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%81%E4%B9%85%E8%AE%A2%E9%98%85%E5%92%8C%E9%9D%9E%E6%8C%81%E4%B9%85%E8%AE%A2%E9%98%85"><span class="toc-text">持久订阅和非持久订阅</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E5%8F%AF%E9%9D%A0%E6%80%A7%E7%9A%84%E4%BF%9D%E8%AF%81"><span class="toc-text">消息可靠性的保证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7"><span class="toc-text">消息发送的可靠性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E5%AD%98%E5%82%A8%E5%8F%AF%E9%9D%A0%E6%80%A7"><span class="toc-text">消息存储可靠性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pull-push%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94"><span class="toc-text">pull&#x2F;push方式对比</span></a></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E8%AE%A4%E8%AF%86%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"><i class="fa fa-tags"></i>分布式</a>
+     
+      <a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/"><i class="fa fa-tags"></i>消息中间件</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E8%84%91%E5%9B%BE%E7%AC%94%E8%AE%B0-%E5%9B%BE%E8%A7%A3TCP-IP/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E8%AE%A4%E8%AF%86%E5%A4%A7%E5%9E%8B%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83-%E4%B8%8B/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

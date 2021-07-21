@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>Java中的泛型-入门篇 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="Java基础,泛型," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2020-12-06
+    </span>
+    
+      <span>
+        | <a href="/categories/Java%E5%9F%BA%E7%A1%80/"><i class="fa fa-bookmark"></i>Java基础</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    Java中的泛型-入门篇
+  </h1>
+  
+  <article class="passage-article">
+    <!-- TOC -->
+
+<ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B3%9B%E5%9E%8B">什么是泛型</a></li>
+<li><a href="#%E6%B3%9B%E5%9E%8B%E8%A7%A3%E5%86%B3%E4%BA%86%E4%BB%80%E4%B9%88%E7%97%9B%E7%82%B9">泛型解决了什么痛点</a></li>
+<li><a href="#%E7%BC%BA%E7%9C%81%E6%B3%9B%E5%9E%8B%E4%B8%8E%E6%8C%87%E5%AE%9A%E6%B3%9B%E5%9E%8B%E4%B8%BAobject%E7%9A%84%E5%8C%BA%E5%88%AB">缺省泛型与指定泛型为Object的区别</a></li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E5%AE%9A%E4%B9%89%E5%92%8C%E4%BD%BF%E7%94%A8">常见的定义和使用</a><ul>
+<li><a href="#%E6%B3%9B%E5%9E%8B%E7%B1%BB">泛型类</a></li>
+<li><a href="#%E6%B3%9B%E5%9E%8B%E6%8E%A5%E5%8F%A3">泛型接口</a></li>
+<li><a href="#%E6%B3%9B%E5%9E%8B%E5%87%BD%E6%95%B0">泛型函数</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93">学习总结</a></li>
+</ul>
+<!-- /TOC -->
+
+<p>原本今天是想接着写Java8新特性相关的文章的，在啃Stream的源码的时候，发现Stream对泛型的使用简直是牛逼！于是乎，想起我那可怜的Java基础。因此决定对泛型相关的知识点做一个全面的总结。写给自己看，讲给大家听。</p>
+<h4 id="什么是泛型"><a href="#什么是泛型" class="headerlink" title="什么是泛型"></a>什么是泛型</h4><p>泛型（Generics）是JDK5中引入的一个新特性，<strong>泛型提供了编译时安全检查机制</strong>。<br>泛型的本质是把“类型”也变成一种特殊的参数，即参数化类型。</p>
+<h4 id="泛型解决了什么痛点"><a href="#泛型解决了什么痛点" class="headerlink" title="泛型解决了什么痛点"></a>泛型解决了什么痛点</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IntegerSession</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Integer start;</span><br><span class="line">    <span class="keyword">private</span> Integer end;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">getStart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> start;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setStart</span><span class="params">(Integer start)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.start = start;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">getEnd</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> end;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setEnd</span><span class="params">(Integer end)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.end = end;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BigDecimalSession</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> BigDecimal start;</span><br><span class="line">    <span class="keyword">private</span> BigDecimal end;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> BigDecimal <span class="title">getStart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> start;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setStart</span><span class="params">(BigDecimal start)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.start = start;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> BigDecimal <span class="title">getEnd</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> end;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setEnd</span><span class="params">(BigDecimal end)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.end = end;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>观察上述的代码，IntegerSession,BigDecimalSession有很多共性，除了类名称和处理的类型不同之外，共通性是很高的！如果要对上述的两个类进行一种合并，我们会怎么编程呢！我们往往会通过基类来替代.比如用他们的顶层基类，Object，代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ObjectSession</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Object start;</span><br><span class="line">    <span class="keyword">private</span> Object end;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getStart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> start;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setStart</span><span class="params">(Object start)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.start = start;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getEnd</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> end;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setEnd</span><span class="params">(Object end)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.end = end;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们设置区间为[1,2],然后来看看这三个类对取值的转换处理。如下图<br><img src="/.io//%E6%98%BE%E5%BC%8F%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98.jpg" alt="显式转换问题.jpg"></p>
+<p>我们发现虽然引入了Integer/BigDecimal的基类Object想做一个兼容的处理，但是这会导致我们需要对取值做一些强制转换。虽然图片中的代码并不会出现错误，但是要注意到，Object是所有类的基类，如果我们设置的值是String类型的，那么在强制转换的时候就可能会出现类型转换错误，而这种错误只能到了运行期发现！这显然不合理。</p>
+<p><img src="/.io//%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98.jpg" alt="类型转换问题.jpg"></p>
+<p>上面提到了一个痛点。程序在运行时可能发生的类型转换异常。接下来我们看看，泛型是如何解决这两个问题。我们引入一个泛型类，Session<T>。</T></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Session</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> T start;</span><br><span class="line">    <span class="keyword">private</span> T end;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">getStart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> start;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setStart</span><span class="params">(T start)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.start = start;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">getEnd</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> end;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setEnd</span><span class="params">(T end)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.end = end;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/.io//%E6%B3%9B%E5%9E%8B%E8%A7%A3%E5%86%B3%E5%BC%BA%E5%88%B6%E8%BD%AC%E6%8D%A2%E9%97%AE%E9%A2%98.jpg" alt="泛型解决强制转换问题.jpg"></p>
+<p>intSession指定的泛型参数<Integer>即限定了传入的参数类型必须是Integer类型。如果我们设置的数据是“一”，“二”，则显示如下。</Integer></p>
+<p><img src="/.io//%E6%B3%9B%E5%9E%8B%E6%A3%80%E6%9F%A5%E5%8F%82%E6%95%B0.jpg" alt="泛型检查参数.jpg"></p>
+<p>从上面的例子中，我们可以得出两点，关于使用泛型的意义。<br>1.泛型能够讲类型参数化，使得代码的设计更加抽象，是一种模板设计的思想体现。<br>2.泛型提供一个及早发现类型安全问题的机制，即编译时的类型安全检查机制，使得代码更加安全。</p>
+<h4 id="缺省泛型与指定泛型为Object的区别"><a href="#缺省泛型与指定泛型为Object的区别" class="headerlink" title="缺省泛型与指定泛型为Object的区别"></a>缺省泛型与指定泛型为Object的区别</h4><p>让我们先从一个简单的例子开始。搞清楚，缺省泛型变量Session，和使用Object作为泛型变量的情况是怎么样的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    Session session1=<span class="keyword">new</span> Session();</span><br><span class="line">    session1.setStart(<span class="number">1</span>);</span><br><span class="line">    session1.setEnd(<span class="string">&quot;2&quot;</span>);</span><br><span class="line">    System.out.println(<span class="string">&quot;s1-start=&quot;</span>+session1.getStart());</span><br><span class="line">    System.out.println(<span class="string">&quot;s1-end=&quot;</span>+session1.getEnd());</span><br><span class="line"></span><br><span class="line">    Session&lt;Object&gt; session2=<span class="keyword">new</span> Session&lt;&gt;();</span><br><span class="line">    session2.setStart(<span class="number">1</span>);</span><br><span class="line">    session2.setEnd(<span class="string">&quot;2&quot;</span>);</span><br><span class="line">    System.out.println(<span class="string">&quot;s2-start=&quot;</span>+session2.getStart());</span><br><span class="line">    System.out.println(<span class="string">&quot;s2-end=&quot;</span>+session2.getEnd());</span><br><span class="line"></span><br><span class="line">    session2=session1;</span><br><span class="line">    System.out.println(<span class="string">&quot;s2-start=&quot;</span>+session2.getStart());</span><br><span class="line">    System.out.println(<span class="string">&quot;s2-end=&quot;</span>+session2.getEnd());</span><br><span class="line"></span><br><span class="line">    <span class="comment">//第三段代码，用于展示缺省泛型变量的session带来的潜在危害</span></span><br><span class="line">    <span class="comment">//Session&lt;Integer&gt; session3=new Session&lt;&gt;();</span></span><br><span class="line">    <span class="comment">//session3=session1;</span></span><br><span class="line">    <span class="comment">//System.out.println(session3.getEnd()+1);</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//第四段代码，无法编译通过，因为指定的泛型是Integer</span></span><br><span class="line">    <span class="comment">//Session&lt;Integer&gt; session3=new Session&lt;&gt;();</span></span><br><span class="line">    <span class="comment">//session3=session2;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>上述情况均能正常编译，不难理解，缺省泛型变量的时候与泛型变量作为Object是可认为一样的，（如第四段代码无法编译）但不完全相同。所以这两种方法都是不安全的，让我们引入Session<Integer>为例子，将上述代码第三段移除注释，并运行，你会发现该代码段是可以编译的，但是运行时会报错，所以我们推荐在能够明确泛型的前提下，一定要明确泛型类型，否则容易埋下深坑。总结就是，大多数情况下”缺省”和”指定Object”的用法相似，但是“缺省”的时候赋值给明确泛型的变量不会编译失败，而“指定Object”则无法编译通过。</Integer></p>
+<h4 id="常见的定义和使用"><a href="#常见的定义和使用" class="headerlink" title="常见的定义和使用"></a>常见的定义和使用</h4><h5 id="泛型类"><a href="#泛型类" class="headerlink" title="泛型类"></a>泛型类</h5><p><img src="/.io//%E6%B3%9B%E5%9E%8B%E7%B1%BB%E7%9A%84%E5%A3%B0%E6%98%8E.jpg" alt="泛型类的声明.jpg"></p>
+<p>泛型的声明方式非常简单，如果是声明泛型类，则在类名后加上&lt;T,…省略&gt;。<br>如果是声明泛型函数，那么则是在返回类型前加上&lt;T,…省略&gt;。<br><strong>凡是声明，一定要用尖括号包裹泛型参数。泛型变量的命名可以是任意的大写字母！但是往往都具有如下的一些规范</strong></p>
+<p>E:是Element的缩写，通常用于表示容器类中的存放元素，例如List<E>,Set<E><br>K,V:是Key/Value的缩写，通常用于表达键值对关系的泛型变量<br>N:是Number的缩写<br>T:Type，类型</E></E></p>
+<h5 id="泛型接口"><a href="#泛型接口" class="headerlink" title="泛型接口"></a>泛型接口</h5><p>泛型接口是具有泛型变量的interface，和泛型类的声明方式是一样的。在使用上需要注意，如果子类需要沿用泛型变量，则不应该在implement的时候讲泛型接口具体填充好，而是要和泛型接口保持一致的声明。</p>
+<p>以我们常用的List<E>泛型接口为例，我们观察JDK自带的ArrayList<E>子类和我们自己实现一个List<E>子类，MyList的区别</E></E></E></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyList</span> <span class="keyword">implements</span> <span class="title">List</span>&lt;<span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">//...省略代码</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArrayList</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">AbstractList</span>&lt;<span class="title">E</span>&gt;</span></span><br><span class="line"><span class="class">        <span class="keyword">implements</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt;, <span class="title">RandomAccess</span>, <span class="title">Cloneable</span>, <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">     <span class="comment">//...省略代码</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        MyList myList=<span class="keyword">new</span> MyList();</span><br><span class="line">        List&lt;String&gt; arrayList=<span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>通过上述的MyList和ArrayList的比较，我们不难发现我们自己实现的MyList子类，已经不具备泛型的特性了。这是因为在实现泛型接口的时候将泛型变量指定成具体类型String了。而观察ArrayList，它在实现泛型接口的同时，仍然延续了泛型接口变量<T>,因此ArrayList是一个泛型类。</T></p>
+<p>同样的，在extends关系中也有可能造成这个情况。<strong>如果我们希望子类在继承或者实现接口类的同时，保持泛型特性，不可把泛型具体化</strong></p>
+<h5 id="泛型函数"><a href="#泛型函数" class="headerlink" title="泛型函数"></a>泛型函数</h5><p>泛型方法使得方法可以接收不同类型的参数。和泛型类的声明是一样的，泛型方法的声明也需要使用尖括号&lt;T,…&gt;的格式。例如我在ArrayList源码中翻阅到的toArray方法，就是一个泛型方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ArrayList中的toArray方法就是一个泛型方法</span></span><br><span class="line"><span class="keyword">public</span> &lt;T&gt; T[] toArray(T[] a) &#123;</span><br><span class="line">        <span class="keyword">if</span> (a.length &lt; size)</span><br><span class="line">            <span class="comment">// Make a new array of a&#x27;s runtime type, but my contents:</span></span><br><span class="line">            <span class="keyword">return</span> (T[]) Arrays.copyOf(elementData, size, a.getClass());</span><br><span class="line">        System.arraycopy(elementData, <span class="number">0</span>, a, <span class="number">0</span>, size);</span><br><span class="line">        <span class="keyword">if</span> (a.length &gt; size)</span><br><span class="line">            a[size] = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在ArrayList中还有一个方法，是我们常用的get()方法，我们来看看它的源码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">get</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">        rangeCheck(index);</span><br><span class="line">        <span class="keyword">return</span> elementData(index);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>get方法虽然返回的是泛型类型的数据，但是他并不是泛型方法，它只是ArrayList中的一个普通成员方法，它能够使用T作为返回参数，只不过是因为ArrayList在声明泛型类的时候已经声明过T变量了。</p>
+<p>综上可见。泛型变量必须在类层面声明，或者在泛型函数中声明才能使用。泛型函数一定是具备&lt;T,…&gt;的。方法中使用泛型作为接收参数或者返回参数，不一定就是泛型方法！</p>
+<h4 id="学习总结"><a href="#学习总结" class="headerlink" title="学习总结"></a>学习总结</h4><p>1.泛型（Generics）是JDK5中引入的一个新特性，<strong>泛型提供了编译时安全检查机制</strong>。泛型的本质是把“类型”也变成一种特殊的参数，即参数化类型。</p>
+<p>2.合理使用泛型，能够使得代码更加健壮，更加精简</p>
+<p>3.泛型变量的使用必须先经尖括号(&lt;T,…&gt;)的方式进行声明，可以在类层级(泛型类，泛型接口)，或者方法层级(泛型方法)上进行声明。</p>
+<p>4.使用了泛型变量作为入参或者出参的方法，不一定是泛型方法。</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B3%9B%E5%9E%8B"><span class="toc-text">什么是泛型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B3%9B%E5%9E%8B%E8%A7%A3%E5%86%B3%E4%BA%86%E4%BB%80%E4%B9%88%E7%97%9B%E7%82%B9"><span class="toc-text">泛型解决了什么痛点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%BA%E7%9C%81%E6%B3%9B%E5%9E%8B%E4%B8%8E%E6%8C%87%E5%AE%9A%E6%B3%9B%E5%9E%8B%E4%B8%BAObject%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">缺省泛型与指定泛型为Object的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E5%AE%9A%E4%B9%89%E5%92%8C%E4%BD%BF%E7%94%A8"><span class="toc-text">常见的定义和使用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%9B%E5%9E%8B%E7%B1%BB"><span class="toc-text">泛型类</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%9B%E5%9E%8B%E6%8E%A5%E5%8F%A3"><span class="toc-text">泛型接口</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B3%9B%E5%9E%8B%E5%87%BD%E6%95%B0"><span class="toc-text">泛型函数</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93"><span class="toc-text">学习总结</span></a></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B-%E5%85%A5%E9%97%A8%E7%AF%87/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E6%B3%9B%E5%9E%8B/"><i class="fa fa-tags"></i>泛型</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B-%E8%BF%9B%E9%98%B6%E7%AF%87/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/Java8%E7%9A%84Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

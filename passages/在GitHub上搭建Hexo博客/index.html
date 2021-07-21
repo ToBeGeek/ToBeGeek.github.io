@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>在GitHub上搭建Hexo博客 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="好用的软件工具,学习工具,Hexo," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2017-11-04
+    </span>
+    
+      <span>
+        | <a href="/categories/%E5%A5%BD%E7%94%A8%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%B7%A5%E5%85%B7/"><i class="fa fa-bookmark"></i>好用的软件工具</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    在GitHub上搭建Hexo博客
+  </h1>
+  
+  <article class="passage-article">
+    <h2 id="Hexo简介"><a href="#Hexo简介" class="headerlink" title="Hexo简介"></a>Hexo简介</h2><p>通过GitHub创建一个仓库github.io结合HEXO就能快速搭建一个能够访问的博客站点。Hexo是一个<br>快速上手，简单高效，支持多种主题的博客系统（基于Node.js）。通过Hexo创建文章后，再用Markdown语法对文章进行编辑，<br>后发布到github.io仓库，即可访问该文章。</p>
+<h2 id="快速入门"><a href="#快速入门" class="headerlink" title="快速入门"></a>快速入门</h2><h3 id="Step-One-创建-io仓库"><a href="#Step-One-创建-io仓库" class="headerlink" title="Step One:创建.io仓库"></a>Step One:创建.io仓库</h3><p>1.New repository</p>
+<p>2.在Repository name输入框，必需为YourUserName.github.io格式。YourUserName替换为你的用户名</p>
+<p>3.Create repository</p>
+<p>4.进入仓库YourUserName.github.io,点击setting,找到GitHub Pages模块</p>
+<p>5.点击choose a theme选择一个页面主题</p>
+<p>6.访问<a target="_blank" rel="noopener" href="https://username.github.io就可以访问博客网站了/">https://username.github.io就可以访问博客网站了</a></p>
+<h3 id="Step-Two-安装Git"><a href="#Step-Two-安装Git" class="headerlink" title="Step Two:安装Git"></a>Step Two:安装Git</h3><p>下载地址：<a target="_blank" rel="noopener" href="https://www.git-scm.com/download/">https://www.git-scm.com/download/</a><br>推荐教程：<a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/">廖雪峰老是的Git教程</a></p>
+<h3 id="Step-Three-安装Node-Js和Hexo"><a href="#Step-Three-安装Node-Js和Hexo" class="headerlink" title="Step Three:安装Node.Js和Hexo"></a>Step Three:安装Node.Js和Hexo</h3><p>Hexo是基于node.Js环境的静态博客系统，因此在安装之前需要先装<a target="_blank" rel="noopener" href="https://nodejs.org/en/">node.Js</a><br>有的人会遇到node.Js版本过低导致Hexo安装失败，所以这里建议尽量选版本高点的。</p>
+<p>检验是否安装Node.Js成功</p>
+<blockquote>
+<p>~ node -v<br>v11.8.0</p>
+</blockquote>
+<p>npm安装Hexo<br>指令：npm install -g hexo-cli  </p>
+<p>检验是否安装hexo成功</p>
+<blockquote>
+<p>~ hexo -v<br>hexo: 3.8.0<br>hexo-cli: 1.1.0<br>os: Windows_NT 10.0.17134 win32 x64<br>node: 11.8.0<br>v8: 7.0.276.38-node.16<br>uv: 1.25.0<br>zlib: 1.2.11<br>brotli: 1.0.7<br>ares: 1.15.0<br>modules: 67<br>nghttp2: 1.34.0<br>napi: 4<br>llhttp: 1.0.1<br>http_parser: 2.8.0<br>openssl: 1.1.0j<br>cldr: 34.0<br>icu: 63.1<br>tz: 2018e<br>unicode: 11.0</p>
+</blockquote>
+<h3 id="Step-Four-创建本地博客站点"><a href="#Step-Four-创建本地博客站点" class="headerlink" title="Step Four:创建本地博客站点"></a>Step Four:创建本地博客站点</h3><p>1.创建一个文件夹,如blog<br>2.进入blog目录并执行指令hexo init 初始化博客站点(执行结果是：Start blogging with Hexo!则创建成功)<br>3.执行hexo server启动博客站点，并在<a href="http://localhost:4000访问">http://localhost:4000访问</a><br>4.Crtl+C关闭服务</p>
+<h3 id="Step-Five-本地Hexo关联Github"><a href="#Step-Five-本地Hexo关联Github" class="headerlink" title="Step Five:本地Hexo关联Github"></a>Step Five:本地Hexo关联Github</h3><p>1.进入blog目录 执行安装 npm install hexo-deployer-git –save<br>2.找到blog目录下的_config.yml文件，修改最底部的Deployment配置，如下所示。  </p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">    <span class="attr">repository:</span> <span class="string">https://github.com/YourUserName/YourUserName.github.io</span></span><br><span class="line">    <span class="attr">branch:</span> <span class="string">master</span></span><br></pre></td></tr></table></figure>
+
+<p>注意：yml有严格的格式要求，冒号后需要+上一个空格<br>3.将本地Hexo部署到Github上，执行如下指令  （首次上传可能需要你输入登陆github信息）</p>
+<blockquote>
+<p>hexo clean<br>hexo generate (也可以用hexo g)<br>hexo deploy (也可以用hexo d)</p>
+</blockquote>
+<p>4:验证是否成功关联，打开<code>http://YourUserName.github.io</code></p>
+<h3 id="Step-Six-创建和发布文章"><a href="#Step-Six-创建和发布文章" class="headerlink" title="Step Six:创建和发布文章"></a>Step Six:创建和发布文章</h3><p>1.进入blog目录后，使用hexo new “文章标题”指令，创建MD文件<br>2.在<code>/source/_posts</code>中可以看到刚刚创建的MD文件，用编辑器打开(也可以用有道云笔记打开，现在支持Md语法了)<br>3.编辑后保存，执行<code>hexo d -g</code>发布文章,首次使用会要求输入git账号信息</p>
+<h2 id="其他技巧"><a href="#其他技巧" class="headerlink" title="其他技巧"></a>其他技巧</h2><h3 id="如何给文章引入图片"><a href="#如何给文章引入图片" class="headerlink" title="如何给文章引入图片"></a>如何给文章引入图片</h3><p>背景：默认无法自动处理文章插入本地图片，需要通过扩展插件支持。</p>
+<p>1:_config.yml里面的post_asset_folde选项设置为true。</p>
+<p>2:安装插件hexo-asset-image，安装以后 hexo n “YourPost”指令在生成MD文件的同时会生成一个名字与MD文件相同的文件夹，将本地图片放置在此，然后在文章通过格式 <code>![xxx](xxx/xxx.png)</code> 引入图片即可。</p>
+<blockquote>
+<p>npm install <a target="_blank" rel="noopener" href="https://github.com/7ym0n/hexo-asset-image">https://github.com/7ym0n/hexo-asset-image</a> –save</p>
+</blockquote>
+<h3 id="更换电脑了，如何迁移文章"><a href="#更换电脑了，如何迁移文章" class="headerlink" title="更换电脑了，如何迁移文章"></a>更换电脑了，如何迁移文章</h3><p>背景：程序员经常都会换生产工具，需要对文章进行备份<br>解决这个问题很简单，只要把原有的_post文件夹里的内容完整copy到新机子Hexo对应的_post下即可。</p>
+<h4 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h4><p><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/commands">https://hexo.io/zh-cn/docs/commands</a></p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Hexo%E7%AE%80%E4%BB%8B"><span class="toc-text">Hexo简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8"><span class="toc-text">快速入门</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Step-One-%E5%88%9B%E5%BB%BA-io%E4%BB%93%E5%BA%93"><span class="toc-text">Step One:创建.io仓库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step-Two-%E5%AE%89%E8%A3%85Git"><span class="toc-text">Step Two:安装Git</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step-Three-%E5%AE%89%E8%A3%85Node-Js%E5%92%8CHexo"><span class="toc-text">Step Three:安装Node.Js和Hexo</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step-Four-%E5%88%9B%E5%BB%BA%E6%9C%AC%E5%9C%B0%E5%8D%9A%E5%AE%A2%E7%AB%99%E7%82%B9"><span class="toc-text">Step Four:创建本地博客站点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step-Five-%E6%9C%AC%E5%9C%B0Hexo%E5%85%B3%E8%81%94Github"><span class="toc-text">Step Five:本地Hexo关联Github</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step-Six-%E5%88%9B%E5%BB%BA%E5%92%8C%E5%8F%91%E5%B8%83%E6%96%87%E7%AB%A0"><span class="toc-text">Step Six:创建和发布文章</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E6%8A%80%E5%B7%A7"><span class="toc-text">其他技巧</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E7%BB%99%E6%96%87%E7%AB%A0%E5%BC%95%E5%85%A5%E5%9B%BE%E7%89%87"><span class="toc-text">如何给文章引入图片</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9B%B4%E6%8D%A2%E7%94%B5%E8%84%91%E4%BA%86%EF%BC%8C%E5%A6%82%E4%BD%95%E8%BF%81%E7%A7%BB%E6%96%87%E7%AB%A0"><span class="toc-text">更换电脑了，如何迁移文章</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-text">参考文献</span></a></li></ol></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E5%9C%A8GitHub%E4%B8%8A%E6%90%AD%E5%BB%BAHexo%E5%8D%9A%E5%AE%A2/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E5%AD%A6%E4%B9%A0%E5%B7%A5%E5%85%B7/"><i class="fa fa-tags"></i>学习工具</a>
+     
+      <a href="/tags/Hexo/"><i class="fa fa-tags"></i>Hexo</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/Java%E5%9F%BA%E7%A1%80%E6%80%BB%E7%BB%93/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="javascript:void(0);" data-enable="false">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

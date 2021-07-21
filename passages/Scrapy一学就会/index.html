@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>Scrapy一学就会 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="Python,爬虫,Python," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2019-09-09
+    </span>
+    
+      <span>
+        | <a href="/categories/Python/"><i class="fa fa-bookmark"></i>Python</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    Scrapy一学就会
+  </h1>
+  
+  <article class="passage-article">
+    <p>这大半年来因为工作的需要开始接触到一些大数据相关的开发技术(数仓建设，ETL，爬虫..)，故而想对其中的爬虫技术做一个简单的总结，亦作为公司小伙伴们学习分享的入门实践资料。</p>
+<p>本文将以如下形式展开讲述：</p>
+<!-- TOC -->
+
+<ul>
+<li><a href="#scrapy%E6%A1%86%E6%9E%B6%E4%BB%8B%E7%BB%8D">Scrapy框架介绍</a><ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AFscrapy%E6%A1%86%E6%9E%B6">什么是Scrapy框架</a></li>
+<li><a href="#scrapy%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%BF%B0">Scrapy的体系结构概述</a></li>
+<li><a href="#%E4%B8%80%E5%AE%9A%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5itemspiderpipeline">一定要了解的基础概念(item,spider,pipeline)</a></li>
+</ul>
+</li>
+<li><a href="#%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8demo%E7%A4%BA%E4%BE%8B">快速入门，Demo示例</a><ul>
+<li><a href="#%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97">安装指南</a></li>
+<li><a href="#%E9%80%9A%E8%BF%87scrapy%E5%BF%AB%E9%80%9F%E6%9E%84%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%B7%A5%E7%A8%8B">通过Scrapy快速构建项目工程</a></li>
+<li><a href="#%E5%AF%B9%E7%9B%AE%E6%A0%87%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%BB%BA%E6%A8%A1%E5%AE%9A%E4%B9%89item">对目标数据进行建模(定义item)</a></li>
+<li><a href="#%E5%88%86%E6%9E%90%E4%BB%A5%E5%8F%8A%E7%BC%96%E5%86%99%E5%AF%B9%E5%BA%94%E7%9A%84%E7%88%AC%E5%8F%96%E7%AD%96%E7%95%A5%E7%BC%96%E5%86%99spider">分析以及编写对应的爬取策略(编写spider)</a></li>
+<li><a href="#%E5%8A%A0%E5%B7%A5%E5%A4%84%E7%90%86%E9%87%87%E9%9B%86%E7%9A%84%E6%95%B0%E6%8D%AEpipeline%E4%B8%AD%E5%8A%A0%E5%B7%A5%E9%87%87%E9%9B%86%E6%95%B0%E6%8D%AE">加工处理采集的数据(pipeline中加工采集数据)</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%B6%E4%BB%96">其他</a><ul>
+<li><a href="#settingspy">settings.py</a></li>
+<li><a href="#scrapy%E4%B8%AD%E5%A6%82%E4%BD%95%E8%BE%93%E5%87%BA%E6%97%A5%E5%BF%97%E4%BF%A1%E6%81%AF">Scrapy中如何输出日志信息</a></li>
+<li><a href="#%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E8%A2%ABban%E6%8E%89">如何避免被Ban掉</a></li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="1-Scrapy框架介绍"><a href="#1-Scrapy框架介绍" class="headerlink" title="..1. Scrapy框架介绍"></a>..1. Scrapy框架介绍</h3><p>Scrapy框架是基于Python语言实现的快速构建爬虫应用的框架</p>
+<h4 id="1-1-什么是Scrapy框架"><a href="#1-1-什么是Scrapy框架" class="headerlink" title="..1.1. 什么是Scrapy框架"></a>..1.1. 什么是Scrapy框架</h4><p>Scrapy是基于Python语言实现的一个用于快速实现网站数据爬取，提取结构性数据的应用框架。Scrapy框架常见用于大数据采集工程，为数据仓库提供丰富的数据来源，模拟用户行为进行一些应用操作(很多黑产其实就是通过爬虫去实现)</p>
+<h4 id="1-2-Scrapy的体系结构概述"><a href="#1-2-Scrapy的体系结构概述" class="headerlink" title="..1.2. Scrapy的体系结构概述"></a>..1.2. Scrapy的体系结构概述</h4><p><img src="/.io//scrapy_component.png" alt="Scrapy工作机制图解"><br>补充说明：上述的一个流程结束后，会进行流程循环，直至调度器(Scheduler)中的请求队列为空，程序终止</p>
+<p>组件简述:</p>
+<p>Scrapy Engine：引擎负责控制数据在系统各个组件中的流动，监听组件事件并且触发相应的动作，是Scrapy的“神经中枢”</p>
+<p>Scheduler：调度器负责接收来自引擎的Request，并对Request进行优先级排序，入队。Request出队则交由引擎</p>
+<p>Downloader：下载器发起请求并获取Response，Response目的就是为了提供给Spider组件进行提取结构化数据。</p>
+<p>Spiders：spider负责处理一个特定(或一些)网站，获取从下载器返回的response对象并在parse()中进行数据提取，输出item信息</p>
+<p>Item Pipeline：item管道主要是spider处理得到的item信息，进行后期处理（详细分析、过滤、存储等）的地方</p>
+<p>Spider Middlewares：Spider中间件，该中间件是位于引擎和蜘蛛之间的特定钩子。主要是对spider的输入数据进行预处理，输出数据进行后续加工</p>
+<p>ownloader Middlewares：下载中间件，该中间件是位于引擎和下载器之间的特定钩子。主要是对Downloader的输入数据进行预处理，输出数据进行后续加工</p>
+<h4 id="1-3-一定要了解的基础概念-item-spider-pipeline"><a href="#1-3-一定要了解的基础概念-item-spider-pipeline" class="headerlink" title="..1.3. 一定要了解的基础概念(item,spider,pipeline)"></a>..1.3. 一定要了解的基础概念(item,spider,pipeline)</h4><p>通过上个小节，可以发现item，spider，pipeline是高频出现的词汇。没错，这也是想要学会使用Scrapy不可不知的玩意。</p>
+<p>Item：<br>进行爬取的行为，本质上来说就是把可见的非结构数据源(通常是网页)中提取数据并进行结构化。既然是结构化，那么必然离不开数据结构，scrapy中的item即是该场景下的数据结构（如同面向对象开发中的类），item对象是用于收集所爬取的数据的简单容器。</p>
+<p>spider：<br>spider是定义一个特定站点（或一组站点）抓取策略的类，主要负责执行具体策略去爬取数据，以及对响应信息中的非结构化数据进行提取（即获取item）。</p>
+<p>pipeline：<br>spider获取的每一个item都会交由管道(pipeline)进行后续加工，其主要用途有如下所述。<br>1：清理 HTML 数据<br>2：验证爬取的数据(检查 item 包含某些字段)<br>3：数据查重<br>4：对清洗完后的数据进行持久化操作</p>
+<h3 id="2-快速入门，Demo示例"><a href="#2-快速入门，Demo示例" class="headerlink" title="..2. 快速入门，Demo示例"></a>..2. 快速入门，Demo示例</h3><p>爬虫开发步骤(小白版本，前提是所有工具都安装了)<br>Step One：通过scrapy框架的脚手架，快速搭建工程结构(指令：scrapy startproject YourProjectName )<br>Step Two：分析并且定义你所需要爬取的数据结构，编写item<br>Step Three：分析抓取策略，编写spider爬取数据，提取数据为item的具体逻辑<br>Finally：编写pipeline中的后续加工逻辑</p>
+<h4 id="2-1-安装指南"><a href="#2-1-安装指南" class="headerlink" title="..2.1. 安装指南"></a>..2.1. 安装指南</h4><p>1：安装Python(Scrapy要求的Python版本&gt;=2.7)，可以参考<a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624">廖雪峰-Python教程</a><br>2：通过pip工具安装Scrapy框架,pip install Scrapy</p>
+<h4 id="2-2-通过Scrapy快速构建项目工程"><a href="#2-2-通过Scrapy快速构建项目工程" class="headerlink" title="..2.2. 通过Scrapy快速构建项目工程"></a>..2.2. 通过Scrapy快速构建项目工程</h4><p>打开终端，进入想要生成工程文件夹的路径，通过</p>
+<blockquote>
+<p>scrapy startproject YourProjectName</p>
+</blockquote>
+<p>生成“YourProjectName”的爬虫应用工程</p>
+<p><img src="/.io//01.jpg" alt="我生成的project截图"></p>
+<p>工程师结构示意如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">scrapy.cfg</span></span><br><span class="line">    <span class="string">YourProjectName/</span></span><br><span class="line">        <span class="string">__init__.py</span></span><br><span class="line">        <span class="string">items.py</span></span><br><span class="line">        <span class="string">middlewares.py</span></span><br><span class="line">        <span class="string">pipelines.py</span></span><br><span class="line">        <span class="string">settings.py</span></span><br><span class="line">        <span class="string">spiders/</span></span><br><span class="line">            <span class="string">__init__.py</span></span><br><span class="line">            <span class="string">spider1.py</span></span><br><span class="line">            <span class="string">spider2.py</span></span><br><span class="line">        <span class="string">...</span></span><br></pre></td></tr></table></figure>
+
+<p>接下来，我会对一个示例进行拆解分析，如何爬取融360中全国内地不同城市的房贷利率信息~<br>主要爬取的数据如下图中，红色圈中部分的数据。<br> <img src="/.io//02.jpg" alt="示例-广州公积金贷款利率图"><br> <img src="/.io//loan02.jpg" alt="示例-光大银行房屋按揭贷款贷款利率图"></p>
+<h4 id="2-3-对目标数据进行建模-定义item"><a href="#2-3-对目标数据进行建模-定义item" class="headerlink" title="..2.3. 对目标数据进行建模(定义item)"></a>..2.3. 对目标数据进行建模(定义item)</h4><p>从上面的小节可以看出我们要的数据，于是我定义了一个item，用于装载提取得到的数据。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># items.py</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 爬取房贷相关信息item</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoanInfoItem</span>(<span class="params">scrapy.Item</span>):</span></span><br><span class="line">    <span class="built_in">id</span> = scrapy.Field()</span><br><span class="line">    <span class="comment"># 贷款机构</span></span><br><span class="line">    organization = scrapy.Field()</span><br><span class="line">    <span class="comment"># 贷款类型</span></span><br><span class="line">    loan_type = scrapy.Field()</span><br><span class="line">    <span class="comment"># 房屋类型</span></span><br><span class="line">    house_type = scrapy.Field()</span><br><span class="line">    <span class="comment"># 套数</span></span><br><span class="line">    house_numb = scrapy.Field()</span><br><span class="line">    <span class="comment"># 五年及以下贷款利率</span></span><br><span class="line">    loan_under_five = scrapy.Field()</span><br><span class="line">    <span class="comment"># 五年以上贷款利率</span></span><br><span class="line">    loan_over_five = scrapy.Field()</span><br><span class="line">    <span class="comment"># 信用额度上限</span></span><br><span class="line">    credit_limit = scrapy.Field()</span><br><span class="line">    <span class="comment"># 首付比例</span></span><br><span class="line">    payment_ratio = scrapy.Field()</span><br><span class="line">    <span class="comment"># 归属城市</span></span><br><span class="line">    city = scrapy.Field()</span><br><span class="line">    <span class="comment"># 数据来源链接</span></span><br><span class="line">    detail_url = scrapy.Field()</span><br><span class="line">    <span class="comment"># 爬取日期</span></span><br><span class="line">    create_time = scrapy.Field()</span><br><span class="line">    <span class="comment"># 常见批出利率</span></span><br><span class="line">    common_rate = scrapy.Field()</span><br><span class="line">    <span class="comment"># 最低利率</span></span><br><span class="line">    min_rate = scrapy.Field()</span><br><span class="line">    <span class="comment"># 最高利率</span></span><br><span class="line">    max_rate = scrapy.Field()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-4-分析以及编写对应的爬取策略-编写spider"><a href="#2-4-分析以及编写对应的爬取策略-编写spider" class="headerlink" title="..2.4. 分析以及编写对应的爬取策略(编写spider)"></a>..2.4. 分析以及编写对应的爬取策略(编写spider)</h4><p>分析需求以及过程拆解<br>明确需求：融360，全国范围内地的城市，每一个城市的所有公积金贷款信息、房屋按揭贷款信息</p>
+<p>1：确定spider的第一层级，即入口URL，<a target="_blank" rel="noopener" href="https://www.rong360.com/cityNavi.html">https://www.rong360.com/cityNavi.html</a><br><img src="/.io//web01.jpg" alt="第一层级入口"></p>
+<p>2:点击其中一个城市站点，如广州站点，进入后发现当前路径还是<a target="_blank" rel="noopener" href="http://www.rong360.com(猜想应该是做了一些隐藏,把city信息存入到cookie中了,果不其然)/">www.rong360.com（猜想应该是做了一些隐藏，把city信息存入到cookie中了，果不其然）</a><br><img src="/.io//web02.jpg" alt="第二层级01"><br><img src="/.io//web03.jpg" alt="第二层级02"><br>总结：domainCity这个参数数据可以从第一层级的入口a标签的href属性获取(domain属性也可以)，只要能拿到domianCity参数，就可以直接进入二级页面</p>
+<p>3:观察二级页面如何进入三级页面，终于找到你~<br><img src="/.io//web04.jpg" alt="第二层级03"></p>
+<hr>
+<p>PS：下述的实现需要对<a target="_blank" rel="noopener" href="https://www.w3school.com.cn/xpath/index.asp">Xpath语法</a>有一定的了解<br>代码分析：<br>1：在spiders目录下创建一个rong_spider.py文件，为spider设置基础配置信息</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># rong_spider.py</span></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> uuid</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> scrapy</span><br><span class="line"><span class="keyword">from</span> HouseloanSpider.items <span class="keyword">import</span> LoanInfoItem</span><br><span class="line"><span class="keyword">from</span> scrapy <span class="keyword">import</span> Request</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RongSpider</span>(<span class="params">scrapy.Spider</span>):</span></span><br><span class="line">    <span class="comment"># name属性用于标识该spider类的名称，启动指定spider的时候需要用到</span></span><br><span class="line">    name = <span class="string">&#x27;rong360_spider&#x27;</span></span><br><span class="line">    <span class="comment"># allowed_domains是包含允许此蜘蛛爬行的域的字符串的可选列表</span></span><br><span class="line">    allowed_domains = [<span class="string">&#x27;rong360.com&#x27;</span>]</span><br><span class="line">    <span class="comment"># start_urls,spider默认开始爬取的URL</span></span><br><span class="line">    start_urls = [<span class="string">&#x27;https://www.rong360.com/cityNavi.html&#x27;</span>]</span><br><span class="line">    <span class="comment"># 我自己定义的属性，用于方便后续路径拼接</span></span><br><span class="line">    BASE = <span class="string">&quot;https://www.rong360.com&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parse</span>(<span class="params">self, response</span>):</span></span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>2：从一级页面遍历所有城市入口，获取domainCity参数（从标签的href属性获取）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">parse</span>(<span class="params">self, response</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    主入口-页面解析处理。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    程序逻辑如下：</span></span><br><span class="line"><span class="string">    1:获取所有城市地址信息，如获取北京的标识：beijing</span></span><br><span class="line"><span class="string">    2:根据步骤1获取城市标识，进入二级页面（房贷列表分页），如 https://www.rong360.com/&#123;城市标识&#125;/fangdai/search?px=0</span></span><br><span class="line"><span class="string">    3:由步骤2页面可以获取对应不同机构的贷款利率连接(“查看”按钮对应的href属性)，进入详情页(三级页面)</span></span><br><span class="line"><span class="string">    4:进入详情页，爬取房屋类型、套数、贷款5年及以下利率、贷款5年以上利率、额度上限、首付比例，</span></span><br><span class="line"><span class="string">    5:信息入库处理</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    如何启动程序：</span></span><br><span class="line"><span class="string">    进入项目根目录,cmd &gt;&gt; scrapy crawl rong360_spider</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    :param response: 主入口页面请求响应</span></span><br><span class="line"><span class="string">    :return 结构化的item信息</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 需求仅要求内地城市(不包括港澳台)，因此需要过滤网站接入的HK站点(另外两个没有接入)</span></span><br><span class="line">    <span class="keyword">for</span> el <span class="keyword">in</span> response.xpath(<span class="string">&#x27;//div[contains(@class,&quot;citys city_list&quot;)]/a[not(contains(@domain,&quot;xianggang&quot;))]&#x27;</span>):</span><br><span class="line">        city = el.xpath(<span class="string">&#x27;string(.)&#x27;</span>).extract()[<span class="number">0</span>].strip()</span><br><span class="line">        page_view_url = <span class="string">&quot;&#123;&#125;/&#123;&#125;fangdai/search?px=0&quot;</span>.<span class="built_in">format</span>(RongSpider.BASE, el.xpath(<span class="string">&#x27;@href&#x27;</span>).extract()[<span class="number">0</span>].strip())</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 进入二级页面，dont_filter=False,设置过滤重复爬取数据,回调函数为into_page_view</span></span><br><span class="line">        <span class="keyword">yield</span> Request(url=page_view_url,</span><br><span class="line">                      meta=&#123;<span class="string">&#x27;city&#x27;</span>: city, <span class="string">&#x27;page_view_url&#x27;</span>: page_view_url&#125;,</span><br><span class="line">                      callback=self.into_page_view, dont_filter=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">into_page_view</span>(<span class="params">self, response</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    进入不同城市站点的房贷列表分页，尝试获取不同机构的房贷详情页</span></span><br><span class="line"><span class="string">    :param response: 分页请求页面响应</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>3：完成二级页面的数据抓取策略，抓取数据为进入第三级页面的入口URL</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#完善上一步骤中的into_page_view函数</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">into_page_view</span>(<span class="params">self, response</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    第二级页面的响应处理函数</span></span><br><span class="line"><span class="string">    进入不同城市站点的房贷列表分页，尝试获取不同机构的房贷详情页</span></span><br><span class="line"><span class="string">    :param response: 分页请求页面响应</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    city = response.meta[<span class="string">&#x27;city&#x27;</span>]</span><br><span class="line">    page_view_url = response.meta[<span class="string">&#x27;page_view_url&#x27;</span>]</span><br><span class="line">    self.logger.info(<span class="string">&quot;======  已进入[&#123;&#125;]城市的房贷模块列表入口:[&#123;&#125;]  ======&quot;</span>.<span class="built_in">format</span>(city, page_view_url))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 遍历网页中的每一列数据，并从每一列的li标签中的click_url属性获得三级页面的入口</span></span><br><span class="line">        <span class="keyword">for</span> el <span class="keyword">in</span> response.xpath(<span class="string">&#x27;//ul[@id=&quot;product_list&quot;]/li&#x27;</span>):</span><br><span class="line">            detail_url = <span class="string">&quot;&#123;&#125;&#123;&#125;&quot;</span>.<span class="built_in">format</span>(RongSpider.BASE, el.xpath(<span class="string">&#x27;@click-url&#x27;</span>).extract()[<span class="number">0</span>].strip())</span><br><span class="line">            <span class="comment"># 进入二级页面，dont_filter=False,设置过滤重复爬取数据</span></span><br><span class="line">            <span class="keyword">yield</span> Request(url=detail_url,</span><br><span class="line">                          meta=&#123;<span class="string">&#x27;city&#x27;</span>: city, <span class="string">&#x27;detail_url&#x27;</span>: detail_url&#125;,</span><br><span class="line">                          callback=self.into_detail_url, dont_filter=<span class="literal">False</span>)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        self.logger.error(<span class="string">&quot;获取[&#123;&#125;]城市的房贷信息失败，原因是：[&#123;&#125;]&quot;</span>.<span class="built_in">format</span>(city, e))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">into_detail_url</span>(<span class="params">self, response</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    第三级页面响应的处理函数</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>4：完成第三级页面(详情页)的数据抓取策略，抓取数据为表格中的所有数据，以及页面的xxx机构-贷款类型(公积金贷款/房屋按揭贷款)，组成item</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">into_detail_url</span>(<span class="params">self, response</span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    第三级页面响应的处理函数</span></span><br><span class="line"><span class="string">    进入第三级页面，房贷详情页，爬取相对应的房贷信息</span></span><br><span class="line"><span class="string">    :param response: 详情页页面响应</span></span><br><span class="line"><span class="string">    :return: 待入库的Item信息</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    city = response.meta[<span class="string">&#x27;city&#x27;</span>]</span><br><span class="line">    detail_url = response.meta[<span class="string">&#x27;detail_url&#x27;</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 获取当前详情页面的归属信息，如-&gt;广州公积金-公积金贷款</span></span><br><span class="line">    module_arr = \</span><br><span class="line">        response.xpath(<span class="string">&#x27;//h1[contains(@class,&quot;title r-gl&quot;)]/span&#x27;</span>).xpath(<span class="string">&#x27;normalize-space(string())&#x27;</span>).extract()[</span><br><span class="line">            <span class="number">0</span>].split(<span class="string">&#x27;  -  &#x27;</span>)</span><br><span class="line">    <span class="comment"># 获取机构名称</span></span><br><span class="line">    organization = module_arr[<span class="number">0</span>]</span><br><span class="line">    <span class="comment"># 获取贷款性质</span></span><br><span class="line">    loan_type = module_arr[<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    self.logger.info(<span class="string">&quot;已进入房贷详情页面===[&#123;&#125;],模块：[&#123;&#125;-&#123;&#125;]&quot;</span>.<span class="built_in">format</span>(detail_url, organization, loan_type))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 遍历除了表头的所有&lt;tr/&gt;内容</span></span><br><span class="line">    <span class="keyword">for</span> tr <span class="keyword">in</span> response.xpath(<span class="string">&#x27;//*[@id=&quot;pd_lilv_c&quot;]/table/tbody/tr[not(contains(@class,&quot;thead&quot;))]&#x27;</span>):</span><br><span class="line">        info = LoanInfoItem()</span><br><span class="line">        <span class="comment"># 设置基础信息</span></span><br><span class="line">        info[<span class="string">&#x27;id&#x27;</span>] = uuid.uuid1()</span><br><span class="line">        info[<span class="string">&#x27;organization&#x27;</span>] = organization</span><br><span class="line">        info[<span class="string">&#x27;city&#x27;</span>] = city</span><br><span class="line">        info[<span class="string">&#x27;detail_url&#x27;</span>] = detail_url</span><br><span class="line">        info[<span class="string">&#x27;loan_type&#x27;</span>] = loan_type</span><br><span class="line">        info[<span class="string">&#x27;create_time&#x27;</span>] = time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>, time.localtime(time.time()))</span><br><span class="line">        <span class="comment"># 设置第三级页面所爬取的table信息</span></span><br><span class="line">        info[<span class="string">&#x27;house_type&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(tr.xpath(<span class="string">&#x27;./td[1]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">        info[<span class="string">&#x27;house_numb&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(tr.xpath(<span class="string">&#x27;./td[2]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 爬取公积金贷款特有数据</span></span><br><span class="line">        <span class="keyword">if</span> loan_type == <span class="string">&#x27;公积金贷款&#x27;</span>:</span><br><span class="line">            info[<span class="string">&#x27;loan_under_five&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">                tr.xpath(<span class="string">&#x27;./td[3]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">            info[<span class="string">&#x27;loan_over_five&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">                tr.xpath(<span class="string">&#x27;./td[4]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">            info[<span class="string">&#x27;credit_limit&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(tr.xpath(<span class="string">&#x27;./td[5]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">            info[<span class="string">&#x27;common_rate&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line">            info[<span class="string">&#x27;min_rate&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line">            info[<span class="string">&#x27;max_rate&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 爬取房屋按揭贷款特有数据</span></span><br><span class="line">        <span class="keyword">elif</span> loan_type == <span class="string">&#x27;房屋按揭贷款&#x27;</span>:</span><br><span class="line">            info[<span class="string">&#x27;common_rate&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">                tr.xpath(<span class="string">&#x27;./td[3]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">            info[<span class="string">&#x27;min_rate&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">                tr.xpath(<span class="string">&#x27;./td[4]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">            info[<span class="string">&#x27;max_rate&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(tr.xpath(<span class="string">&#x27;./td[5]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">            info[<span class="string">&#x27;loan_under_five&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line">            info[<span class="string">&#x27;loan_over_five&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line">            info[<span class="string">&#x27;credit_limit&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">        info[<span class="string">&#x27;payment_ratio&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">            tr.xpath(<span class="string">&#x27;./td[6]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">yield</span> info</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>以上便是rong360_spider的实现逻辑。完整的代码实现如下所示：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> uuid</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> scrapy</span><br><span class="line"><span class="keyword">from</span> HouseloanSpider.items <span class="keyword">import</span> LoanInfoItem</span><br><span class="line"><span class="keyword">from</span> scrapy <span class="keyword">import</span> Request</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RongSpider</span>(<span class="params">scrapy.Spider</span>):</span></span><br><span class="line">    name = <span class="string">&#x27;rong360_spider&#x27;</span></span><br><span class="line">    allowed_domains = [<span class="string">&#x27;rong360.com&#x27;</span>]</span><br><span class="line">    start_urls = [<span class="string">&#x27;https://www.rong360.com/cityNavi.html&#x27;</span>]</span><br><span class="line">    BASE = <span class="string">&quot;https://www.rong360.com&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parse</span>(<span class="params">self, response</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        主入口-页面解析处理。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        程序逻辑如下：</span></span><br><span class="line"><span class="string">        1:获取所有城市地址信息，如获取北京的标识：beijing</span></span><br><span class="line"><span class="string">        2:根据步骤1获取城市标识，进入二级页面（房贷列表分页），如 https://www.rong360.com/&#123;城市标识&#125;/fangdai/search?px=0</span></span><br><span class="line"><span class="string">        3:由步骤2页面可以获取对应不同机构的贷款利率连接(“查看”按钮对应的href属性)，进入详情页(三级页面)</span></span><br><span class="line"><span class="string">        4:进入详情页，爬取房屋类型、套数、贷款5年及以下利率、贷款5年以上利率、额度上限、首付比例，</span></span><br><span class="line"><span class="string">        5:返回结构化信息item,交由pipeline组件完成入库</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        如何启动程序：</span></span><br><span class="line"><span class="string">        进入项目根目录,cmd &gt;&gt; scrapy crawl rong360_spider</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param response: 主入口页面请求响应</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 因为香港站点信息较为特殊，且需求不需要，使用not语法过滤香港站点数据</span></span><br><span class="line">        <span class="keyword">for</span> el <span class="keyword">in</span> response.xpath(<span class="string">&#x27;//div[contains(@class,&quot;citys city_list&quot;)]/a[not(contains(@domain,&quot;xianggang&quot;))]&#x27;</span>):</span><br><span class="line">            city = el.xpath(<span class="string">&#x27;string(.)&#x27;</span>).extract()[<span class="number">0</span>].strip()</span><br><span class="line">            page_view_url = <span class="string">&quot;&#123;&#125;/&#123;&#125;fangdai/search?px=0&quot;</span>.<span class="built_in">format</span>(RongSpider.BASE, el.xpath(<span class="string">&#x27;@href&#x27;</span>).extract()[<span class="number">0</span>].strip())</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 进入二级页面，dont_filter=False,设置过滤重复爬取数据</span></span><br><span class="line">            <span class="keyword">yield</span> Request(url=page_view_url,</span><br><span class="line">                          meta=&#123;<span class="string">&#x27;city&#x27;</span>: city, <span class="string">&#x27;page_view_url&#x27;</span>: page_view_url&#125;,</span><br><span class="line">                          callback=self.into_page_view, dont_filter=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">into_page_view</span>(<span class="params">self, response</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        第二级页面的响应处理函数</span></span><br><span class="line"><span class="string">        进入不同城市站点的房贷列表分页，尝试获取不同机构的房贷详情页</span></span><br><span class="line"><span class="string">        :param response: 分页请求页面响应</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        city = response.meta[<span class="string">&#x27;city&#x27;</span>]</span><br><span class="line">        page_view_url = response.meta[<span class="string">&#x27;page_view_url&#x27;</span>]</span><br><span class="line">        self.logger.info(<span class="string">&quot;======  已进入[&#123;&#125;]城市的房贷模块列表入口:[&#123;&#125;]  ======&quot;</span>.<span class="built_in">format</span>(city, page_view_url))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">for</span> el <span class="keyword">in</span> response.xpath(<span class="string">&#x27;//ul[@id=&quot;product_list&quot;]/li&#x27;</span>):</span><br><span class="line">                detail_url = <span class="string">&quot;&#123;&#125;&#123;&#125;&quot;</span>.<span class="built_in">format</span>(RongSpider.BASE, el.xpath(<span class="string">&#x27;@click-url&#x27;</span>).extract()[<span class="number">0</span>].strip())</span><br><span class="line">                <span class="comment"># 进入二级页面，dont_filter=False,设置过滤重复爬取数据</span></span><br><span class="line">                <span class="keyword">yield</span> Request(url=detail_url,</span><br><span class="line">                              meta=&#123;<span class="string">&#x27;city&#x27;</span>: city, <span class="string">&#x27;detail_url&#x27;</span>: detail_url&#125;,</span><br><span class="line">                              callback=self.into_detail_url, dont_filter=<span class="literal">False</span>)</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            self.logger.error(<span class="string">&quot;获取[&#123;&#125;]城市的房贷信息失败，原因是：[&#123;&#125;]&quot;</span>.<span class="built_in">format</span>(city, e))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">into_detail_url</span>(<span class="params">self, response</span>):</span></span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        第三级页面的响应处理函数</span></span><br><span class="line"><span class="string">        进入第三级页面，房贷详情页，爬取相对应的房贷信息</span></span><br><span class="line"><span class="string">        :param response: 详情页页面响应</span></span><br><span class="line"><span class="string">        :return: 待入库的Item信息</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        city = response.meta[<span class="string">&#x27;city&#x27;</span>]</span><br><span class="line">        detail_url = response.meta[<span class="string">&#x27;detail_url&#x27;</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 获取当前详情页面的归属信息，如-&gt;广州公积金-公积金贷款</span></span><br><span class="line">        module_arr = \</span><br><span class="line">            response.xpath(<span class="string">&#x27;//h1[contains(@class,&quot;title r-gl&quot;)]/span&#x27;</span>).xpath(<span class="string">&#x27;normalize-space(string())&#x27;</span>).extract()[</span><br><span class="line">                <span class="number">0</span>].split(<span class="string">&#x27;  -  &#x27;</span>)</span><br><span class="line">        <span class="comment"># 获取机构名称</span></span><br><span class="line">        organization = module_arr[<span class="number">0</span>]</span><br><span class="line">        <span class="comment"># 获取贷款性质</span></span><br><span class="line">        loan_type = module_arr[<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        self.logger.info(<span class="string">&quot;已进入房贷详情页面===[&#123;&#125;],模块：[&#123;&#125;-&#123;&#125;]&quot;</span>.<span class="built_in">format</span>(detail_url, organization, loan_type))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 遍历除了表头的所有&lt;tr/&gt;内容</span></span><br><span class="line">        <span class="keyword">for</span> tr <span class="keyword">in</span> response.xpath(<span class="string">&#x27;//*[@id=&quot;pd_lilv_c&quot;]/table/tbody/tr[not(contains(@class,&quot;thead&quot;))]&#x27;</span>):</span><br><span class="line">            info = LoanInfoItem()</span><br><span class="line">            <span class="comment"># 设置基础信息</span></span><br><span class="line">            info[<span class="string">&#x27;id&#x27;</span>] = uuid.uuid1()</span><br><span class="line">            info[<span class="string">&#x27;organization&#x27;</span>] = organization</span><br><span class="line">            info[<span class="string">&#x27;city&#x27;</span>] = city</span><br><span class="line">            info[<span class="string">&#x27;detail_url&#x27;</span>] = detail_url</span><br><span class="line">            info[<span class="string">&#x27;loan_type&#x27;</span>] = loan_type</span><br><span class="line">            info[<span class="string">&#x27;create_time&#x27;</span>] = time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>, time.localtime(time.time()))</span><br><span class="line">            <span class="comment"># 设置第三级页面所爬取的table信息</span></span><br><span class="line">            info[<span class="string">&#x27;house_type&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(tr.xpath(<span class="string">&#x27;./td[1]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">            info[<span class="string">&#x27;house_numb&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(tr.xpath(<span class="string">&#x27;./td[2]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 爬取公积金贷款特有数据</span></span><br><span class="line">            <span class="keyword">if</span> loan_type == <span class="string">&#x27;公积金贷款&#x27;</span>:</span><br><span class="line">                info[<span class="string">&#x27;loan_under_five&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">                    tr.xpath(<span class="string">&#x27;./td[3]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">                info[<span class="string">&#x27;loan_over_five&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">                    tr.xpath(<span class="string">&#x27;./td[4]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">                info[<span class="string">&#x27;credit_limit&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(tr.xpath(<span class="string">&#x27;./td[5]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">                info[<span class="string">&#x27;common_rate&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line">                info[<span class="string">&#x27;min_rate&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line">                info[<span class="string">&#x27;max_rate&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 爬取房屋按揭贷款特有数据</span></span><br><span class="line">            <span class="keyword">elif</span> loan_type == <span class="string">&#x27;房屋按揭贷款&#x27;</span>:</span><br><span class="line">                info[<span class="string">&#x27;common_rate&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">                    tr.xpath(<span class="string">&#x27;./td[3]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">                info[<span class="string">&#x27;min_rate&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">                    tr.xpath(<span class="string">&#x27;./td[4]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">                info[<span class="string">&#x27;max_rate&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(tr.xpath(<span class="string">&#x27;./td[5]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line">                info[<span class="string">&#x27;loan_under_five&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line">                info[<span class="string">&#x27;loan_over_five&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line">                info[<span class="string">&#x27;credit_limit&#x27;</span>] = <span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">            info[<span class="string">&#x27;payment_ratio&#x27;</span>] = <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">                tr.xpath(<span class="string">&#x27;./td[6]&#x27;</span>).xpath(<span class="string">&quot;normalize-space(string())&quot;</span>).extract()).strip()</span><br><span class="line"></span><br><span class="line">            <span class="keyword">yield</span> info</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-5-加工处理采集的数据-pipeline中加工采集数据"><a href="#2-5-加工处理采集的数据-pipeline中加工采集数据" class="headerlink" title="..2.5. 加工处理采集的数据(pipeline中加工采集数据)"></a>..2.5. 加工处理采集的数据(pipeline中加工采集数据)</h4><p>在pipelines.py文件中，修改process_item()中的逻辑<br>本次示例的pipeline加工item逻辑，非常简单易懂，上代码即可.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> logging <span class="keyword">import</span> log</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> HouseloanSpider.mapper.house_loan_mapper <span class="keyword">import</span> OdsHouseLoanInfoMapper</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HouseloanspiderPipeline</span>(<span class="params"><span class="built_in">object</span></span>):</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    ItemPipeline组件主要职责如下：</span></span><br><span class="line"><span class="string">    1：能够对初步爬取的HTML数据做进一步的加工处理</span></span><br><span class="line"><span class="string">    2：验证爬取数据（如检查item某些字段）</span></span><br><span class="line"><span class="string">    3：数据爬取查重以及策略（如：重复爬取则丢弃）</span></span><br><span class="line"><span class="string">    4：对爬取，清洗后的item数据进行入库</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_item</span>(<span class="params">self, item, spider</span>):</span></span><br><span class="line">        <span class="keyword">if</span> spider.name == <span class="string">&#x27;rong360_spider&#x27;</span>:</span><br><span class="line">            mapper = OdsHouseLoanInfoMapper()</span><br><span class="line">            mapper.insert(item)</span><br><span class="line">            mapper.closed()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            log.info(<span class="string">&quot;---无法判断的spider---&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> item</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-其他"><a href="#3-其他" class="headerlink" title="..3. 其他"></a>..3. 其他</h3><h4 id="3-1-settings-py"><a href="#3-1-settings-py" class="headerlink" title="..3.1. settings.py"></a>..3.1. settings.py</h4><p>这个文件很好体现了Scrapy框架对于扩展是开放的，对于更改是封闭的。通过简单灵活的配置修改，来完成一些常见设定。<br>具体设定可以参照<a target="_blank" rel="noopener" href="https://docs.scrapy.org/en/latest/topics/settings.html">官方文档</a></p>
+<h4 id="3-2-Scrapy中如何输出日志信息"><a href="#3-2-Scrapy中如何输出日志信息" class="headerlink" title="..3.2. Scrapy中如何输出日志信息"></a>..3.2. Scrapy中如何输出日志信息</h4><p>最简单的做法，利用Scrapy中自带的logger工具<br>1:在setting.py中新增如下配置</p>
+<blockquote>
+<p>#指定输出的日志文件路径<br>LOG_FILE = “../log.txt”</p>
+</blockquote>
+<p>2:在spider中，通过self.logger.（info、debug、error…）的方式输出日志</p>
+<h4 id="3-3-如何避免被Ban掉"><a href="#3-3-如何避免被Ban掉" class="headerlink" title="..3.3. 如何避免被Ban掉"></a>..3.3. 如何避免被Ban掉</h4><p>有如下几种方法<br>1：为你的USER_AGENT提供一个可以切换的代理池，并制定你想要的策略，具体可以参考我的文章：<a href="www.baidu.com">Scrapy爬虫切换USER_AGENT</a><br>2: 在setting文件中设置cookie禁用(COOKIES_ENABLED = False)，因为某些网站会使用cookie来判断行为者是否为机器人<br>3：适当的延迟设置(DOWNLOAD_DELAY)<br>4: 使用Google cache获取页面，而不是直接访问站点,但是页面响应不一定是最新的(国内，这个方案还是算了吧)<br>5: 使用IP代理池，采取策略轮换ip使用(封一个我换一个)<br>6: 借助一些第三方工具，如crawlera</p>
+<p>隐藏方案：招一批程序员来996人工爬数据</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Scrapy%E6%A1%86%E6%9E%B6%E4%BB%8B%E7%BB%8D"><span class="toc-text">..1. Scrapy框架介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AFScrapy%E6%A1%86%E6%9E%B6"><span class="toc-text">..1.1. 什么是Scrapy框架</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-Scrapy%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%BF%B0"><span class="toc-text">..1.2. Scrapy的体系结构概述</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-%E4%B8%80%E5%AE%9A%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5-item-spider-pipeline"><span class="toc-text">..1.3. 一定要了解的基础概念(item,spider,pipeline)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8%EF%BC%8CDemo%E7%A4%BA%E4%BE%8B"><span class="toc-text">..2. 快速入门，Demo示例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97"><span class="toc-text">..2.1. 安装指南</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-%E9%80%9A%E8%BF%87Scrapy%E5%BF%AB%E9%80%9F%E6%9E%84%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%B7%A5%E7%A8%8B"><span class="toc-text">..2.2. 通过Scrapy快速构建项目工程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-%E5%AF%B9%E7%9B%AE%E6%A0%87%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E5%BB%BA%E6%A8%A1-%E5%AE%9A%E4%B9%89item"><span class="toc-text">..2.3. 对目标数据进行建模(定义item)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-%E5%88%86%E6%9E%90%E4%BB%A5%E5%8F%8A%E7%BC%96%E5%86%99%E5%AF%B9%E5%BA%94%E7%9A%84%E7%88%AC%E5%8F%96%E7%AD%96%E7%95%A5-%E7%BC%96%E5%86%99spider"><span class="toc-text">..2.4. 分析以及编写对应的爬取策略(编写spider)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-%E5%8A%A0%E5%B7%A5%E5%A4%84%E7%90%86%E9%87%87%E9%9B%86%E7%9A%84%E6%95%B0%E6%8D%AE-pipeline%E4%B8%AD%E5%8A%A0%E5%B7%A5%E9%87%87%E9%9B%86%E6%95%B0%E6%8D%AE"><span class="toc-text">..2.5. 加工处理采集的数据(pipeline中加工采集数据)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%85%B6%E4%BB%96"><span class="toc-text">..3. 其他</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-settings-py"><span class="toc-text">..3.1. settings.py</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-Scrapy%E4%B8%AD%E5%A6%82%E4%BD%95%E8%BE%93%E5%87%BA%E6%97%A5%E5%BF%97%E4%BF%A1%E6%81%AF"><span class="toc-text">..3.2. Scrapy中如何输出日志信息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E8%A2%ABBan%E6%8E%89"><span class="toc-text">..3.3. 如何避免被Ban掉</span></a></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/Scrapy%E4%B8%80%E5%AD%A6%E5%B0%B1%E4%BC%9A/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E7%88%AC%E8%99%AB/"><i class="fa fa-tags"></i>爬虫</a>
+     
+      <a href="/tags/Python/"><i class="fa fa-tags"></i>Python</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E8%AE%A4%E8%AF%86%E5%A4%A7%E5%9E%8B%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/Eureka%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>缓存利器--Caffeine | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="好用的轮子,分布式,缓存,工具," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2018-02-11
+    </span>
+    
+      <span>
+        | <a href="/categories/%E5%A5%BD%E7%94%A8%E7%9A%84%E8%BD%AE%E5%AD%90/"><i class="fa fa-bookmark"></i>好用的轮子</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    缓存利器--Caffeine
+  </h1>
+  
+  <article class="passage-article">
+    <h2 id="缓存漫谈"><a href="#缓存漫谈" class="headerlink" title="缓存漫谈"></a>缓存漫谈</h2><p>用户对于一个应用的体验度是判断一个软件好坏的标准。谈及用户体验，最多的问题就是界面渲染的速度与请求的快慢。<br>研究表明，用户最满意的打开网页时间是2-5秒，如果等待超过10秒，99%的用户会关闭这个网页。因此利用缓存提高请求响应速度<br>可以很好的提高用户体验，同时也可以提高应用的性能。根据不同场景来选择需要的Cache,常见如下。  </p>
+<table>
+<thead>
+<tr>
+<th align="center">缓存</th>
+<th align="center">缓存类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Redis</td>
+<td align="center">分布式缓存</td>
+</tr>
+<tr>
+<td align="center">Memcache</td>
+<td align="center">分布式缓存</td>
+</tr>
+<tr>
+<td align="center">ehcache</td>
+<td align="center">进程内缓存</td>
+</tr>
+<tr>
+<td align="center">GuavaCache</td>
+<td align="center">进程内缓存</td>
+</tr>
+<tr>
+<td align="center">Caffeine</td>
+<td align="center">进程内缓存</td>
+</tr>
+<tr>
+<td align="center">PS:对于数据规模较小的的访问场景可以采用进程内缓存，它在性能上优于分布式缓存。对于数据规模较大，且要求读的一致性，</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">分布式缓存是一个不错的解决方案。当然也可以将进程缓存与分布式缓存结合使用，构建多级缓存架构。</td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<h2 id="Guava-Cache与Caffeine-Cache"><a href="#Guava-Cache与Caffeine-Cache" class="headerlink" title="Guava Cache与Caffeine Cache"></a>Guava Cache与Caffeine Cache</h2><p>guava cache 是Google guava工具包中提供的十分强大、易用的本地化缓存实现，基于LRU算法，支持多种缓存过期策略。</p>
+<p>Caffeine是收到guava的启发而开发的缓存，它基于JDK8,基于W-TinyLFU(LFU+LRU算法的变种)，支持多种过期策略，且性能更加极致！<br>接下来请欣赏，来这官方的性能评测。</p>
+<p>场景1：八线程并发执行读操作<br><img src="/.io//caffeine1.jpg" alt="avatar"></p>
+<p>场景2：6条线程并发执行读操作，2条现在并发执行写操作（读多写少）<br><img src="/.io//caffeine2.jpg" alt="avatar">  </p>
+<p>场景3：8条线程全部并发执行写操作<br><img src="/.io//caffeine3.jpg" alt="avatar"></p>
+<p>由上可知，Caffeine无论是在只读操作，读写并存，只写操作上的效率都远远高于其他缓存工具！Spring5目前也已经放弃了GuavaCache转而使用Caffeine，由此可知Caffeine的强大了吧！赶紧学起来~</p>
+<h2 id="如何使用"><a href="#如何使用" class="headerlink" title="如何使用"></a>如何使用</h2><p>1：引入依赖<br>2：使用配置<br>3：开启缓存支持</p>
+<h3 id="引入依赖"><a href="#引入依赖" class="headerlink" title="引入依赖"></a>引入依赖</h3><blockquote>
+<pre><code>  &lt;!--Caffein缓存依赖--&gt;
+   &lt;dependency&gt;
+      &lt;groupId&gt;com.github.ben-manes.caffeine&lt;/groupId&gt;
+      &lt;artifactId&gt;caffeine&lt;/artifactId&gt;
+   &lt;/dependency&gt;
+</code></pre>
+</blockquote>
+<h3 id="使用配置（SpringBoot）"><a href="#使用配置（SpringBoot）" class="headerlink" title="使用配置（SpringBoot）"></a>使用配置（SpringBoot）</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span>  </span><br><span class="line">    <span class="attr">cache:</span>  </span><br><span class="line">        <span class="comment">#指定使用caffeine缓存  </span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">caffeine</span>  </span><br><span class="line">        <span class="comment">#指定一个缓存名称  </span></span><br><span class="line">        <span class="attr">cache-names:</span> <span class="string">labels</span>  </span><br><span class="line">        <span class="attr">caffeine:</span>  </span><br><span class="line">            <span class="comment">#设置初始的缓存空间大小、缓存的最大条数、最后一次写入固定60s后失效  </span></span><br><span class="line">            <span class="attr">spec:</span> <span class="string">initialCapacity=50,maximumSize=500,expireAfterWrite=60s</span>  </span><br></pre></td></tr></table></figure>
+
+<h3 id="开启缓存的支持"><a href="#开启缓存的支持" class="headerlink" title="开启缓存的支持"></a>开启缓存的支持</h3><p>使用@EnableCaching注解让Spring Boot开启对缓存的支持</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#程序main入口</span><br><span class="line"><span class="meta">@SpringBootApplication</span>  </span><br><span class="line"><span class="meta">@EnableCaching</span><span class="comment">// 开启缓存支持  </span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CaffeineDemoApplication</span> </span>&#123;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;  </span><br><span class="line">        SpringApplication.run(CaffeineDemoApplication.class, args);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过@Cacheable注解使用，当函数被调用的时候，若存在缓存则直接返回缓存结果。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Cacheable(value = &quot;labels&quot;)</span>  </span><br><span class="line"><span class="function"><span class="keyword">public</span> List&lt;String&gt; <span class="title">createLables</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    List&lt;String&gt; labs = Lists.newArrayList();  </span><br><span class="line">    labs.add(<span class="string">&quot;标签1&quot;</span>);  </span><br><span class="line">    labs.add(<span class="string">&quot;标签2&quot;</span>);  </span><br><span class="line">    labs.add(<span class="string">&quot;标签3&quot;</span>);  </span><br><span class="line">    <span class="keyword">return</span> labs;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E6%BC%AB%E8%B0%88"><span class="toc-text">缓存漫谈</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Guava-Cache%E4%B8%8ECaffeine-Cache"><span class="toc-text">Guava Cache与Caffeine Cache</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8"><span class="toc-text">如何使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E5%85%A5%E4%BE%9D%E8%B5%96"><span class="toc-text">引入依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E9%85%8D%E7%BD%AE%EF%BC%88SpringBoot%EF%BC%89"><span class="toc-text">使用配置（SpringBoot）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%90%AF%E7%BC%93%E5%AD%98%E7%9A%84%E6%94%AF%E6%8C%81"><span class="toc-text">开启缓存的支持</span></a></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E7%BC%93%E5%AD%98%E5%88%A9%E5%99%A8--Caffeine/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"><i class="fa fa-tags"></i>分布式</a>
+     
+      <a href="/tags/%E7%BC%93%E5%AD%98/"><i class="fa fa-tags"></i>缓存</a>
+     
+      <a href="/tags/%E5%B7%A5%E5%85%B7/"><i class="fa fa-tags"></i>工具</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/Java%E6%98%AF%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91%E7%9A%84/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/Java%E4%B8%AD%E7%9A%84IO%E3%80%81NIO%E6%B5%85%E6%9E%90/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

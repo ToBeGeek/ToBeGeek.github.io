@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>Java中的IO、NIO浅析 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="Java基础," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2018-01-21
+    </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    Java中的IO、NIO浅析
+  </h1>
+  
+  <article class="passage-article">
+    <p>话不多说，先看两者的区别点，如下所示。</p>
+<table>
+<thead>
+<tr>
+<th align="center">IO</th>
+<th align="center">NIO</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">面向流</td>
+<td align="center">面向buffer</td>
+</tr>
+<tr>
+<td align="center">阻塞IO</td>
+<td align="center">基于选择器非阻塞IO</td>
+</tr>
+</tbody></table>
+<h3 id="什么是面向流、面向缓存"><a href="#什么是面向流、面向缓存" class="headerlink" title="什么是面向流、面向缓存"></a>什么是面向流、面向缓存</h3><p>Java IO面向流意味着对数据的读写操作都是面向流的，流的表现在于没有缓存。就好比数据在流水线上向你传输过来，<br>而你只能依次处理当前数据。如果你想要获取某个数据的上一个，或者下一个数据，很遗憾你只能先缓存数据而不能从流中获取。  </p>
+<p>面向缓存，就好比把全部数据先存放到一个缓存中，后续的读写操作都基于缓存上。在缓存上处理数据是十分灵活的，但是这种<br>灵活也带来一定的代价，如新数据写入时如何避免未处理的数据被覆盖、需要检查缓存上是否存在待处理的数据。</p>
+<h3 id="什么是阻塞IO，非阻塞IO"><a href="#什么是阻塞IO，非阻塞IO" class="headerlink" title="什么是阻塞IO，非阻塞IO"></a>什么是阻塞IO，非阻塞IO</h3><p>在Java IO中是阻塞的，读写操作时候，如果数据没有准备好或者不可以写入，那么读写操作会一直等待到数据准备好或者可写入后能执行，这就是阻塞。<br>好比一些餐厅，需要取菜窗口排队取餐，这个过程中你只能等。</p>
+<p>Java NIO是非阻塞的，在进行读写的时候每次调用都会马上返回，存在目前可读或者可写的数据则写入缓存或者从缓存中输出，如果没有<br>那就返回且不做操作。同样还是去下馆子，这次不需要排队取餐了，看到是你的菜你就带着你的票据取，取不到你就乖乖做回位置打打王者荣耀。</p>
+<h3 id="谈谈我对NIO的看法"><a href="#谈谈我对NIO的看法" class="headerlink" title="谈谈我对NIO的看法"></a>谈谈我对NIO的看法</h3><p>先来张图，描述一下在Java NIO中的几个核心成员<br>![NIO主体结构](<a target="_blank" rel="noopener" href="https://upload-images.jianshu.io/upload_images/13229212-0c802a65e6f5f52f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/632/format/webp">https://upload-images.jianshu.io/upload_images/13229212-0c802a65e6f5f52f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/632/format/webp</a> ‘’NIO主体结构’’)</p>
+<p>可以看出来，在Java NIO中三个核心成员是Buffer、Channel和Selector（也叫多路复用器）</p>
+<h4 id="核心成员之Buffer"><a href="#核心成员之Buffer" class="headerlink" title="核心成员之Buffer"></a>核心成员之Buffer</h4><p>Buffer的本质就是内存上的一块存储空间。在面向流的I/O中，数据是直接写入/或者读到Stream对象中。而在NIO库中，所有数据<br>都用Buffer处理。也就是说，在读取数据的时候，是从Buffer上读取的；在写入数据的时候，是写入Buffer的。  </p>
+<p>Buffer存在两种模式，读模式/写模式。<br>Bufffer有三个主要属性<br>1.capacity，表示buffer的最大容量<br>2.position，当前操作位置（读/写开始的位置<br>3.limit，在写模式下，该值表示能从buffer中写入多少数据。在读模式下，则表示能从buffer读取多少数据。通过flip()方法将<br>buffer由写模式切换到读模式</p>
+<h5 id="NIO中的读写示例"><a href="#NIO中的读写示例" class="headerlink" title="NIO中的读写示例"></a>NIO中的读写示例</h5><p>从文件中读取<br>1.第一步是获取通道。我们从 FileInputStream 获取通道：</p>
+<blockquote>
+<p>FileInputStream input = new FileInputStream( “test.txt” );<br>FileChannel fc = input.getChannel();  </p>
+</blockquote>
+<p>2.第二步是定义并创建Buffer</p>
+<blockquote>
+<p>ByteBuffer buffer = ByteBuffer.allocate( 1024 );</p>
+</blockquote>
+<p>3.第三步从通道读到buffer中</p>
+<blockquote>
+<p>fc.read( buffer );</p>
+</blockquote>
+<p>数据写入文件<br>1.第一步，获取通道。</p>
+<blockquote>
+<p>FileOutputStream out = new FileOutputStream( “test.txt” );<br>FileChannel fc = out.getChannel();  </p>
+</blockquote>
+<p>2.第二步，定义并创建buffer，将待写入的测试数据put入buffer中（写模式）</p>
+<blockquote>
+<p>ByteBuffer buffer = ByteBuffer.allocate(1024);<br>byte[] arr = “66660”.getBytes();<br>for (int i = 0; i &lt; arr.length; ++i)&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buffer.put(arr[i]);<br>&nbsp;&nbsp;}<br>buffer.flip();  //将buffer从写模式切换到读模式</p>
+</blockquote>
+<p>3.将buffer数据写入文件</p>
+<blockquote>
+<p>fc.write( buffer );  </p>
+</blockquote>
+<h5 id="NIO中的读写模式实现原理详解"><a href="#NIO中的读写模式实现原理详解" class="headerlink" title="NIO中的读写模式实现原理详解"></a>NIO中的读写模式实现原理详解</h5><p>细心的朋友会发现，在上述代码示例中，都不需要去告诉channel，它可以读入或者写入多少数据？<br>其原因在于，buffer中有一套内部统计机制。</p>
+<p>情景1：定义一个Buffer时候，容量为6，Buffer的状态如下<br><img src="https://upload-images.jianshu.io/upload_images/13229212-6eafb6b56f633961.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="buffer容量为6，position设置为0状态图" title="初始化Buffer"><br>如图可见，当初始化一个capacity为6的Buffer,limit和capacity指向最尾虚拟节点（实际不存在），且capacity以后都不会改变。<br>position设置为0，说明下一次读写操作从0位置开始。</p>
+<p>情景2：从0位开始，假设第一次向buffer写入2个数据(即第一次读取2个数据)。从channel中读取数据到buffer中，position由0变成2。（填充色表示有数据）<br><img src="https://upload-images.jianshu.io/upload_images/13229212-a5c432d1d5966f93.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="从0位开始第一次写入2个数据" title="第一次读取"></p>
+<p>情景3：第二次读取（假设再写入两个数据），position从2开始，每次读入一个数据便后移一个单位。最终position为4<br><img src="https://upload-images.jianshu.io/upload_images/13229212-e805c54a338649f8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="第二次读取" title="第二次读取"></p>
+<p>情景4：调用flip( )方法，切换写模式到读模式。<br>现在我们要把数据从buffer中输入到channel中。必须使用flip切换模式。阅读flip( )的源代码如下所示：  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Buffer <span class="title">flip</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">     limit = position;   <span class="comment">//将limit设置为已经写入的最大位置  </span></span><br><span class="line">     position = <span class="number">0</span>;  <span class="comment">//将原本写模式下的指向位置置为0，表示读模式下从0位开始  </span></span><br><span class="line">     mark = -<span class="number">1</span>;  </span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">this</span>;  </span><br><span class="line"> &#125;  </span><br></pre></td></tr></table></figure>
+
+<p>执行的过程如下图所示：<br><img src="https://upload-images.jianshu.io/upload_images/13229212-de3c8d21bb8c2d44.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="flip的原理图示" title="flip()执行"></p>
+<p>情景5：假设现在从已经切换成读模式的Buffer中向chanel输出两个单位的数据。输出后，position由0-&gt;2,如图所示：<br><img src="https://upload-images.jianshu.io/upload_images/13229212-e6729a43006409c9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="第一次写入" title="第一次写入"></p>
+<p>情景6：假设第二次写入，将剩下的所有未写入的数据写入。则将从buffer中把最后的数据写入channel，并将position置为limit。<br><img src="https://upload-images.jianshu.io/upload_images/13229212-84f5d4909958211e.png?imageMogr2/auto-orientstrip%7CimageView2/2/w/1240" alt="最后一次写入" title="最后一次写入"></p>
+<p>情景7：当数据已经全部写入后，buffer中已经没有可以再输出到channel的数据，但是数据此时并未移除，为了方便buffer能够接收更多数据，需要进行clear()，清空已经无效数据。阅读clear( )<br>方法源代码，如下所示：  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Buffer <span class="title">clear</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">      position = <span class="number">0</span>;  <span class="comment">//将position置为0  </span></span><br><span class="line">      limit = capacity;  <span class="comment">//将limit设置为capacity  </span></span><br><span class="line">      mark = -<span class="number">1</span>;  </span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">this</span>;  </span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://upload-images.jianshu.io/upload_images/13229212-375d36888750f243.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="clear()调用" title="clear方法调用"></p>
+<h4 id="核心成员之Channel"><a href="#核心成员之Channel" class="headerlink" title="核心成员之Channel"></a>核心成员之Channel</h4><p>待完成…</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%9D%A2%E5%90%91%E6%B5%81%E3%80%81%E9%9D%A2%E5%90%91%E7%BC%93%E5%AD%98"><span class="toc-text">什么是面向流、面向缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%98%BB%E5%A1%9EIO%EF%BC%8C%E9%9D%9E%E9%98%BB%E5%A1%9EIO"><span class="toc-text">什么是阻塞IO，非阻塞IO</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%88%E8%B0%88%E6%88%91%E5%AF%B9NIO%E7%9A%84%E7%9C%8B%E6%B3%95"><span class="toc-text">谈谈我对NIO的看法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%88%90%E5%91%98%E4%B9%8BBuffer"><span class="toc-text">核心成员之Buffer</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#NIO%E4%B8%AD%E7%9A%84%E8%AF%BB%E5%86%99%E7%A4%BA%E4%BE%8B"><span class="toc-text">NIO中的读写示例</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#NIO%E4%B8%AD%E7%9A%84%E8%AF%BB%E5%86%99%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3"><span class="toc-text">NIO中的读写模式实现原理详解</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%88%90%E5%91%98%E4%B9%8BChannel"><span class="toc-text">核心成员之Channel</span></a></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/Java%E4%B8%AD%E7%9A%84IO%E3%80%81NIO%E6%B5%85%E6%9E%90/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/Java%E5%9F%BA%E7%A1%80/"><i class="fa fa-tags"></i>Java基础</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E7%BC%93%E5%AD%98%E5%88%A9%E5%99%A8--Caffeine/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/Java%E5%9F%BA%E7%A1%80%E6%80%BB%E7%BB%93/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

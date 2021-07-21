@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>认识大型系统中的软负载中心 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="分布式系统,分布式,软负载中心," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2019-10-01
+    </span>
+    
+      <span>
+        | <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"><i class="fa fa-bookmark"></i>分布式系统</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    认识大型系统中的软负载中心
+  </h1>
+  
+  <article class="passage-article">
+    <p>毕业以来，有幸自己一直所在的公司都有着不错的技术栈，自己一直也在工作中，学习微服务，分布式相关的知识。用了很久的Eureka、Consul组件，越发的对这些软负载中心感到兴趣，本篇作为《逐个击破-微服务组件》系列的辅助文章，将对软负载中心进行讲解。</p>
+<!-- TOC -->
+
+<ul>
+<li><a href="#%E8%AE%A4%E8%AF%86%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83">认识软负载中心</a><ul>
+<li><a href="#%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83%E7%9A%84%E6%9E%B6%E6%9E%84cs">软负载中心的架构(C/S)</a></li>
+<li><a href="#%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83%E7%9A%84%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD">软负载中心的核心功能</a><ul>
+<li><a href="#%E5%9C%B0%E5%9D%80%E6%95%B0%E6%8D%AE%E8%81%9A%E5%90%88">地址数据聚合</a><ul>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%81%9A%E5%90%88%E5%9C%B0%E5%9D%80%E6%95%B0%E6%8D%AE">为什么要聚合地址数据</a></li>
+<li><a href="#%E8%81%9A%E5%90%88%E7%9A%84%E6%95%B0%E6%8D%AE%E6%9C%89%E5%93%AA%E4%BA%9B">聚合的数据有哪些</a><ul>
+<li><a href="#%E8%81%9A%E5%90%88%E5%9C%B0%E5%9D%80%E4%BF%A1%E6%81%AF%E8%81%9A%E5%90%88%E6%95%B0%E6%8D%AE">聚合地址信息(聚合数据)</a></li>
+<li><a href="#%E8%AE%A2%E9%98%85%E5%85%B3%E7%B3%BB%E8%AE%A2%E9%98%85%E5%85%B3%E7%B3%BB%E9%9B%86%E5%90%88">订阅关系(订阅关系集合)</a></li>
+<li><a href="#%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE">连接数据</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%84%9F%E7%9F%A5">生命周期感知</a><ul>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%9C%8D%E5%8A%A1%E4%B8%8A%E4%B8%8B%E7%BA%BF%E8%87%AA%E5%8A%A8%E6%84%9F%E7%9F%A5">为什么需要服务上下线自动感知</a></li>
+<li><a href="#%E5%A6%82%E4%BD%95%E5%AF%B9%E6%9C%8D%E5%8A%A1%E7%9A%84%E4%B8%8A%E4%B8%8B%E7%BA%BF%E8%BF%9B%E8%A1%8C%E6%84%9F%E7%9F%A5">如何对服务的上下线进行感知</a><ul>
+<li><a href="#%E6%96%B9%E5%BC%8F%E4%B8%80%E5%9F%BA%E4%BA%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B9%8B%E9%97%B4%E7%9A%84%E9%95%BF%E8%BF%9E%E6%8E%A5%E5%BB%BA%E7%AB%8B%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6">方式一：基于客户端，服务端之间的长连接建立心跳机制</a></li>
+<li><a href="#%E6%96%B9%E5%BC%8F%E4%BA%8C%E9%A2%9D%E5%A4%96%E7%9A%84%E4%B8%BB%E5%8A%A8%E6%A3%80%E6%9F%A5%E6%96%B9%E5%BC%8F%E4%B8%BB%E5%8A%A8%E5%AF%B9%E5%8F%91%E5%B8%83%E5%9C%B0%E5%9D%80%E7%AB%AF%E5%8F%A3%E7%9A%84%E8%BF%9E%E6%8E%A5%E9%AA%8C%E8%AF%81">方式二：额外的主动检查方式（主动对发布地址、端口的连接验证）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+
+<h2 id="认识软负载中心"><a href="#认识软负载中心" class="headerlink" title="认识软负载中心"></a>认识软负载中心</h2><p>随着业务的发展，单一的系统越来越复杂，单纯依靠提升服务器性能始终会达到瓶颈，而分布式技术可以很好的提高系统整体服务能力。同时，也带来了很多挑战！分布式系统的演进，服务越来越多，服务之间的调用链路越来越复杂，如果没有有效的管理方式，那么这些链路就会像“城中村的电线”一样交织复杂，维护成本抖增。引入软负载中心，可以有效管理这些“电线”。是先来看看软负载中心在整个分布式系统中起了什么作用，如图所示：</p>
+<p><img src="/.io//%E5%88%9D%E8%AF%86%E8%BD%AF%E8%B4%9F%E8%BD%BD01.png" alt="初识软负载中心"><br>不难看出软负载中心具备两个最基础的职责。1：地址数据聚合 2：生命周期感知。学习过Eureka，Consul，ZooKeeper的童鞋，就会明白这样的软负载中心在实际项目开发中有多方便！</p>
+<h3 id="软负载中心的架构-C-S"><a href="#软负载中心的架构-C-S" class="headerlink" title="软负载中心的架构(C/S)"></a>软负载中心的架构(C/S)</h3><p>软负载中心采用了C/S架构的设计，由软负载中心服务端与软负载中心客户端构成。服务端对提供服务的机器进行统一化的管理，如上下线状态的感知，服务提供者的机器信息,同时也会向客户端推送数据。</p>
+<p>客户端主要是把服务提供者的具体信息主动上送到服务端，监听服务提供者的变化且更新数据。当服务使用者进行消费的时候，客户端获取软负载中心服务端最新所需数据，并且对本地的数据进行缓存，通过本地数据的缓存，可以有效的避免每次都从服务器端获取数据，从而提高服务的效率和性能。当然缓存的引入，也需要考虑好合适的缓存失效策略。</p>
+<h3 id="软负载中心的核心功能"><a href="#软负载中心的核心功能" class="headerlink" title="软负载中心的核心功能"></a>软负载中心的核心功能</h3><p>从概述中可以得知，一个软负载中心最基础，最核心的职责功能在于下述两点。地址数据聚合与生命周期感知</p>
+<h4 id="地址数据聚合"><a href="#地址数据聚合" class="headerlink" title="地址数据聚合"></a>地址数据聚合</h4><h5 id="为什么要聚合地址数据"><a href="#为什么要聚合地址数据" class="headerlink" title="为什么要聚合地址数据"></a>为什么要聚合地址数据</h5><p>我们都知道IP地址的可阅读性很差，换言之，这玩意它不友好啊！所以当我们访问网站的时候，通常都会通过域名去访问，而DNS服务会负责解析域名并转换成ip。<br>软负载中心也同样借鉴了该思想，在对数据进行聚合的时候通过唯一的dataId进行地址标识。没有这样的功能，在代码里面去维护地址信息，将变的很可怕。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//(没有软负载中心的方式)伪代码,模拟消费者向服务提供者发起post请求</span></span><br><span class="line">httpClient.post(<span class="string">&#x27;127.0.0.1:8080/api&#x27;</span>,requestData);</span><br><span class="line"><span class="comment">//(软负载中心的方式)伪代码,模拟消费者向服务提供者发起post请求</span></span><br><span class="line">httpClient.post(<span class="string">&#x27;PROVIDER/api&#x27;</span>,requestData);</span><br></pre></td></tr></table></figure>
+
+<p>没有软负载中心，消费者服务不得不自己维护地址信息，这将是一个噩梦。<br><img src="/.io//%E6%B2%A1%E6%9C%89%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83%E7%9A%84%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8.png" alt="初识软负载中心"><br><img src="/.io//%E5%85%B7%E6%9C%89%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83%E7%9A%84%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8.png" alt="初识软负载中心"></p>
+<p>不仅仅是代码层面的痛点，随着分布式系统的演进，会有越来越多的服务集成进来。聚合地址数据，统一化的地址信息管理，有利于降低消费者端对地址信息的维护成本，同时也有利于系统的扩展。</p>
+<h5 id="聚合的数据有哪些"><a href="#聚合的数据有哪些" class="headerlink" title="聚合的数据有哪些"></a>聚合的数据有哪些</h5><p>一幅图来表明软负载中心服务端中存放的核心数据：</p>
+<p><img src="/.io//%E5%AD%98%E5%82%A8%E7%9A%84%E6%95%B0%E6%8D%AE.png" alt="认识服务端存放的主要数据"></p>
+<h6 id="聚合地址信息-聚合数据"><a href="#聚合地址信息-聚合数据" class="headerlink" title="聚合地址信息(聚合数据)"></a>聚合地址信息(聚合数据)</h6><p>聚合数据是聚合后地址映射表。软负载中心通过一个唯一的标识dataId（如前面所述的PROVIDER）对服务进行标识，且对于具有同样的dataId的服务(同种服务的集群)支持通过groupId来进行分组管理，dataId+groupId形成一个二维的结构，映射的value即为服务地址。</p>
+<h6 id="订阅关系-订阅关系集合"><a href="#订阅关系-订阅关系集合" class="headerlink" title="订阅关系(订阅关系集合)"></a>订阅关系(订阅关系集合)</h6><p>订阅关系是存储了上下游服务的映射关系，这里可以把上游理解成软负载中心服务端，下游则是所有注册到中心的服务（软负载服务的使用者）。可以从上述图中看出，订阅关系的数据接口与聚合地址信息的数据结构相似，订阅关系是通过dataId+groupId来确定数据consumerGroupId。若聚合数据发生变化，通过订阅关系可以获取需要通知的数据订阅者(服务使用者)，然后发起更新数据的通知信息。</p>
+<h6 id="连接数据"><a href="#连接数据" class="headerlink" title="连接数据"></a>连接数据</h6><p>连接数据是指连接到软负载中心的节点和软负载中心已经建立的连接的管理，即对物理连接的管理。使用软负载中心的应用时，无论是发布数据还是订阅数据，都会有一个自己独立的分组id(groupId)，而连接数据就是用这个groupId作为key，然后对应管理这个物理连接，通常采用长连接方式！</p>
+<p>当订阅数据产生变化的时候，通过订阅关系可以找到需要通知的groupId（consumerGroupId），然后在连接数据中根据该groupId（consumerGroupId）找到相应的需要通知的消费者连接信息，发送数据，完成数据更新。</p>
+<p>题外话：<br>长连接与短链接：HTTP协议的长连接和短链接，实质上是TCP协议的长连接和短链接。TCP建立连接需要三次握手，释放则需要四次握手。长连接可以省去较多的TCP连接建立和关闭的操作，减少浪费，节约时间。对于请求频繁的场景来说，适合长连接。但是长连接的缺点在于，存活功能的探测周期过长，遇到恶意连接时容易造成连接数过多，保活功能不够用，服务端扛压过大。短连接相对服务器来说管理较为简答，不需要额外的控制手段。但如果客户端发起请求频繁，频繁的建立和关闭TCP连接，容易造成时间和宽带的浪费！</p>
+<h4 id="生命周期感知"><a href="#生命周期感知" class="headerlink" title="生命周期感知"></a>生命周期感知</h4><p>软负载中心对服务的上下线自动感知，且依据感知变化去更新服务地址数据，形成新的地址列表数据后，再将最新数据通知给服务订阅者</p>
+<h5 id="为什么需要服务上下线自动感知"><a href="#为什么需要服务上下线自动感知" class="headerlink" title="为什么需要服务上下线自动感知"></a>为什么需要服务上下线自动感知</h5><p>为什么需要上下线自动感知，我们可以反过来思考，如果没有这个功能带来哪些痛点。</p>
+<p>没有服务的上下线自动感知，当注册的服务宕机后，必须手动去重启该服务，并且每次手动检查重启后的服务是否成功接入软负载中心。同样的，当有新的服务需要使用软负载中心的时候，还要人工检查服务是否上线。这样的软负载中心没有带来便利，反而降低效率。随着系统发展，这种工作将会是个苦力活。</p>
+<h5 id="如何对服务的上下线进行感知"><a href="#如何对服务的上下线进行感知" class="headerlink" title="如何对服务的上下线进行感知"></a>如何对服务的上下线进行感知</h5><h6 id="方式一：基于客户端，服务端之间的长连接建立心跳机制"><a href="#方式一：基于客户端，服务端之间的长连接建立心跳机制" class="headerlink" title="方式一：基于客户端，服务端之间的长连接建立心跳机制"></a>方式一：基于客户端，服务端之间的长连接建立心跳机制</h6><p>无论是发布数据还是订阅数据，服务端与客户端都维持了一个长连接。软负载中心服务端可以通过该长连接上的心跳或者数据的发布来判断服务发布者是否在线。在一定时限内没有心跳返回或者数据发布，则可以认为服务下线。当服务上线的时候，通过连接的建立和数据发布完成上线通知，服务端更新聚合数据。</p>
+<p>这种方式也有其不足之处。从结构上来说，软负载中心是旁路，它不在调用链路上，若服务提供者到软负载中心的链路存在问题，而服务调用者本身到服务提供者之间的链路没有问题，但由于软负载中心判断提供者状态下线，导致服务调用者不可感知服务提供者。此外，之前说过这种方式是基于长连接。既然是基于长连接，则当软负载中心服务端的连接过多，负载过高的时候，容易出现服务端对心跳数据的处理不及时，从而引起对上下线状态的误判。</p>
+<h6 id="方式二：额外的主动检查方式（主动对发布地址、端口的连接验证）"><a href="#方式二：额外的主动检查方式（主动对发布地址、端口的连接验证）" class="headerlink" title="方式二：额外的主动检查方式（主动对发布地址、端口的连接验证）"></a>方式二：额外的主动检查方式（主动对发布地址、端口的连接验证）</h6><p>实际上这里讨论是的一种补偿机制。因为方式一存在无法避免的误判可能，所以需要提供一个主动检查的方式，当长连接判断服务应用下线的时候，服务端不去直接认定服务下线，而是由另一个独立的监控应用去检查服务是否下线。然而，如果该应用本身也出了问题，那么实际上也存在感知问题！</p>
+<p>总结：无论是方式一还是方式二，最准确的感知方式还是需要服务调用者进行最终确认，因为系统中进行的实际业务通信是在服务调用者和服务提供者之间的！</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%A4%E8%AF%86%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83"><span class="toc-text">认识软负载中心</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83%E7%9A%84%E6%9E%B6%E6%9E%84-C-S"><span class="toc-text">软负载中心的架构(C&#x2F;S)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83%E7%9A%84%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD"><span class="toc-text">软负载中心的核心功能</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%B0%E5%9D%80%E6%95%B0%E6%8D%AE%E8%81%9A%E5%90%88"><span class="toc-text">地址数据聚合</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%81%9A%E5%90%88%E5%9C%B0%E5%9D%80%E6%95%B0%E6%8D%AE"><span class="toc-text">为什么要聚合地址数据</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%81%9A%E5%90%88%E7%9A%84%E6%95%B0%E6%8D%AE%E6%9C%89%E5%93%AA%E4%BA%9B"><span class="toc-text">聚合的数据有哪些</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E8%81%9A%E5%90%88%E5%9C%B0%E5%9D%80%E4%BF%A1%E6%81%AF-%E8%81%9A%E5%90%88%E6%95%B0%E6%8D%AE"><span class="toc-text">聚合地址信息(聚合数据)</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E8%AE%A2%E9%98%85%E5%85%B3%E7%B3%BB-%E8%AE%A2%E9%98%85%E5%85%B3%E7%B3%BB%E9%9B%86%E5%90%88"><span class="toc-text">订阅关系(订阅关系集合)</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE"><span class="toc-text">连接数据</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%84%9F%E7%9F%A5"><span class="toc-text">生命周期感知</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%9C%8D%E5%8A%A1%E4%B8%8A%E4%B8%8B%E7%BA%BF%E8%87%AA%E5%8A%A8%E6%84%9F%E7%9F%A5"><span class="toc-text">为什么需要服务上下线自动感知</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AF%B9%E6%9C%8D%E5%8A%A1%E7%9A%84%E4%B8%8A%E4%B8%8B%E7%BA%BF%E8%BF%9B%E8%A1%8C%E6%84%9F%E7%9F%A5"><span class="toc-text">如何对服务的上下线进行感知</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%96%B9%E5%BC%8F%E4%B8%80%EF%BC%9A%E5%9F%BA%E4%BA%8E%E5%AE%A2%E6%88%B7%E7%AB%AF%EF%BC%8C%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B9%8B%E9%97%B4%E7%9A%84%E9%95%BF%E8%BF%9E%E6%8E%A5%E5%BB%BA%E7%AB%8B%E5%BF%83%E8%B7%B3%E6%9C%BA%E5%88%B6"><span class="toc-text">方式一：基于客户端，服务端之间的长连接建立心跳机制</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%96%B9%E5%BC%8F%E4%BA%8C%EF%BC%9A%E9%A2%9D%E5%A4%96%E7%9A%84%E4%B8%BB%E5%8A%A8%E6%A3%80%E6%9F%A5%E6%96%B9%E5%BC%8F%EF%BC%88%E4%B8%BB%E5%8A%A8%E5%AF%B9%E5%8F%91%E5%B8%83%E5%9C%B0%E5%9D%80%E3%80%81%E7%AB%AF%E5%8F%A3%E7%9A%84%E8%BF%9E%E6%8E%A5%E9%AA%8C%E8%AF%81%EF%BC%89"><span class="toc-text">方式二：额外的主动检查方式（主动对发布地址、端口的连接验证）</span></a></li></ol></li></ol></li></ol></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E8%AE%A4%E8%AF%86%E5%A4%A7%E5%9E%8B%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/"><i class="fa fa-tags"></i>分布式</a>
+     
+      <a href="/tags/%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83/"><i class="fa fa-tags"></i>软负载中心</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E8%AE%A4%E8%AF%86%E5%A4%A7%E5%9E%8B%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E8%BD%AF%E8%B4%9F%E8%BD%BD%E4%B8%AD%E5%BF%83-%E4%B8%8B/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/Scrapy%E4%B8%80%E5%AD%A6%E5%B0%B1%E4%BC%9A/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

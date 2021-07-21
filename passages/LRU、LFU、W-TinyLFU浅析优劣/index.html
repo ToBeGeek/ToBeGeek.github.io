@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>LRU、LFU、W-TinyLFU浅析优劣 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="Hexo, Theme-AD" />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2019-02-26
+    </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    LRU、LFU、W-TinyLFU浅析优劣
+  </h1>
+  
+  <article class="passage-article">
+    <p>在企业开发中，时常会需要与‘缓存’这个东西打交道。在对成熟的缓存工具做技术选型的时候，不仅需要充分考虑其效率，也要考虑到该工具的缓存命中率。何谓缓存命中率呢？说白了，就是从(缓存中获取到数据的次数)/发起获取的总次数.</p>
+<p>缓存的更新策略在一定程度上影响了缓存的命中率。现有的缓存，大多数基于以下算法实现。</p>
+<p>FIFO( First In First Out ):先入先出，也就是说先进入缓存的数据，在缓存空间整理的情况下，优先淘汰。</p>
+<p>LRU( Least Recently Used ):最近时间段内最久没有被使用的数据，在缓存空间整理的时候，会被优先淘汰。</p>
+<p>LFU( Less Frequently Used ):最近访问频率低的数据，在缓存空间整理时，优先淘汰。</p>
+<h2 id="LRU-算法"><a href="#LRU-算法" class="headerlink" title="LRU 算法"></a>LRU 算法</h2><p>图解：<br><img src="/.io//lru.png" alt="avatar"></p>
+<p>从<strong>时间维度</strong>来说，当存在热点数据时，LRU的效率很好。但由于只要访问一次数据，就把该数据移入缓存中，造成了缓存污染的问题.(缓存污染是指将不常用的数据从内存移到缓存，导致缓存的效率变低)。在一些批量操作的情况下会导致LRU的命中率急剧下降。因此在LRU的基础上，衍生了LRU-K算法。</p>
+<p>LRU-K算法，新增了一个访问历史队列记录数据的访问历史，当次数达到K次的条件时候，数据将从历史队列中删除并且移入缓存队列中，后续在缓存队列中进行LRU的更新策略。（没有达到K次的数据，将会在访问历史记录中根据FIFO或者LRU算法进行移除）</p>
+<p>图解:<br><img src="/.io//lru-k.png" alt="avatar"></p>
+<p>LRU-K的命中率相比LRU-1（LRU）来说，要提高很多，能够有效降低缓存污染带来问题，但是算法更加复杂，CPU消耗也比较高。</p>
+<h2 id="LFU-算法"><a href="#LFU-算法" class="headerlink" title="LFU 算法"></a>LFU 算法</h2><p>LFU(Least Frequently Used)算法表明了这是一个基于访问频率的缓存策略。与基于时间维度的LRU不同，LRU会将时间边缘的数据淘汰。LFU则是将访问频率低的数据淘汰。每次缓存命中的时候，都会更新命中元素所对应的引用计数，然后重新进行优先级排序。当存在新元素进入队列的时候，将引用计数值最低的元素从队列中移除。</p>
+<p>图解:<br><img src="/.io//LFU.jpg" alt="avatar">  </p>
+<p>优缺点分析：<br>相对于基于时间的LRU算法来说，LFU算法要更有效一些。LRU算法中，一些周期性或者偶然性的操作会导致新加入的数据（脏数据）将缓存中实际有效的数据淘汰，真正需要的缓存数据淘汰后直接影响缓存命中率（重申一遍：缓存污染）。然鹅~,LFU也不是完美的，它同样会出现缓存污染问题，只不过它的缓存污染源自于历史数据。</p>
+<p>举个栗子：我们假设微博热搜排名，采用了基于LFU算法的缓存机制，如果这个月1号的时候，某蔡姓明星的一段酷炫炸天的篮球舞蹈视频发布，且在当天搜索热度达到全年顶峰(也就是说，引用计数碾压其余队列元素),根据LFU算法的话蔡某全年占据头条!!(汪峰都要哭了,即使后续无人关注这件事了,但是由于计数值逆天,根本不会被淘汰.换句话说就是占着茅坑不拉屎，不常用的数据占据缓存)</p>
+<h2 id="TinyLFU-算法"><a href="#TinyLFU-算法" class="headerlink" title="TinyLFU 算法"></a>TinyLFU 算法</h2><p>由名字可以得知TinyLFU算法是在LFU算法上的一种变种。上述可知，LFU算法会存在维护访问频率信息的开销，并且当数据的访问模式随着时间发生变化的时候，缓存的命中率会下降。TinyLFU算法是在LFU算法的基础上解决这两个问题。</p>
+<p>1：如何降低因维护访问频率信息带来的开销</p>
+<p>2：数据的访问模式随时间变化的时候采取什么方式应对。</p>
+<p>图解:<br><img src="/.io//Tiny-LFU.jpg" alt="avatar">  </p>
+<p>TinyLFU算法借鉴了大数据处理中的梗概(Sketching，在统计精度和存储空间上折衷)的思想，采用了Count-Min Sketch 算法（其实就是把布隆过滤器的实现使用在统计上了，该算法的好处在于仅需要固定内存分配和固定的计算时间）大大缩小了内存和计算的开销，因此可以解决上述的问题1。至于问题2，Tiny-LFU算法采用了一种衰退机制，对维护数据进行简单的重置。每次新增录到Sketch的时候，都会给一个计数器上加1，当计数器达到阈值的时候，所有Sketch数值都除以2。</p>
+<h2 id="W-TinyLFU-算法"><a href="#W-TinyLFU-算法" class="headerlink" title="W-TinyLFU 算法"></a>W-TinyLFU 算法</h2><p>W-TinyLFU算法全名称也是Windows-TinyLFU算法，它基于TinyLFU算法实现。那么它解决了什么问题呢？如果一个新的元素在短期内突然访问流量很多次，依旧有可能无法构建足够的频率数据来保证自己驻留在缓存中。这也是W-TinyLFU算法要解决的痛点。</p>
+<p>W-TinyLFU的结构如下：<br><img src="/.io//W-TinyLFU.png" alt="avatar">  </p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#LRU-%E7%AE%97%E6%B3%95"><span class="toc-text">LRU 算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#LFU-%E7%AE%97%E6%B3%95"><span class="toc-text">LFU 算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#TinyLFU-%E7%AE%97%E6%B3%95"><span class="toc-text">TinyLFU 算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#W-TinyLFU-%E7%AE%97%E6%B3%95"><span class="toc-text">W-TinyLFU 算法</span></a></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/LRU%E3%80%81LFU%E3%80%81W-TinyLFU%E6%B5%85%E6%9E%90%E4%BC%98%E5%8A%A3/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/Eureka%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/Java%E6%98%AF%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91%E7%9A%84/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

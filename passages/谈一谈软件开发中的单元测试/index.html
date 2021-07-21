@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>谈一谈软件开发中的单元测试 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="软件开发,软件开发周期,软件测试," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2020-02-20
+    </span>
+    
+      <span>
+        | <a href="/categories/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91/"><i class="fa fa-bookmark"></i>软件开发</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    谈一谈软件开发中的单元测试
+  </h1>
+  
+  <article class="passage-article">
+    <p>毕业后，有幸自己加入的公司平台，都有较为完善的一整套开发流程，对程序员写单元测试也有一定要求。最开始的时候，对这种行为感到很不理解，<br>甚至认为写单元测试简直是在浪费时间。接触的时间长了，发现单元测试可以提高代码质量，减少维护成本，降低重构难度。长远的来说，这是利大于弊的！</p>
+<!-- TOC -->
+
+<ul>
+<li><a href="#%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E4%B8%8E%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95">软件开发生命周期与单元测试</a><ul>
+<li><a href="#%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90">持续集成</a></li>
+<li><a href="#%E6%8C%81%E7%BB%AD%E4%BA%A4%E4%BB%98">持续交付</a></li>
+<li><a href="#%E6%8C%81%E7%BB%AD%E9%83%A8%E7%BD%B2">持续部署</a></li>
+<li><a href="#%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%95%E6%9C%89%E5%93%AA%E4%BA%9B">软件测试有哪些</a></li>
+<li><a href="#%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%95%E7%9A%84%E6%96%B9%E6%B3%95">软件测试的方法</a></li>
+</ul>
+</li>
+<li><a href="#%E8%AE%B2%E8%AE%B2%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95">讲讲单元测试</a><ul>
+<li><a href="#%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6">单元测试框架</a><ul>
+<li><a href="#%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7">测试工具</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95%E5%A5%97%E4%BB%B6">测试套件</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95%E8%BF%90%E8%A1%8C%E5%99%A8">测试运行器</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AFmock">什么是Mock</a><ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%83%85%E5%86%B5%E5%8F%AF%E4%BB%A5%E7%94%A8mock">什么情况可以用mock</a></li>
+<li><a href="#mock%E7%9A%84%E6%84%8F%E4%B9%89">mock的意义</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="软件开发生命周期与单元测试"><a href="#软件开发生命周期与单元测试" class="headerlink" title="软件开发生命周期与单元测试"></a>软件开发生命周期与单元测试</h3><p>软件从开发到上线，至少经过<a target="_blank" rel="noopener" href="https://www.mindtheproduct.com/what-the-hell-are-ci-cd-and-devops-a-cheatsheet-for-the-rest-of-us/">“持续集成”，“持续交付”，“持续部署”</a>三个关键节点。</p>
+<h4 id="持续集成"><a href="#持续集成" class="headerlink" title="持续集成"></a>持续集成</h4><p><img src="/.io//%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90.png" alt="持续集成"></p>
+<p>持续集成强调开发人员提交新代码之后，立刻进行构建、（单元）测试。对于Java程序员来说git commit+mvn clean install的过程！有些公司会通过一些集成平台<br>来实现【代码提交】+【单元测试】+【程序构建】。每次经由单元测试再进行代码构建以便尽早地发现开发人员提交地代码部分问题。  </p>
+<h4 id="持续交付"><a href="#持续交付" class="headerlink" title="持续交付"></a>持续交付</h4><p><img src="/.io//%E6%8C%81%E7%BB%AD%E4%BA%A4%E4%BB%98.png" alt="持续交付"></p>
+<p>持续交付(Conotinous Deliver)是指在持续集成的基础之上，将集成后的代码部署到一个“类生产”环境中去运行。举栗子，作为一个后端开发人员时常需要和前端人员进行联调，后端人员把代码提交之后，在到Jenkins平台上build，指定发布的环境(dev环境)。前端人员再去与dev环境运行的服务联调。（为什么不在本地联调，因为如果是单体服务的环境下本地联调自然没问题，但是如果是分布式环境的下就容易存在很多麻烦）</p>
+<p>与前端联调的时候用dev环境，转测之后用test环境，业务验收的时候用staging环境，这些都是“类生产环境”。</p>
+<h4 id="持续部署"><a href="#持续部署" class="headerlink" title="持续部署"></a>持续部署</h4><p><img src="/.io//%E6%8C%81%E7%BB%AD%E9%83%A8%E7%BD%B2.png" alt="持续部署"></p>
+<p>持续部署(Continuous Deploy)是在持续交付的基础上，把部署到生产环境的过程自动化。持续部署就是定时地、自动地将过去一个稳定的发布版本部署到生产环境中。</p>
+<p>不难看出来，上面的每一个阶段都离不开软件的自动化测试。<br>自动化测试是指软件测试的自动化，软件测试就算再预设条件下允许系统或应用程序，评估运行结果，预先条件应摆阔正常条件和异常条件。</p>
+<h4 id="软件测试有哪些"><a href="#软件测试有哪些" class="headerlink" title="软件测试有哪些"></a>软件测试有哪些</h4><p><img src="/.io//%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%95%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5.png" alt="软件测试基本概念"></p>
+<h4 id="软件测试的方法"><a href="#软件测试的方法" class="headerlink" title="软件测试的方法"></a>软件测试的方法</h4><p><img src="/.io//%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%95%E7%9A%84%E6%96%B9%E6%B3%95.png" alt="软件测试的方法"></p>
+<h3 id="讲讲单元测试"><a href="#讲讲单元测试" class="headerlink" title="讲讲单元测试"></a>讲讲单元测试</h3><p>对于内部推行TDD的公司的开发人员来说，单元测试作为测试的第一个阶段，能够在一定程度上提前发现问题，并付出最小的成本。对于程序员来说，“单测先行”有利于开发人员在更加专注地去思考代码，保证了代码的质量。</p>
+<p>单元测试（模块测试）是开发者编写的一小段代码，用于检验被测代码的一个很小的、很明确的功能是否正确。通常而言，一个单元测试是用于判断某个特定条件（或者场景）下某个特定函数的行为。工厂在组装一台电视机之前，会对每个元件都进行测试，这，就是单元测试，每个“元件”的可用才会保证最终可用！</p>
+<p>单元测试是开发者编写的测试最小单元的代码，也是一种白盒测试。白盒测试的测试方法是，测试者输入数据去验证数据流在程序中的流动路径，并且确定适当的输出，对预期结果与实际输出结果进行比较。通常包括如下几个基础步骤<br>1：初始化测试环境、准备测试数据<br>2：调用需要被测试的单元<br>3：将实际输出的结果与预设的期望结果进行比较<br>4：测试数据清理</p>
+<h4 id="单元测试框架"><a href="#单元测试框架" class="headerlink" title="单元测试框架"></a>单元测试框架</h4><p>想一下自己当初入行的时候，每次写完一个工具方法，总是写一个main函数，并且在函数中去打印结果，然后人眼比对去判断结果是否符合预期！我相信这也是很多人最开始经常做的事情哈哈哈。如果当需要测试的用例多了起来或者复杂起来的时候，总是通过控制台看输出才知道单元测试是否成功，这显然很不合理。所以我们通常会使用单元测试框架来解决这个问题。</p>
+<p>通常的单元测试框架会有如下三个基本功能：测试工具，测试套件，测试运行器</p>
+<h5 id="测试工具"><a href="#测试工具" class="headerlink" title="测试工具"></a>测试工具</h5><p>测试工具是一整套工具用于基线测试。目的是为了确保测试能够在共享固定的环境运行，保证测试结果的可重复验证。一般负责对测试环境的初始化、准备测试数据和测试数据的清理。</p>
+<h5 id="测试套件"><a href="#测试套件" class="headerlink" title="测试套件"></a>测试套件</h5><p>测试套件是框架提供允许捆绑多个测试用例运行的方式。比如测试人员在做UI自动化测试的时候，一般会用Python+Selenium的方式去模拟用户的一连贯操作。</p>
+<h5 id="测试运行器"><a href="#测试运行器" class="headerlink" title="测试运行器"></a>测试运行器</h5><p>用于执行测试案例。一般负责调用需要被测试的单元、收集结果、并与期望值比较.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Created by Herman on 2019/5/16</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SensitiveDataUtilsTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 测试手机号码脱敏</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">mobileEncrypt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//测试输入数据</span></span><br><span class="line">        String pre = <span class="string">&quot;17666666666&quot;</span>;</span><br><span class="line">        <span class="comment">//期望的输出数据</span></span><br><span class="line">        String after = <span class="string">&quot;176****6666&quot;</span>;</span><br><span class="line">        <span class="comment">//调用测试方法</span></span><br><span class="line">        String result = SensitiveDataUtils.phoneEncrypt(pre);</span><br><span class="line">        <span class="comment">//对比并且验证结果是否符合预期</span></span><br><span class="line">        Assert.assertEquals(after, result);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行的结果：<br><img src="/.io//%E5%8D%95%E6%B5%8B%E7%BB%93%E6%9E%9C.jpg" alt="单测结果.jpg"></p>
+<h4 id="什么是Mock"><a href="#什么是Mock" class="headerlink" title="什么是Mock"></a>什么是Mock</h4><p>上述是我过往写的一个测试用例demo。是一个比较简单的测试用例。在一些复杂的场景下，有时候我们会用mock(模拟)的方式去模拟部分函数的执行，从而保证单元测试的可测试性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">querySurveyInfoPage_SUCC</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="comment">//模拟请求数据</span></span><br><span class="line">      SurveyInfoPageReqDTO req = SurveyInfoPageReqDTO.builder()</span><br><span class="line">              .groupId(<span class="keyword">new</span> ImmutableList.Builder&lt;String&gt;().add(<span class="string">&quot;groupId&quot;</span>).build())</span><br><span class="line">              .projectCode(<span class="keyword">new</span> ImmutableList.Builder&lt;String&gt;().add(<span class="string">&quot;projectCode&quot;</span>).build()).build();</span><br><span class="line">      <span class="comment">//mock，当调用中台-内容中心获取问卷信息页面时候，返回null</span></span><br><span class="line">      when(contentService.querySurveyInfoPage(any())).thenReturn(<span class="keyword">null</span>);</span><br><span class="line">      <span class="comment">//测试querySurveyInfoPage方法</span></span><br><span class="line">      Assert.assertEquals(ResultCodeEnum.SUCCESS.getCode(), onlineInfoService.querySurveyInfoPage(req).getCode());</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的contentService.querySurveyInfoPage，是对中台API的调用(外部依赖)，通过mock方式我们允许，当程序运行到被mock的方法querySurveyInfoPage的时候返回我们需要的null。从而消除了被测试对象onlineInfoService.querySurveyInfoPage的外部依赖，且保证测试对象的单测运行不受到外部因素的影响，提高运行效率！</p>
+<h5 id="什么情况可以用mock"><a href="#什么情况可以用mock" class="headerlink" title="什么情况可以用mock"></a>什么情况可以用mock</h5><p>1：有时候我们会自己模拟一些DB数据的生成，但是由于业务过于复杂，会使得开发人员十分头疼“造数据”这件事，这种情况下我们可以模拟这些数据</p>
+<p>2：调用第三方API接口，由于外部依赖的不确定性可能会造成单元测试的阻塞或者运行失败或者运行效率低下</p>
+<p>3：当下未完成的接口可以通过mock的方式，假设他可行</p>
+<h5 id="mock的意义"><a href="#mock的意义" class="headerlink" title="mock的意义"></a>mock的意义</h5><p>1：Mock可以用来消除测试对象对外部服务的依赖（比如数据库，第三方接口等）。任何外部依赖的存在都会极大的限制测试用例的可迁移性和稳定性。</p>
+<p>2：对一些耗时的外部依赖，通过Mock的方式能够极大的提升测试用例的运行效率。对外部服务的调用是两个进程级之间的通信，有可能网络超时或者响应缓慢，而Mock可以把消耗控制在进程内。</p>
+<p>3：消除了外部依赖，能够保证单元测试用例的简洁性，有利于开发人员对用例的维护。</p>
+<p>关于单元测试的浅谈，就到此为止了。说说我个人常用的一些测试工具，JUnit+Mockito，相关的教学我就不赘述了，网上的资料也有一堆。</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E4%B8%8E%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="toc-text">软件开发生命周期与单元测试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90"><span class="toc-text">持续集成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%81%E7%BB%AD%E4%BA%A4%E4%BB%98"><span class="toc-text">持续交付</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8C%81%E7%BB%AD%E9%83%A8%E7%BD%B2"><span class="toc-text">持续部署</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%95%E6%9C%89%E5%93%AA%E4%BA%9B"><span class="toc-text">软件测试有哪些</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%95%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-text">软件测试的方法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%B2%E8%AE%B2%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="toc-text">讲讲单元测试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6"><span class="toc-text">单元测试框架</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E5%B7%A5%E5%85%B7"><span class="toc-text">测试工具</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E5%A5%97%E4%BB%B6"><span class="toc-text">测试套件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E8%BF%90%E8%A1%8C%E5%99%A8"><span class="toc-text">测试运行器</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFMock"><span class="toc-text">什么是Mock</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%83%85%E5%86%B5%E5%8F%AF%E4%BB%A5%E7%94%A8mock"><span class="toc-text">什么情况可以用mock</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#mock%E7%9A%84%E6%84%8F%E4%B9%89"><span class="toc-text">mock的意义</span></a></li></ol></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E8%B0%88%E4%B8%80%E8%B0%88%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E5%91%A8%E6%9C%9F/"><i class="fa fa-tags"></i>软件开发周期</a>
+     
+      <a href="/tags/%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%95/"><i class="fa fa-tags"></i>软件测试</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E8%AF%A6%E8%A7%A3Springcloud%E4%B9%8BRibbon%E7%BB%84%E4%BB%B6/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E7%90%86%E8%A7%A3%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%83%E5%A4%A7%E5%8E%9F%E5%88%99/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

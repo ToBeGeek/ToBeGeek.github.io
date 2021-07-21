@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>深入理解Linux内核-内存寻址上篇 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="Linux,计算机基础,操作系统,内存寻址," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2021-02-10
+    </span>
+    
+      <span>
+        | <a href="/categories/Linux/"><i class="fa fa-bookmark"></i>Linux</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    深入理解Linux内核-内存寻址上篇
+  </h1>
+  
+  <article class="passage-article">
+    <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>最近在啃O’REILLY系列的《深入理解Linux内核-第三版》这本书，全书一共897页。真的是一本砖头书啊···虽然我以前也啃过不少砖头书，但这本绝对算得上那种“难以下咽”的砖头。故此，一边啃一边细嚼慢咽。</p>
+<!-- TOC -->
+
+<ul>
+<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
+<li><a href="#%E7%9B%B8%E5%85%B3%E5%B8%B8%E8%A7%81%E7%9A%84%E5%AD%97%E8%AF%8D%E8%A7%A3%E8%AF%BB">相关常见的字词解读</a><ul>
+<li><a href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5">操作系统的基本概念</a></li>
+<li><a href="#%E5%86%85%E6%A0%B8">内核</a></li>
+<li><a href="#%E7%94%A8%E6%88%B7%E6%80%81%E5%92%8C%E5%86%85%E6%A0%B8%E6%80%81">用户态和内核态</a></li>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98">什么是虚拟内存?</a></li>
+<li><a href="#%E9%9A%8F%E6%9C%BA%E8%AE%BF%E9%97%AE%E5%AD%98%E5%82%A8%E5%99%A8ram">随机访问存储器RAM</a></li>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%AF%84%E5%AD%98%E5%99%A8">什么是寄存器</a></li>
+</ul>
+</li>
+<li><a href="#%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80">内存寻址</a><ul>
+<li><a href="#%E4%B8%A4%E7%A7%8D%E4%B8%8D%E5%90%8C%E7%9A%84%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2%E6%96%B9%E5%BC%8F%E5%AE%9E%E6%A8%A1%E5%BC%8F%E5%92%8C%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F">两种不同的地址转换方式实模式和保护模式</a></li>
+<li><a href="#%E5%AE%9E%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80">实模式下的内存寻址</a></li>
+<li><a href="#%E4%B8%89%E7%A7%8D%E5%9C%B0%E5%9D%80">三种地址</a></li>
+<li><a href="#%E4%B8%BA%E5%95%A5%E9%9C%80%E8%A6%81%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F">为啥需要保护模式</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80">保护模式下的内存寻址</a><ul>
+<li><a href="#%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E5%88%86%E6%AE%B5">硬件中的分段</a><ul>
+<li><a href="#%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80">保护模式下的逻辑地址</a></li>
+<li><a href="#%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6gdtldt">段描述符、GDT、LDT</a></li>
+<li><a href="#%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80%E6%98%AF%E5%A6%82%E4%BD%95%E8%AE%A1%E7%AE%97%E5%BE%97%E5%88%B0%E7%BA%BF%E6%80%A7%E5%9C%B0%E5%9D%80%E7%9A%84">逻辑地址是如何计算得到线性地址的</a></li>
+<li><a href="#%E5%BF%AB%E9%80%9F%E8%AE%BF%E9%97%AE%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6">快速访问段描述符</a></li>
+</ul>
+</li>
+<li><a href="#%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E5%88%86%E9%A1%B5">硬件中的分页</a><ul>
+<li><a href="#%E6%9C%89%E4%BA%86%E5%88%86%E6%AE%B5%E4%B8%BA%E5%95%A5%E8%BF%98%E8%A6%81%E5%88%86%E9%A1%B5">有了分段为啥还要分页</a></li>
+<li><a href="#%E9%A1%B5%E6%A1%86page-frame%E4%B8%8E%E9%A1%B5page">页框page frame与页page</a></li>
+<li><a href="#%E9%A1%B5%E8%A1%A8">页表</a></li>
+<li><a href="#%E5%B8%B8%E8%A7%84%E5%88%86%E9%A1%B5">常规分页</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E6%80%BB%E7%BB%93%E4%B8%8E%E5%8F%8D%E6%80%9D">总结与反思</a></li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="相关常见的字词解读"><a href="#相关常见的字词解读" class="headerlink" title="相关常见的字词解读"></a>相关常见的字词解读</h3><p>内存寻址是内存管理的一部分，而内存管理可以说是Linux内核中最为复杂的活动。本篇解读Linux是如何做到内存寻址，如果不提前了解一些概念，会让人一头雾水。（劝退警告）</p>
+<h4 id="操作系统的基本概念"><a href="#操作系统的基本概念" class="headerlink" title="操作系统的基本概念"></a>操作系统的基本概念</h4><p>几乎所有的计算机系统都包含一个被称为“操作系统”的<strong>基本程序集合。</strong>操作系统的主要作用归结为如下两点：<br>1.与硬件资源交互，为包含在硬件平台上的所有<strong>可编程</strong>的硬件元件提供服务<br>2.操作系统封装了硬件的直接使用，<strong>对上屏蔽底层硬件</strong>并<strong>提供上层应用的执行环境</strong><br>如下图所示：<br><img src="/.io//%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F.png" alt="操作系统.png"></p>
+<h4 id="内核"><a href="#内核" class="headerlink" title="内核"></a>内核</h4><p>Unix（包括类Unix）计算机操作系统是一个基本程序集合，其中最重要的程序集合就是内核，内核中包含了系统运行时期必不可少的服务核心过程。当我们启动操作系统的时候，内核就会被装入RAM(通俗就是内存条)。所有系统资源管理都是在内核中完成的，比如I/O，分配和回收内存，从网络接口读写数据，所有应用程序必须通过内核才具有这些能力！</p>
+<p>题外话：<strong>也有一些操作系统允许应用程序直接与硬件交互</strong>，典型如：MS-DOS</p>
+<h4 id="用户态和内核态"><a href="#用户态和内核态" class="headerlink" title="用户态和内核态"></a>用户态和内核态</h4><p>为了保证用户程序与硬件资源不直接交互的过程实现，现代操作系统也是要依靠硬件特性来禁止用户程序与底层硬件部分进行交互。</p>
+<p>硬件上的支持：CPU引入了至少两种不同的执行模式(实际上有四个等级，但Linux仅仅使用了最高等级和最低等级)，<strong>用户程序的非特权模式</strong>和<strong>内核的特权模式</strong>，对应在Unix系统中也被称为<strong>用户态</strong>和<strong>内核态</strong>。</p>
+<h4 id="什么是虚拟内存"><a href="#什么是虚拟内存" class="headerlink" title="什么是虚拟内存?"></a>什么是虚拟内存?</h4><p><strong>虚拟内存是Unix系统(包含类Unix系统)对底层内存硬件资源的一种抽象。虚拟内存系统可看作是一层逻辑层，位于应用层与硬件内存管理单元(MMU)之间，主要负责满足应用层对底层的内存请求。</strong></p>
+<p>MMU：Management Unit,是一种硬件，负责CPU内存的访问请求，它的功能包括：<strong>逻辑地址到线性地址的转换、线性地址到物理地址的转换</strong>、内存保护，CPU高速缓存的控制，内存管理。</p>
+<h4 id="随机访问存储器-RAM"><a href="#随机访问存储器-RAM" class="headerlink" title="随机访问存储器(RAM)"></a>随机访问存储器(RAM)</h4><p>也就是我们常常说到的内存条，它是一种硬件资源，具有断电易失性。Unix系统将RAM的使用可以划分成两个部分。一部分用于专门存放内核映像(内核的静态数据结构与内核代码)，这部分通常占比不大。另一部分主要由虚拟内存系统处理，主要有如下的场景：</p>
+<p>1：满足内核对缓冲区、描述符及其他动态内核数据结构的请求。<br>2：满足进程对一般内存区的请求以对及文件内存映射的请求。<br>3：借助于高速缓存从磁盘及其他缓冲设备获得较好的性能。</p>
+<h4 id="什么是寄存器"><a href="#什么是寄存器" class="headerlink" title="什么是寄存器"></a>什么是寄存器</h4><p><strong>寄存器是CPU内部用来存放数据的一些小型存储区域，用来暂时存放参与运算的数据和运算结果。</strong>其实寄存器就是一种常用的时序逻辑电路，但这种时序逻辑电路只包含存储电路。<strong>是一种硬件存储结构</strong></p>
+<h3 id="内存寻址"><a href="#内存寻址" class="headerlink" title="内存寻址"></a>内存寻址</h3><p>当前篇章围绕“内存寻址”的知识进行详解，<strong>主要讲解硬件方面的发展给计算机的“内存寻址”带来哪些支持</strong>，为后续篇章从Linux操作系统如何利用硬件支持做到“内存寻址”做铺垫。</p>
+<p>PS：本文涉及到的处理器模型，按照时间线排序。8086模型(实模式)、80286(16位保护模式，分段式)、80386(32位保护模式，分页式)</p>
+<h4 id="两种不同的地址转换方式-实模式和保护模式"><a href="#两种不同的地址转换方式-实模式和保护模式" class="headerlink" title="两种不同的地址转换方式(实模式和保护模式)"></a>两种不同的地址转换方式(实模式和保护模式)</h4><p>从80286模型开始及以后，Intel处理器主要有两种不同的方式执行地址转换，这两种方式分别称为<strong>实模式和保护模式</strong>。</p>
+<p><strong>实模式的“实”体现在程序中使用的地址都是真实的物理地址（实模式下的逻辑地址由“段基址”和“段内偏移地址”组成）</strong>。实模式存在<strong>安全隐患</strong>。在实模式下，用户程序和操作系统拥有同等权力，因为实模式<strong>没有区分特权级</strong>。在实模式下用户程序可以任意修改物理地址，甚至是操作系统内存。</p>
+<p><strong>保护模式引入了特权级的概念</strong>，将用户程序和操作系统划分不同的执行特权并引入了虚拟内存管理，从而保证了用户程序不能随便修改物理地址。</p>
+<h4 id="实模式下的内存寻址"><a href="#实模式下的内存寻址" class="headerlink" title="实模式下的内存寻址"></a>实模式下的内存寻址</h4><p>在8086模型时代，CPU只有实时模式，地址总线有20位，而当时的寄存器只有16位。学过计算机组成原理的话，其实我们知道“地址总线的位数决定了CPU寻址范围”，也就是最多能够访问2^20=1M的内存空间，一次取最多一段数据是2^16=64KB。这就有一个问题了，16位的寄存器怎么表达20位的地址？看到这里相信大多数人已经想到解决方案了，“映射”。而这个“映射”就是8086引入的实模式。<strong>8086的时代，intel通过两个寄存器来实现20位的寻址</strong>。肯定不是简单的相加啦，两个16位的二进制数加起来还没够20位呢！所以这个“映射”就是我们常说的“<strong>左移4位+偏移量</strong>”,接下来展开说说。</p>
+<p>8086CPU将1M的内存划分成多个段，每个段的大小不会超过64Kb(但不一定都是64kb)，这就是实模式下的分段。实模式下内存寻址的过程就是逻辑地址转换成物理地址的过程。<strong>实模式下的逻辑地址由“段基址”和“段内偏移地址”组成，寻址的时候从一个段寄存器中读取“段基址”再乘以16(左移4位操作)，然后从另一个寄存器中读取“段内偏移量”，两者相加得到的一个新地址就是物理地址。</strong>过程示例如下：</p>
+<p><img src="/.io//%E5%AE%9E%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E5%AF%BB%E5%9D%80.jpg" alt="实模式下的寻址.jpg"></p>
+<p>在80286及以后，内存地址改为16位或32位，至少可以访问到2^32=4G的内存空间。但为了保证后续的CPU能够运行旧的CPU，只能保持向下兼容。因此，80286及以后的CPU首先进入实模式，然后通过切换机制再进入到保护模式。</p>
+<h4 id="三种地址"><a href="#三种地址" class="headerlink" title="三种地址"></a>三种地址</h4><p>原本想着顺着实模式往下讲讲保护模式，但是我发觉如果在讲保护模式之前，不对“地址”有透彻的了解可能会十分懵逼。<br>地址是一个很笼统的概念，当我们说它的时候，我们必须将区分三种地址的概念。</p>
+<p><strong>逻辑地址</strong><br><strong>包含在机器语言指令中用来指定一个操作数或一条指令的地址</strong>。其实就是一种相对地址，它的意义是简化操作系统之上的应用对地址的使用。每一个逻辑地址都由一个**段(segment)<strong>和</strong>偏移量(offset)**组成。</p>
+<p><strong>线性地址</strong><br><strong>线性地址也被成为“虚拟地址”，它是一个用32位表示的无符号整数，可以用来表达高达4GB的地址(0-2^32)。</strong>为了直观紧凑，通常会用将线性地址用16进制的数字表示，值的范围[0x00000000,0xFFFFFFFF]</p>
+<p><strong>物理地址</strong><br><strong>与CPU寻址直接关联，用于芯片级内存单元寻址</strong>。物理地址由32位或36位无符号整数表示。</p>
+<p>为什么要说到上述的三种地址，因为在<strong>保护模式内存寻址的过程，其实就是上述三者之间计算转换成实际物理地址的过程</strong>。而这些转换的计算，在硬件上离不开前面说到的MMU单元(一种硬件)，大体的转换过程如下所示。</p>
+<p><img src="/.io//MMU%E7%9A%84%E5%8A%9F%E8%83%BD.png" alt="MMU的功能.png"></p>
+<p>可以注意到图中的两个硬件单元：分段单元与分页单元，前者负责将接收到的逻辑地址转换成“线性地址”，后者负责将“线性地址”转换成物理地址。</p>
+<p>看到这里，相信大多数人都有有一个疑惑？<strong>为什么要分段和分页呢，直接操作物理地址不香吗？省去中间环节，岂不是更加高效么？</strong></p>
+<h4 id="为啥需要保护模式"><a href="#为啥需要保护模式" class="headerlink" title="为啥需要保护模式"></a>为啥需要保护模式</h4><p>保护模式引入了“分段”，“分页”，“特权检查”这些机制来保证安全性。如果没有这些中间环节，直接对物理地址使用，使用效率上当然更高！但是会存在很多问题，比如不同的进程对同一个物理空间的写入操作，会造成数据覆盖。想象一下，如果没有分段、分页机制，程序员需要编写大量与机器相关的代码，繁杂且极其容易出错，某个普通进程不小心把内核占用的一些地址给破坏了，整体将会非常不安全！<strong>8086虽然引入了分段机制，但是在实模式下没有安全机制，等同于直接对物理内存操作。</strong></p>
+<p>接下来讲讲80286提出的保护模式。</p>
+<h3 id="保护模式下的内存寻址"><a href="#保护模式下的内存寻址" class="headerlink" title="保护模式下的内存寻址"></a>保护模式下的内存寻址</h3><p>从上面关于MMU单元的功能来看，我们就已经知道了，保护模式下的内存寻址分成两个部分。<br>第一：虚拟地址是如何计算得到线性地址的？<br>第二：线性地址是如何计算得到物理地址的？</p>
+<h4 id="硬件中的分段"><a href="#硬件中的分段" class="headerlink" title="硬件中的分段"></a>硬件中的分段</h4><h5 id="保护模式下的逻辑地址"><a href="#保护模式下的逻辑地址" class="headerlink" title="保护模式下的逻辑地址"></a>保护模式下的逻辑地址</h5><p><strong>保护模式中的逻辑地址与实模式下的逻辑地址有所不同。保护模式下的逻辑地址，由“段标识符”(也叫做段选择符)和“段内偏移量”组成。</strong>段选择符是一个16位长度的字段，段内偏移量则是一个32位长度的字段。</p>
+<p><img src="/.io//%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80%E7%BB%84%E6%88%90.jpg" alt="保护模式下的逻辑地址组成.jpg"></p>
+<p><strong>段选择符存放在CPU中的段寄存器中</strong>，方便快速查找到对应的段描述符。这些段寄存器可以分成六种，分别如下列表所示。</p>
+<table>
+<thead>
+<tr>
+<th align="center">种类</th>
+<th align="center">作用描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img width="200/"><strong>CS寄存器</strong></td>
+<td align="center">(Code Segment)代码段寄存器,指向包含程序指令的段，还有一个作用就是它有两个位用于表明当前CPU的特权级，我们称它为CPL。0值(00)表示最高级，而3值(11)则表示最低优先级。<strong>在Linux系统中仅仅用到了最高级和最低级来做内核态和用户态的判断</strong></td>
+</tr>
+<tr>
+<td align="center"><strong>SS寄存器</strong></td>
+<td align="center">（Stack Segment）栈段寄存器，指向包含当前程序栈的段</td>
+</tr>
+<tr>
+<td align="center"><strong>DS寄存器</strong></td>
+<td align="center">（Date Segment）数据段寄存器，包含静态数据或者全局数据段</td>
+</tr>
+<tr>
+<td align="center">ES寄存器</td>
+<td align="center">一般用途，可指向任意的数据段</td>
+</tr>
+<tr>
+<td align="center">FS寄存器</td>
+<td align="center">一般用途，可指向任意的数据段</td>
+</tr>
+<tr>
+<td align="center">GS寄存器</td>
+<td align="center">一般用途，可指向任意的数据段</td>
+</tr>
+</tbody></table>
+<h5 id="段描述符、GDT、LDT"><a href="#段描述符、GDT、LDT" class="headerlink" title="段描述符、GDT、LDT"></a>段描述符、GDT、LDT</h5><p>首先来说说个人对“段”的理解，<strong>段是信息的一种逻辑单位，它包含了一组相对完整的信息</strong>。</p>
+<p>段描述符：用一个8字节的段描述符来描述一个段的特征，它描述了段的特征。<strong>段描述符存放在GDT或者LDT中</strong></p>
+<p><img src="/.io//%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF.jpg" alt="段描述符基本信息.jpg"></p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">作用描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><img width="200/"><strong>Base</strong></td>
+<td align="center"><strong>包含段的首字节的线性地址，基地址字段。</strong></td>
+</tr>
+<tr>
+<td align="center">G</td>
+<td align="center">粒度标志：如果该位置为0，则段大小以字节为单位。否则以4096字节的倍数计</td>
+</tr>
+<tr>
+<td align="center"><strong>Limit</strong></td>
+<td align="center"><strong>相对偏移量，存放当前段中最后一个内存单元的偏移量，从而可以获知段的长度</strong></td>
+</tr>
+<tr>
+<td align="center">S</td>
+<td align="center">系统标志位：如果为0则表示这是一个系统段，存储诸如LDT这种关键的数据结构。不等于0则表示当前为普通的代码段或者数据段</td>
+</tr>
+<tr>
+<td align="center">Type</td>
+<td align="center">描述段的特征和它存取权限</td>
+</tr>
+<tr>
+<td align="center"><strong>DPL</strong></td>
+<td align="center"><strong>描述符特权级：用于限制对这个段的存取。它表示为当前访问这个段的时候，CPU需要什么样的CPL。比如当DPL=0的时候，要求，CPU必须是内核态才可以访问，即CPL=0。而当DPL=3的时候，CPU在用户态(CPL=3)、内核态(CPL=0)都可以访问</strong></td>
+</tr>
+<tr>
+<td align="center">P</td>
+<td align="center">Segment-Present标志：表示当前段存放在什么硬件中。等于0表示当前段不在主存中。在Linux系统中总是设置为1，因Linux不允许把段存在磁盘中</td>
+</tr>
+<tr>
+<td align="center">D或B</td>
+<td align="center">根据段描述符描述的是一个可执行代码段、下扩数据段还是一个堆栈段，这个标志具有不同的功能。（对于32位代码和数据段，这个标志应该总是设置为1；对于16位代码和数据段，这个标志被设置为0。）</td>
+</tr>
+<tr>
+<td align="center">AVL标志</td>
+<td align="center">Avaliable标志位，可由操作系统任意扩展使用，但是Linux没用到</td>
+</tr>
+</tbody></table>
+<p>GDT：全局描述符表，是主存中用来存放段描述符一块区域。<strong>GDT在主存中的地址入口和大小存放在gdtr寄存器中</strong></p>
+<p>LDT：局部描述符表，是主存中用来存放段描述符一块区域。<strong>LTD地址入口和大小存放在ldtr寄存器中</strong></p>
+<p>值得注意的是。在整个系统中，全局描述符表GDT只有一张(一个CPU对应一个GDT)，<strong>GDT可以存在在主存的任意一个位置</strong>，但是CPU必须要能够知道它的入口在哪。所以后来Intel引入了gdtr寄存器用来存放GDT的入口地址和大小信息。</p>
+<p><strong>GDT初始化</strong>过程如下：<br>程序将GDT在内存某个位置设定好之后，再通过LGDT指令将GDT的入口地址写入gdtr寄存器中，此后每当CPU需要从GDT中获取信息，都通过gdtr寄存器查询。</p>
+<h5 id="逻辑地址是如何计算得到线性地址的"><a href="#逻辑地址是如何计算得到线性地址的" class="headerlink" title="逻辑地址是如何计算得到线性地址的"></a>逻辑地址是如何计算得到线性地址的</h5><p>前面说到MMU中的分段单元负责把逻辑地址转换成线性地址，现在具体来讲讲这个分段单元的执行原理。<br>红黄蓝的过程排序，分别对应第一步，第二步骤，第三步骤。</p>
+<p><img src="/.io//%E7%A1%AC%E4%BB%B6%E5%88%86%E6%AE%B5.jpg" alt="硬件分段.jpg"></p>
+<p>第一步骤：<strong>分段单元先检查段选择符中的TI标识，根据TI标识去对应的gdtr\ldtr寄存器中获取线性基址。</strong>如果TI=0则表明当前的段描述符处于GDT中，否则则处于LDT中。图示中TI=0，则从gdtr寄存器中获取线性基址，假设为0x00020000。</p>
+<p>第二步骤：<strong>从段选择符的index字段值乘以8（2x8），再与第一步骤中的线性基址值相加,得到描述符表(当前是GDT)中的相应的段描述符地址。</strong>从而可以访问获取段描述符。</p>
+<p>第三步骤：<strong>从段描述符中获取Base字段值，与逻辑地址的段偏移量相加，得到线性地址。分段转换完成，即由逻辑地址计算得出线性地址。</strong></p>
+<p>知道了分段单元是分成三步把逻辑地址转换成线性地址了，相信有的童鞋可能会有疑惑。光一个逻辑地址转换成线性地址就要这么多步骤了啊，难怪搞硬件的人经常diss搞软件的，浪费人家的性能。Don’t worry，因为“CPU一秒钟，人间已万年”，其次<strong>硬件层面其实提供了优化机制快速访问段描述符，也就是说不需要经过前面两个步骤来获取段描述符信息。</strong>哦？怎么做到的，见下述。</p>
+<h5 id="快速访问段描述符"><a href="#快速访问段描述符" class="headerlink" title="快速访问段描述符"></a>快速访问段描述符</h5><p>为了避免每次都去描述符表（GDT or LDT）中获取段描述符信息，硬件给六种段寄存器(前面说到的那6种)都配有一个非编程寄存器。这些非编程寄存器对于开发人员是不可见的，无感知的。<strong>每次段寄存器装载段选择符的时候，自动将对应的段描述符从内存装载到该段寄存器配有的非编程寄存器（也叫高速缓存寄存器）中</strong>。既然非编程寄存器中已经有需要获取的段描述符了，CPU就可以跳过前面说到的前两个步骤，直接获取段描述符。</p>
+<p><strong>这样一个优化过程，其实就是我们软件开发上常常接触到的“缓存”嘛！</strong>所以缓存的思想，早早就存在了，这就是为啥要学习底层原理的原因了！既然说是缓存，那么就涉及到一个问题了，“缓存更新问题”。<strong>当我们更新了描述符表中的段描述符信息的时候，此时非编程寄存器中的数据就存在不一致了，所以这个时候我们需要通过上述的前两个步骤来获取最新的段描述符，并进行重新的装载。</strong></p>
+<h4 id="硬件中的分页"><a href="#硬件中的分页" class="headerlink" title="硬件中的分页"></a>硬件中的分页</h4><h5 id="有了分段为啥还要分页"><a href="#有了分段为啥还要分页" class="headerlink" title="有了分段为啥还要分页"></a>有了分段为啥还要分页</h5><p>80286虽然最早提出了保护模式，但是由于当时的硬件水平所限，最大段大小依旧是64K。这也就是意味着大数组分配可能出现问题，所以很快也被淘汰了。80286的保护模式也被称作16位保护模式。它后续的80386时代，段寄存器的位数基本与寻址总线位数保持一致，寄存器和地址总线都是32位了，这就意味着以前16位下的分段机制其实没啥用武之地了（以前是位数不够，分段机制就好比一个“映射”的寻址过程）。<strong>因此在80386及以后的处理器都支持分页，但是为了前向兼容性，所以还是将分段保留了下来。</strong>32位保护模式保留下来的分段，“名存实亡”。为什么这么说呢，因为后来的操作系统干脆把分段的段基址设置成0，段内偏移量32位，也就是说所有的逻辑地址都共享同一个分段，等于没有分段（Linux就是这么干的）。</p>
+<p>32位保护模式与16位保护模式的区别如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">差异点</th>
+<th align="center">16位保护模式</th>
+<th align="center">32位保护模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">偏移地址</td>
+<td align="center">16位，段的大小限制为64K</td>
+<td align="center">扩展至32位，段的大小最大4G</td>
+</tr>
+<tr>
+<td align="center">寻址处理</td>
+<td align="center">分段</td>
+<td align="center">兼容分段，支持分页</td>
+</tr>
+</tbody></table>
+<h5 id="页框-page-frame-与页-page"><a href="#页框-page-frame-与页-page" class="headerlink" title="页框(page frame)与页(page)"></a>页框(page frame)与页(page)</h5><p>分页单元的职责是将线性地址转成相应的物理地址。<strong>分页单元把所有RAM资源划分成固定长度的页框，也叫物理页。</strong>那什么是页呢，我们把线性地址划分到不同的集合中，每一个集合的长度都是固定的，我们称这样的集合为页。<strong>页内部连续的线性地址被映射到物理地址上也是连续的。</strong></p>
+<p>那么这两者有啥关系呢？有关系，一个页框恰好包含一个页，两者长度相同。但是页是一个数据块，它可以在不同的介者中存储(磁盘或者主存)，而页框是主存的一部分，是存储区域。两者的关系，就好比大小相同的相框与相片。相片(页)可以夹在相框(页框)中，也可以夹到某本相册(磁盘)中。</p>
+<h5 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h5><p>我们把线性地址映射到物理地址的数据结构称为页表，<strong>页表存放在主存中，它必须在分页机制开启之前进行初始化</strong>。为什么要了解页表，因为在分页机制中，线性地址的转换离不开这种中间表。</p>
+<h5 id="常规分页"><a href="#常规分页" class="headerlink" title="常规分页"></a>常规分页</h5><p>常规分页下，分页单元会把32为的线性地址划分成三个域，分别是：</p>
+<p>Directory::Table::Offset</p>
+<table>
+<thead>
+<tr>
+<th align="center">域</th>
+<th align="center">长度</th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Directory(目录)</td>
+<td align="center">最高的10位</td>
+<td align="center">用于找到页目录上关联的目录项</td>
+</tr>
+<tr>
+<td align="center">Table(页表)</td>
+<td align="center">中间的10位</td>
+<td align="center">用于找到页目录上关联的页表项</td>
+</tr>
+<tr>
+<td align="center">Offset(偏移量)</td>
+<td align="center">最低12位</td>
+<td align="center">用于在目标页框中读偏移量为offset的字节</td>
+</tr>
+</tbody></table>
+<p>常规分页方式需要两种中间表结构，两者的结构基本上是一致的，你也可以理解成“一级映射表”和“二级映射表”。只不过前者叫做页目录表，后者称为页表。</p>
+<p>废话不多说，直接上demo看流程，就懂了。我们假设现在常规分页下，处理器需要访问线性地址0x20021406。分页单元收到这个地址后，会按照下述流程进行转换：<br>过程依旧是按照“红黄蓝”的排序讲解：<br><img src="/.io//%E5%B8%B8%E8%A7%84%E5%88%86%E9%A1%B5.jpg" alt="常规分页.jpg"></p>
+<p>第一步：处理器从cr3控制寄存器中获取得到当前使用中的页目录的基址，然后根据线性地址的最高10位Ditrectory(值0x080等于10进制的128)作为偏移量找到对应的目录项目，第128项。</p>
+<p>第二步：由第一步得到目录项后，因为每个目录项中的结构都包含了指向下一个目标结构(页表或者页)的地址，再根据Table作为第二阶段映射的偏移量去寻找页表中的页表项，第33项目。</p>
+<p>第三步：检查页表项对应的Present标志位，若该位值为0，则需要访问的目标数据不在主存上，分页单元会产生一个缺页异常。否则，根据线性地址中最低12位Offset，加上当前页表项中的指向页框的基址，得到页框中的指定位置的信息，然后处理器读取对应物理地址中的字节信息。</p>
+<h3 id="总结与反思"><a href="#总结与反思" class="headerlink" title="总结与反思"></a>总结与反思</h3><p>令人头秃的CS！！在啃《深入理解Linux内核-第三版》的时候，我发现翻译有很多问题（后来在豆瓣页看到不少人喷翻译），搞得我不得不一边FQ对比原著，一边查找这本书的勘误信息。<br>总的来说，这本书还是非常优秀的，可以看出著者是一个知识渊博的大牛，值得一学。</p>
+<p>在学习内存寻址的时候，一定要结合当时的硬件发展背景来理解，为什么要从“实模式”到“保护模式”。了解整个计算机内存寻址的过程，虽然和我这个Java仔看起来没什么luan用，但是却让我感受到自己的无知。无知才会进步…</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%B8%B8%E8%A7%81%E7%9A%84%E5%AD%97%E8%AF%8D%E8%A7%A3%E8%AF%BB"><span class="toc-text">相关常见的字词解读</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-text">操作系统的基本概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%85%E6%A0%B8"><span class="toc-text">内核</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%80%81%E5%92%8C%E5%86%85%E6%A0%B8%E6%80%81"><span class="toc-text">用户态和内核态</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98"><span class="toc-text">什么是虚拟内存?</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9A%8F%E6%9C%BA%E8%AE%BF%E9%97%AE%E5%AD%98%E5%82%A8%E5%99%A8-RAM"><span class="toc-text">随机访问存储器(RAM)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-text">什么是寄存器</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80"><span class="toc-text">内存寻址</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%A4%E7%A7%8D%E4%B8%8D%E5%90%8C%E7%9A%84%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2%E6%96%B9%E5%BC%8F-%E5%AE%9E%E6%A8%A1%E5%BC%8F%E5%92%8C%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F"><span class="toc-text">两种不同的地址转换方式(实模式和保护模式)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80"><span class="toc-text">实模式下的内存寻址</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E7%A7%8D%E5%9C%B0%E5%9D%80"><span class="toc-text">三种地址</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E5%95%A5%E9%9C%80%E8%A6%81%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F"><span class="toc-text">为啥需要保护模式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80"><span class="toc-text">保护模式下的内存寻址</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E5%88%86%E6%AE%B5"><span class="toc-text">硬件中的分段</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80"><span class="toc-text">保护模式下的逻辑地址</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6%E3%80%81GDT%E3%80%81LDT"><span class="toc-text">段描述符、GDT、LDT</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80%E6%98%AF%E5%A6%82%E4%BD%95%E8%AE%A1%E7%AE%97%E5%BE%97%E5%88%B0%E7%BA%BF%E6%80%A7%E5%9C%B0%E5%9D%80%E7%9A%84"><span class="toc-text">逻辑地址是如何计算得到线性地址的</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BF%AB%E9%80%9F%E8%AE%BF%E9%97%AE%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="toc-text">快速访问段描述符</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E5%88%86%E9%A1%B5"><span class="toc-text">硬件中的分页</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9C%89%E4%BA%86%E5%88%86%E6%AE%B5%E4%B8%BA%E5%95%A5%E8%BF%98%E8%A6%81%E5%88%86%E9%A1%B5"><span class="toc-text">有了分段为啥还要分页</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%A1%B5%E6%A1%86-page-frame-%E4%B8%8E%E9%A1%B5-page"><span class="toc-text">页框(page frame)与页(page)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%A1%B5%E8%A1%A8"><span class="toc-text">页表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B8%B8%E8%A7%84%E5%88%86%E9%A1%B5"><span class="toc-text">常规分页</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%E4%B8%8E%E5%8F%8D%E6%80%9D"><span class="toc-text">总结与反思</span></a></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Linux%E5%86%85%E6%A0%B8-%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80%E4%B8%8A%E7%AF%87/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/"><i class="fa fa-tags"></i>计算机基础</a>
+     
+      <a href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"><i class="fa fa-tags"></i>操作系统</a>
+     
+      <a href="/tags/%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80/"><i class="fa fa-tags"></i>内存寻址</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E4%BA%91%E6%B8%B8%E6%88%8F-%E4%B8%80%E9%94%AE%E7%A7%92%E7%8E%A9-%E8%AE%A9%E7%94%A8%E6%88%B7%E6%9B%B4%E7%88%BD%E7%95%85/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E8%B7%AF%E7%94%B1%E7%AD%96%E7%95%A5%E3%80%81%E5%AE%B9%E9%94%99%E7%AD%96%E7%95%A5%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%E6%A5%9A/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

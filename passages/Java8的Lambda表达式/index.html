@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>Java8的Lambda表达式 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="Java基础,Java基础,Lambda表达式," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2020-12-05
+    </span>
+    
+      <span>
+        | <a href="/categories/Java%E5%9F%BA%E7%A1%80/"><i class="fa fa-bookmark"></i>Java基础</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    Java8的Lambda表达式
+  </h1>
+  
+  <article class="passage-article">
+    <p>2017年参加工作以后一直都在使用JDK8的lambda风格方式进行Java编程。最直观的感受就是，代码更加简洁，清晰！其次在进行并发编程的时候，真的是太方便了！<br>本次开篇，借鉴了一本我特别喜欢，逢人必推荐的书籍《Java 8 函数式编程》(原版：《Java 8 Lambdas: Functional Programming For The Masses》)</p>
+<p>本人打算围绕着这一本书，对自己这些年的一些Java8特性做一次完善的总结。写给自己看，再用自己的理解讲给别人听。</p>
+<!-- TOC -->
+
+<ul>
+<li><a href="#java%E8%80%81%E7%9F%A3%E5%B0%9A%E8%83%BD%E9%A5%AD%E5%90%A6">Java老矣，尚能饭否</a></li>
+<li><a href="#lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F">Lambda表达式</a><ul>
+<li><a href="#%E5%8C%BF%E5%90%8D%E5%86%85%E9%83%A8%E7%B1%BB%E4%B8%8E%E5%8C%BF%E5%90%8D%E5%87%BD%E6%95%B0">匿名内部类与匿名函数</a></li>
+<li><a href="#%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E5%92%8Clambda%E8%A1%A8%E8%BE%BE%E5%BC%8F">函数式编程和Lambda表达式</a></li>
+<li><a href="#%E5%87%BD%E6%95%B0%E6%8E%A5%E5%8F%A3">函数接口</a><ul>
+<li><a href="#functionalinterface%E6%B3%A8%E8%A7%A3">@FunctionalInterface注解</a></li>
+<li><a href="#java%E4%B8%AD%E9%87%8D%E8%A6%81%E7%9A%84%E5%87%BD%E6%95%B0%E6%8E%A5%E5%8F%A3">Java中重要的函数接口</a></li>
+</ul>
+</li>
+<li><a href="#%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%AD">类型推断</a></li>
+<li><a href="#%E5%BC%95%E7%94%A8%E5%80%BC%E8%80%8C%E9%9D%9E%E5%8F%98%E9%87%8F">引用值，而非变量</a></li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="Java老矣，尚能饭否"><a href="#Java老矣，尚能饭否" class="headerlink" title="Java老矣，尚能饭否"></a>Java老矣，尚能饭否</h3><p>随着硬件的发展，CPU从单核时代快进到多核时代，也意味着未来的编程语言的趋势一定是对多线程编程的支持愈发友好！这也是为什么Jdk8推出Lambda表达式的重要原因。Lambda表达式未出现以前，Java程序员在面对大数据集合的并行操作，编码上往往非常麻烦且不够高效，易用性低，可读性也不一定高。而Lambda的出现无疑是在Java语言层面上增加了支持。</p>
+<p>我个人觉得，Java8的推出可以说挽回了很多准备弃坑Java的程序员的心。如果没有Lambda这种更加友好的编程风格的支持，我相信诸如Go，Scala这类的语言会挑战Java的王者地位。（可以去了解一下Go语言中的goroutine关键字对多线程的支持的友好性）</p>
+<p>引用书籍中的一段文字</p>
+<blockquote>
+<p>当然，这样做是有代价的，程序员必须学习如何编写和阅读使用Lambda表达式的代码。但是这不是一桩赔本的买卖。与手写一大段复杂，线程安全的代码相比，学习一点新语法和一些新习惯容易很多。开发企业级应用时，好的类库和框架极大降低了开发事件和成本，也为开发易用且高效的类库扫清了障碍</p>
+</blockquote>
+<h3 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h3><p>给出如下的实现Runnable的代码示例，直观感受一下lambda表达式的魅力。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoMain</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 编写Runnable的实现类</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RunnableImpl</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Java7-编写Runnable方式&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Thread thread0=<span class="keyword">new</span> Thread(<span class="keyword">new</span> RunnableImpl());</span><br><span class="line">        Thread thread1=<span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;Java7-匿名内部类方式&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        Thread thread2=<span class="keyword">new</span> Thread(()-&gt; System.out.println(<span class="string">&quot;Java8的Lambda风格&quot;</span>));</span><br><span class="line"></span><br><span class="line">        thread0.start();</span><br><span class="line">        thread1.start();</span><br><span class="line">        thread2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="匿名内部类与匿名函数"><a href="#匿名内部类与匿名函数" class="headerlink" title="匿名内部类与匿名函数"></a>匿名内部类与匿名函数</h4><p>thread0，编写一个Runnable实现类来实现多线程，不难看出这种方式的代码量更多（当然我们也也经常需要这样的一个实现类）<br>thread1，通过匿名内部类的方式实现多线程。<strong>匿名内部类的本质是一个继承该类或者实现该类接口的子类实例</strong><br>thread2，通过lambda表达式实现多线程。</p>
+<p>相信大家对thread0是十分了解的，这里不展开说。关注点在于thread1和thread2的比较。</p>
+<p>从thread1的创建方式中，我们不难看出来，本质上我们是在Thread构造器中传递了一个对象作为参数，只不过这个对象是匿名内部类的实例。而thread2则看起来，更像是传递了一段可执行的代码作为“参数”。这样的一段定义了执行方式的代码，不就是Java中的函数嘛！只不过这个方法有些函数，“匿名函数”。</p>
+<h4 id="函数式编程和Lambda表达式"><a href="#函数式编程和Lambda表达式" class="headerlink" title="函数式编程和Lambda表达式"></a>函数式编程和Lambda表达式</h4><p>在面向对象的Java编程中，我们往往给定的参数是数据，而<strong>函数式编程则希望传入的是一个函数，即将函数“参数化”</strong>。相信看到这句话，你大致明白了函数式编程是怎么一回事。<strong>Lambda表达式是一个匿名函数，将行为像数据一样进行传递。</strong></p>
+<h4 id="函数接口"><a href="#函数接口" class="headerlink" title="函数接口"></a>函数接口</h4><p>在Java中，所有的方法参数都有固定的类型，入thread0的例子，参数类型是RunnableImpl。那么在thread2中，参数的类型是什么？</p>
+<p>()-&gt;System.out.println(“Java8的Lambda风格”)。如果你用的是idea开发工具，你可以按住ctrl鼠标点“()”,跳转到Runnable接口类中，这个Runnable接口就是lambda表达式的类型。我们来看看Runnable的源码。</p>
+<p>如下图所示：<br><img src="/.io//runnable.jpg" alt="runnable.jpg"></p>
+<p>不难看出有两个点。<strong>1：Runnable是一个接口类，2：只有一个抽象方法</strong>。我们把这样的一个接口类称为函数接口，lambda表达式的作为方法参数的时候，它的类型一定是函数接口。</p>
+<h5 id="FunctionalInterface注解"><a href="#FunctionalInterface注解" class="headerlink" title="@FunctionalInterface注解"></a>@FunctionalInterface注解</h5><p>Runnable接口采用了FunctionalInterface注解进行标注。该注解会强制Javac编译的时候检查当前的接口是否满足函数接口的标准。如果该注释标注给一个不符合条件的接口，枚举类等，编译的时候将会报错。相当于一种类型检查机制，所以当我们自己实现函数接口的时候，一定要规范的加上这个注解！它能够帮助我们提前发现风险。</p>
+<h5 id="Java中重要的函数接口"><a href="#Java中重要的函数接口" class="headerlink" title="Java中重要的函数接口"></a>Java中重要的函数接口</h5><table>
+<thead>
+<tr>
+<th align="center">接口</th>
+<th align="center">参数</th>
+<th align="center">返回类型</th>
+<th align="center">常用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Predicate<T></T></td>
+<td align="center">T</td>
+<td align="center">boolean</td>
+<td align="center">用于条件判断</td>
+</tr>
+<tr>
+<td align="center">Consumer<T></T></td>
+<td align="center">T</td>
+<td align="center">void</td>
+<td align="center">用于对一个给定参数进行处理</td>
+</tr>
+<tr>
+<td align="center">Function&lt;T,R&gt;</td>
+<td align="center">T</td>
+<td align="center">R</td>
+<td align="center">用于将给定参数T处理成R类型返回</td>
+</tr>
+<tr>
+<td align="center">Supplier<T></T></td>
+<td align="center">None</td>
+<td align="center">T</td>
+<td align="center">工厂方法获取一个T类型对象</td>
+</tr>
+<tr>
+<td align="center">UnaryOperator<T></T></td>
+<td align="center">T</td>
+<td align="center">T</td>
+<td align="center">逻辑非</td>
+</tr>
+<tr>
+<td align="center">BinaryOperator<T></T></td>
+<td align="center">(T,T)</td>
+<td align="center">T</td>
+<td align="center">对两个同类型对象进行合并操作，比如数值运算</td>
+</tr>
+</tbody></table>
+<h4 id="类型推断"><a href="#类型推断" class="headerlink" title="类型推断"></a>类型推断</h4><p><strong>类型推断，它本质上是javac根据程序的上下文(方法签名，变量类型)推断出数据类型</strong>。所以我们在编写Java代码的时候，能够在一些不言而明的前提写，省掉对类型的显式指定。在JDK7的时候，我们可以通过菱形操作符来推断类型</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoMain</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//显式指定类型</span></span><br><span class="line">        HashMap&lt;String,String&gt; testMap=<span class="keyword">new</span> HashMap&lt;String,String&gt;();</span><br><span class="line">        <span class="comment">//使用菱形操作符，根据变量类型进行推断</span></span><br><span class="line">        HashMap&lt;String,String&gt; testMap1=<span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        <span class="comment">//使用菱形操作符，根据方法签名进行推断。方法签名由方法名称+形参列表构成。重载的方法，方法签名是一样的，但是返回类型不同。</span></span><br><span class="line">        testMethod(<span class="keyword">new</span> HashMap&lt;&gt;());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">testMethod</span><span class="params">(HashMap&lt;String, String&gt; objectObjectHashMap)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;根据方法签名推断&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Java8中的类型推断是对Java7类型推断机制的一个扩展。如下示例，Predicate只有一个泛型参数的函数接口，Lambda表达式实现了该接口。<br>javac会根据上下文中的参数推断出参数类型是Integer，也就是x是Integer类型的！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Predicate&lt;Integer&gt; atLeast5 = x -&gt; x &gt; <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Predicate</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">test</span><span class="params">(T t)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="引用值，而非变量"><a href="#引用值，而非变量" class="headerlink" title="引用值，而非变量"></a>引用值，而非变量</h4><p>我把threa1的代码修改成如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> String method=<span class="string">&quot;匿名内部类方式&quot;</span>;</span><br><span class="line">Thread thread1=<span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Java7-&quot;</span>+method);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>如果是在内部类中，引用了一个外部对象，那么需要把是这个变量声明成final，这也意味着被引用的变量必须是一个不会再改变值。Java8中，已经不需要显式的指定final关键字，但是被引用的变量必须是“既定已成事实”的变量。我对“既定已成事实的变量”的理解就是，一旦定义且初始化，则后续都不会改变的变量。</p>
+<p>lambda引用之前发生改动，无法编译<br><img src="/.io//%E5%BC%95%E7%94%A8%E5%89%8D%E5%8F%91%E7%94%9F%E6%94%B9%E5%8A%A8.jpg" alt="引用前发生改动.jpg"></p>
+<p>lambda引用时发生改动，无法编译<br><img src="/.io//%E5%BC%95%E7%94%A8%E6%97%B6%E5%8F%91%E7%94%9F%E6%94%B9%E5%8A%A8.jpg" alt="引用时发生改动.jpg"></p>
+<p>lambda引用之后发生改动，无法编译<br><img src="/.io//%E5%BC%95%E7%94%A8%E5%90%8E%E5%8F%91%E7%94%9F%E6%94%B9%E5%8A%A8.jpg" alt="引用后发生改动.jpg"></p>
+<p>使用了非“既定已成事实”的变量，则无法编译通过。这也解释了为什么Java中的Lambda表达式被称为闭包。因为闭包的本质是一个定义在函数中的函数。</p>
+<p><img src="/.io//Lambda.png" alt="Lambda.png"></p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Java%E8%80%81%E7%9F%A3%EF%BC%8C%E5%B0%9A%E8%83%BD%E9%A5%AD%E5%90%A6"><span class="toc-text">Java老矣，尚能饭否</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-text">Lambda表达式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8C%BF%E5%90%8D%E5%86%85%E9%83%A8%E7%B1%BB%E4%B8%8E%E5%8C%BF%E5%90%8D%E5%87%BD%E6%95%B0"><span class="toc-text">匿名内部类与匿名函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E5%92%8CLambda%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="toc-text">函数式编程和Lambda表达式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%BD%E6%95%B0%E6%8E%A5%E5%8F%A3"><span class="toc-text">函数接口</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#FunctionalInterface%E6%B3%A8%E8%A7%A3"><span class="toc-text">@FunctionalInterface注解</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Java%E4%B8%AD%E9%87%8D%E8%A6%81%E7%9A%84%E5%87%BD%E6%95%B0%E6%8E%A5%E5%8F%A3"><span class="toc-text">Java中重要的函数接口</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%AD"><span class="toc-text">类型推断</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%95%E7%94%A8%E5%80%BC%EF%BC%8C%E8%80%8C%E9%9D%9E%E5%8F%98%E9%87%8F"><span class="toc-text">引用值，而非变量</span></a></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/Java8%E7%9A%84Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/Java%E5%9F%BA%E7%A1%80/"><i class="fa fa-tags"></i>Java基础</a>
+     
+      <a href="/tags/Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/"><i class="fa fa-tags"></i>Lambda表达式</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/Java%E4%B8%AD%E7%9A%84%E6%B3%9B%E5%9E%8B-%E5%85%A5%E9%97%A8%E7%AF%87/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/Java%E7%9A%84SPI%E6%9C%BA%E5%88%B6/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>

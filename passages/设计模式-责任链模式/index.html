@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Li Haohang" />
+  
+  
+  <title>设计模式-责任链模式 | 道·术</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="编程哲学与思想,设计模式,责任链模式," />
+  
+
+  
+  <meta name="description" content="李浩航的Blog">
+
+  
+
+  
+
+  
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+  
+
+  
+
+  
+
+  <script>
+  // theme-ad's config script
+  // it can be used in every script
+  
+  window.AD_CONFIG = {
+    leancloud: {"appid":"Hyq9wkH495DgNHWhDQCOfQSp-gzGzoHsz","appkey":"WaR7nrzhliHj9aVwdQzkdlGd","comment":false,"count":false},
+    welcome: {"enable":false,"interval":30},
+    start_time: "2018-01-01",
+    passwords: ["efe07af7441da2b69c4a41e42e73be4db47f66010a56900788a458354a7373ec", ],
+    is_post: true,
+    lock: false,
+    author: "Li Haohang",
+    share: {"twitter":false,"facebook":false,"weibo":true,"qq":true,"wechat":true},
+    mathjax: true,
+    page_type: "",
+    root: "/"
+  };
+</script>
+
+  
+<script src="/vendor/sha256.min.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+<script src="/vendor/qrcode.min.js"></script>
+
+
+  
+    <link rel="icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/touch-icon.png">
+  
+
+  <link href="//cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  
+<link rel="stylesheet" href="/css/index.css">
+<link rel="stylesheet" href="/styles/components/highlight/highlight.css">
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <header class="site-header">
+  <div class="site-header-brand">
+    
+      <span class="site-header-brand-title">
+        <a href="/">术·道</a>
+      </span>
+    
+    
+      <span class="site-header-brand-motto"> | 道为术之灵, 术为道之体</span>
+    
+  </div>
+  <div class="site-header-right">
+    <nav class="site-header-navigation">
+      
+        <a href="/" target="_self">首页</a>
+      
+        <a href="/archives/" target="_self">归档</a>
+      
+        <a href="/tags/" target="_self">标签</a>
+      
+        <a href="/categories/" target="_self">分类</a>
+      
+        <a href="/about/" target="_self">关于</a>
+      
+    </nav>
+    <div class="site-header-btn">
+      
+        <a href="https://github.com/ToBeGeek" target="_blank" id="site-github">
+          <i class="fa fa-github-alt"></i>
+        </a>
+      
+      <a href="javascript:void(0);" id="site-search">
+        <i class="fa fa-search"></i>
+      </a>
+      <a href="javascript:void(0);" id="site-nav-btn">
+        <i class="fa fa-ellipsis-v"></i>
+      </a>
+    </div>
+  </div>
+</header>
+<nav class="table-content" id="site-nav">
+  <div class="table-content-title">
+    <span>导航</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc">
+      
+        <li class="toc-item">
+          <a href="/" target="_self">
+            首页
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/archives/" target="_self">
+            归档
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/tags/" target="_self">
+            标签
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/categories/" target="_self">
+            分类
+          </a>
+        </li>
+      
+        <li class="toc-item">
+          <a href="/about/" target="_self">
+            关于
+          </a>
+        </li>
+      
+    </ol>
+  </div>
+</nav>
+<div id="site-process"></div>
+    <main>
+      
+  <div class="passage">
+  <div class="passage-meta">
+    <span>
+      <i class="fa fa-calendar"></i>2020-11-03
+    </span>
+    
+      <span>
+        | <a href="/categories/%E7%BC%96%E7%A8%8B%E5%93%B2%E5%AD%A6%E4%B8%8E%E6%80%9D%E6%83%B3/"><i class="fa fa-bookmark"></i>编程哲学与思想</a>
+      </span>
+    
+    
+      <span>
+        | <i class="fa fa-unlock-alt"></i>UNLOCK
+      </span>
+    
+  </div>
+  <h1 class="passage-title">
+    设计模式-责任链模式
+  </h1>
+  
+  <article class="passage-article">
+    <p>我的个人理解，在这个模式中有两个核心的概念。第一是共同的事件，第二是形成链的关系。</p>
+<p>举一个生活的例子，程序员小翁最近动了跳槽的念头，于是乎他准备发起请假流程，而公司的规定是，两天内的假期由组长，超过三天&amp;&amp;一周内的假期则需要再由部门总监审批，如果是超过1周以上则需要总经理审批。这个例子中，请假事件就是共同请求，而在这个流程上“组长”，“部门总监”，“总经理”就是具体的请求处理者，并且他们形成了一个链路的关系。此种情况之下是非常适用于责任链模式。</p>
+<!-- TOC -->
+
+<ul>
+<li><a href="#%E4%BB%8B%E7%BB%8D">介绍</a><ul>
+<li><a href="#%E5%9B%9B%E4%B8%AA%E6%88%90%E5%91%98">四个成员</a></li>
+<li><a href="#%E7%B1%BB%E5%85%B3%E7%B3%BB%E5%9B%BE">类关系图</a></li>
+<li><a href="#demo%E7%A4%BA%E4%BE%8B">DEMO示例</a></li>
+<li><a href="#%E5%8D%95%E7%BA%AF%E4%B8%8E%E4%B8%8D%E5%8D%95%E7%BA%AF%E7%9A%84%E8%B4%A3%E4%BB%BB%E9%93%BE">单纯与不单纯的责任链</a></li>
+<li><a href="#%E4%BC%98%E7%82%B9%E4%B8%8E%E7%BC%BA%E7%82%B9">优点与缺点</a></li>
+</ul>
+</li>
+</ul>
+<!-- /TOC -->
+
+<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>责任链模式，也被称作职责链模式，它将所有请求处理者通过前一个对象持有下一个对象的引用(类是以前写C语言的链表)从而形成一条链。当请求发生的时候，请求将沿着这条链的，直到有一个处理者将它处理完成。</p>
+<p>在责任链模式中，客户端仅需要将请求发送给责任链即可，无需关心事件的处理细节，责任链将请求的发起者于处理者解耦合了。</p>
+<h4 id="四个成员"><a href="#四个成员" class="headerlink" title="四个成员"></a>四个成员</h4><p>责任链的成员组成较为简单，必须的成员其实只有三个，分别是：抽象处理类，具体处理类，客户端。有时候我们也把请求事件当作第四个成员。如果是一个复杂事件，则一般会封装成对象，若是一个普通的参数，则不需要构建请求对象。</p>
+<p>抽象处理类：定义了请求处理接口，包含抽象处理方法以及对下一个需要传递的处理类的持有。<br>具体处理类：实现抽象处理类的处理方法，包含自己对当前请求的特定的处理方式，若当前能完成处理则处理，否则交由下一个处理类处理。<br>客户端类：创建处理链，并提供请求入链处理的方法<br>请求类：定义了事件本身的一些属性</p>
+<h4 id="类关系图"><a href="#类关系图" class="headerlink" title="类关系图"></a>类关系图</h4><p><img src="/.io//%E7%BB%93%E6%9E%84.jpg" alt="结构.jpg"></p>
+<h4 id="DEMO示例"><a href="#DEMO示例" class="headerlink" title="DEMO示例"></a>DEMO示例</h4><p>场景1：程序猿小翁，在OA系统上发起5天的假期请求</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 抽象请求处理者：定义请求事件的处理方式，持有下一个处理者的引用</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">LeaveProcessHandler</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 持有下一个处理者的引用</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> LeaveProcessHandler nextHandler;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> LeaveProcessHandler <span class="title">getNextHandler</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> nextHandler;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setNextHandler</span><span class="params">(LeaveProcessHandler nextHandler)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.nextHandler = nextHandler;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 定义请求处理方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> String <span class="title">handleRequest</span><span class="params">(LeaveRequest request)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 请求事件</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LeaveRequest</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 请假时常，天数</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> days;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 员工姓名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 是否空闲状态</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> freeStatus=<span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getDays</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> days;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDays</span><span class="params">(<span class="keyword">int</span> days)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.days = days;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isFreeStatus</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> freeStatus;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setFreeStatus</span><span class="params">(<span class="keyword">boolean</span> freeStatus)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.freeStatus = freeStatus;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 具体处理类：小组长-处理两天内的假期</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GroupLeaderHandler</span> <span class="keyword">extends</span> <span class="title">LeaveProcessHandler</span></span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function">String <span class="title">handleRequest</span><span class="params">(LeaveRequest request)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(!request.isFreeStatus())&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;小组长说事情没做完，不准跑路&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(request.getDays()&lt;=<span class="number">2</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;小组长已经批准请假&quot;</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(getNextHandler()!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;小组长不受理，交由部门总监受理&quot;</span>);</span><br><span class="line">                <span class="comment">//当前无法受理&amp;&amp;交由下一个处理类处理</span></span><br><span class="line">               <span class="keyword">return</span> getNextHandler().handleRequest(request);</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="comment">//当前无法处理&amp;&amp;没有下一个处理类承接</span></span><br><span class="line">                <span class="keyword">return</span> <span class="string">&quot;小组长表示，你还是留下来加班吧&quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 具体处理类：部门总监-处理3天至7天内的假期</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DepartmentLeaderHandler</span> <span class="keyword">extends</span> <span class="title">LeaveProcessHandler</span></span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function">String <span class="title">handleRequest</span><span class="params">(LeaveRequest request)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(!request.isFreeStatus())&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;总监说事情没做完，不准跑路&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(request.getDays()&gt;=<span class="number">3</span>&amp;&amp;request.getDays()&lt;=<span class="number">7</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;总监已经批准请假&quot;</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(getNextHandler()!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                <span class="comment">//当前无法受理&amp;&amp;交由下一个处理类处理</span></span><br><span class="line">                System.out.println(<span class="string">&quot;部门总监不受理，交由总经理受理&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> getNextHandler().handleRequest(request);</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="comment">//当前无法处理&amp;&amp;没有下一个处理类承接</span></span><br><span class="line">                <span class="keyword">return</span> <span class="string">&quot;总监表示，你还是留下来加班吧&quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 具体处理类：总经理-7天以上的假期</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ManagerHandler</span> <span class="keyword">extends</span> <span class="title">LeaveProcessHandler</span></span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function">String <span class="title">handleRequest</span><span class="params">(LeaveRequest request)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(!request.isFreeStatus())&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;总经理说事情没做完，不准跑路&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(request.getDays()&gt;<span class="number">7</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;总经理已经批准请假&quot;</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(getNextHandler()!=<span class="keyword">null</span>)&#123;</span><br><span class="line">                <span class="comment">//当前无法受理&amp;&amp;交由下一个处理类处理</span></span><br><span class="line">                System.out.println(<span class="string">&quot;总经理不受理，交由下一个大佬受理&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> getNextHandler().handleRequest(request);</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="comment">//当前无法处理&amp;&amp;没有下一个处理类承接</span></span><br><span class="line">                <span class="keyword">return</span> <span class="string">&quot;总经理表示，你还是留下来加班吧&quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 客户端：创建处理链路，对外提供请求入链的方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ProcessClient</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> LeaveProcessHandler <span class="title">createProcessHandle</span><span class="params">()</span></span>&#123;</span><br><span class="line">        GroupLeaderHandler groupLeaderHandler=<span class="keyword">new</span> GroupLeaderHandler();</span><br><span class="line">        DepartmentLeaderHandler departmentLeaderHandler=<span class="keyword">new</span> DepartmentLeaderHandler();</span><br><span class="line">        ManagerHandler managerHandler=<span class="keyword">new</span> ManagerHandler();</span><br><span class="line">        <span class="comment">//组成链</span></span><br><span class="line">        groupLeaderHandler.setNextHandler(departmentLeaderHandler);</span><br><span class="line">        departmentLeaderHandler.setNextHandler(managerHandler);</span><br><span class="line">        <span class="comment">//返回头节点</span></span><br><span class="line">        <span class="keyword">return</span> groupLeaderHandler;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">submit</span><span class="params">(LeaveRequest request)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> createProcessHandle().handleRequest(request);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> Herman on 2020/11/5</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoMain</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        LeaveRequest request=<span class="keyword">new</span> LeaveRequest();</span><br><span class="line">        request.setName(<span class="string">&quot;程序猿小翁&quot;</span>);</span><br><span class="line">        request.setFreeStatus(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">        ProcessClient client=<span class="keyword">new</span> ProcessClient();</span><br><span class="line"></span><br><span class="line">        request.setDays(<span class="number">2</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;请假&quot;</span>+ request.getDays()+<span class="string">&quot;天，&quot;</span>+client.submit(request));</span><br><span class="line">        System.out.println(<span class="string">&quot;=========================&quot;</span>);</span><br><span class="line"></span><br><span class="line">        request.setDays(<span class="number">5</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;请假&quot;</span>+ request.getDays()+<span class="string">&quot;天，&quot;</span>+client.submit(request));</span><br><span class="line">        System.out.println(<span class="string">&quot;=========================&quot;</span>);</span><br><span class="line"></span><br><span class="line">        request.setDays(<span class="number">14</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;请假&quot;</span>+ request.getDays()+<span class="string">&quot;天，&quot;</span>+client.submit(request));</span><br><span class="line">        System.out.println(<span class="string">&quot;=========================&quot;</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码，允许结果如下：</p>
+<blockquote>
+<p>“C:\Program Files\Java\jdk1.8.0_221\bin\java.exe”… <br><br>请假2天，小组长已经批准请假<br><br>=========================<br><br>小组长不受理，交由部门总监受理<br><br>请假5天，总监已经批准请假<br><br>=========================<br><br>小组长不受理，交由部门总监受理<br><br>部门总监不受理，交由总经理受理<br><br>请假14天，总经理已经批准请假<br><br>=========================<br><br>Process finished with exit code <br></p>
+</blockquote>
+<h4 id="单纯与不单纯的责任链"><a href="#单纯与不单纯的责任链" class="headerlink" title="单纯与不单纯的责任链"></a>单纯与不单纯的责任链</h4><p>上述代码，仔细读一遍，慢慢品，你会发现这是一个单纯的责任链！为什么说它是单纯的呢，一个单纯的责任链要求它的具体处理者要么全部处理，要么都不处理，把责任推给下一个接盘的，且要求一个请求对象必须被某个处理者对象接收。而一个不单纯的责任链模式中，对事件的处理可以是由多个处理者参与的（每个处理者处理完自己的事物就抛给下一个），最重要的一点是请求对象可以不被任何处理者接收。</p>
+<p>来一段抽象的伪代码，描述一下单纯责任链和不单纯责任链。</p>
+<p>单纯的责任链</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Resp</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> amount;</span><br><span class="line">    getAmount();</span><br><span class="line">    setAmount(<span class="keyword">int</span> amount);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//第一个处理者</span></span><br><span class="line"><span class="keyword">if</span>(condition1)&#123;</span><br><span class="line">    <span class="keyword">return</span> resp;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//第二个处理者</span></span><br><span class="line"><span class="keyword">if</span>(condition2)&#123;</span><br><span class="line">    <span class="keyword">return</span> resp;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//第三个处理者</span></span><br><span class="line"><span class="keyword">if</span>(condition3)&#123;</span><br><span class="line">    <span class="keyword">return</span> resp;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>不单纯的责任链又是怎么样的呢,如下所示。不一定任何满足conditionX，也就说可以没有处理者接受。其次，前面的处理者仅仅将resp数据进行修改，但不是最终受理完成者。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第一个处理者</span></span><br><span class="line"><span class="keyword">if</span>(condition1)&#123;</span><br><span class="line">    resp.setAmount(++resp.getAmount());</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//第二个处理者</span></span><br><span class="line"><span class="keyword">if</span>(condition2)&#123;</span><br><span class="line">    resp.setAmount(++resp.getAmount());</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//第三个处理者</span></span><br><span class="line"><span class="keyword">if</span>(condition3)&#123;</span><br><span class="line">    resp.setAmount(++resp.getAmount());</span><br><span class="line">    <span class="keyword">return</span> resp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结合生活实际来联想，我认为不单纯的责任链模式，就像工厂里的流水线，一个产品上来流水线了，每个区域都有各自的处理方式，A区域可能是切割，B区域是打螺丝，C区域负责喷漆…各个区域的处理者都有自己的业务，并且对这个产品做了一些处理。而一个单纯的责任链，就好比某快递公司的仓库，快递被放上流水线，会有不同的人员或者机器人进行分类，比如按照地方分，每个处理者当发现面前流过的快递是自己的，就拿走装箱去了。</p>
+<h4 id="优点与缺点"><a href="#优点与缺点" class="headerlink" title="优点与缺点"></a>优点与缺点</h4><p>优点：<br>1.责任链模式很好的<strong>解耦了接收者与发送者，请求对象无须知道它交由什么处理类处理，对象仅需要知道自己会被处理即可</strong>。客户端负责链的创建，降低了系统的耦合度。即使后续需要新增更多的处理类，也很容易扩展<br>2.请求处理对象仅需要维持一个指向其后继者的引用，而不需要知道链路上所有处理者的引用，<strong>简单的直链关系（即结构简单）</strong><br>3.在给对象分派职责时，<strong>责任链可以在客户端按需组装需要的处理类，提供更多的灵活性，甚至在运行时对该链进行动态修改，来灵活处理一个请求</strong>。<br>4.符合开闭原则，可以参考我之前的文章《理解设计模式的七大原则》。对扩展开放，对修改关闭。模块应该在尽量不修改到原有代码的基础上进行扩展。系统中新增一个具体请求处理类无需修改原有系统代码，只需要在客户端重新组装链条即可！</p>
+<p>缺点：<br>1.如同http请求，永远不知道API提供者是不是宕机了一样。<strong>责任链模式中，请求没有明确的接收者，那么就不一定能够保证会被处理</strong>（除非是单纯责任链模式）。请求可能沿着链路走完都没有被受理，也可能因为没有被正确配置而得不到处理。<br>2.责任链的结构可以认作一个链表。链表的长度越长，检索的性能也就越差，<strong>因此对于一个较长的链来说，请求的处理可能经多个对象处理，系统的性能可能会有所影响</strong>。<br>3.<strong>链结构最怕的就是出现循环的结构，责任链也是如此！一旦构建链结构不当（某链节点指向了链路上已经存在的节点），那么将导致系统进入死循环</strong>。</p>
+
+  </article>
+  <aside class="table-content" id="site-toc">
+  <div class="table-content-title">
+    <i class="fa fa-arrow-right fa-lg" id="site-toc-hide-btn"></i>
+    <span>目录</span>
+  </div>
+  <div class="table-content-main">
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-text">介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E4%B8%AA%E6%88%90%E5%91%98"><span class="toc-text">四个成员</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B1%BB%E5%85%B3%E7%B3%BB%E5%9B%BE"><span class="toc-text">类关系图</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DEMO%E7%A4%BA%E4%BE%8B"><span class="toc-text">DEMO示例</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E7%BA%AF%E4%B8%8E%E4%B8%8D%E5%8D%95%E7%BA%AF%E7%9A%84%E8%B4%A3%E4%BB%BB%E9%93%BE"><span class="toc-text">单纯与不单纯的责任链</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%82%B9%E4%B8%8E%E7%BC%BA%E7%82%B9"><span class="toc-text">优点与缺点</span></a></li></ol></li></ol>
+  </div>
+</aside>
+  
+    <aside class="passage-copyright">
+      <div>本文作者: 是浩航啊···</div>
+      
+        <div>
+          原文链接: 
+          <a href="" target="_blank">http://lihaohanggitee.gitee.io/passages/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F/</a>
+        </div>
+      
+      <div>
+        输出·回馈·成长
+      </div>
+    </aside>
+  
+  
+    <div class="passage-tags">
+     
+      <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><i class="fa fa-tags"></i>设计模式</a>
+     
+      <a href="/tags/%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F/"><i class="fa fa-tags"></i>责任链模式</a>
+    
+    </div>
+  
+</div>
+
+    </main>
+    
+    <div class="site-footer-wrapper">
+  <footer class="site-footer">
+    
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">博客推荐</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://www.martinfowler.com/" target="_blank">ThoughtWorks大神</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="http://blog.didispace.com/" target="_blank">程序猿DD</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">系列教程</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://blog.csdn.net/forezp/article/details/70148833" target="_blank">史上最简单的SpringCloud教程·方志朋</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">Python教程·廖雪峰</a>
+            </span>
+          
+        </div>
+      
+        <div class="site-footer-col">
+          <h5 class="site-footer-title">同志圈</h5>
+          
+            <span class="site-footer-item">
+              <a href="https://juejin.im" target="_blank">掘金</a>
+            </span>
+          
+            <span class="site-footer-item">
+              <a href="https://stackoverflow.com/" target="_blank">stackoverflow</a>
+            </span>
+          
+        </div>
+      
+    
+    <div class="site-footer-info">
+      <i class="fa fa-clock-o"></i> 本站已稳定运行<span id="site-time"></span>
+    </div>
+    
+    
+      <div class="site-footer-info">
+        <i class="fa fa-at"></i> Email: 744168227@qq.com
+      </div>
+    
+    <div class="site-footer-info">
+      <i class="fa fa-copyright"></i> 
+      2019 <a href="https://github.com/dongyuanxin/theme-ad/" target="_blank">Theme-AD</a>.
+      Created by <a href="https://godbmw.com/" target="_blank">GodBMW</a>.
+      All rights reserved.
+    </div>
+  </footer>
+</div>
+    <div id="site-layer" style="display:none;">
+  <div class="site-layer-content">
+    <div class="site-layer-header">
+      <span class="site-layer-header-title" id="site-layer-title"></span>
+      <i class="fa fa-close" id="site-layer-close"></i>
+    </div>
+    <div class="site-layer-body" id="site-layer-container">
+      <div class="site-layer-input" id="site-layer-search" style="display: none;">
+        <div class="site-layer-input-choose">
+          <a href="javascript:void(0);" title="Change Search Engine">Google</a>
+        </div>
+        <input type="text">
+        <i class="fa fa-search"></i>
+      </div>
+      
+      <div id="site-layer-welcome" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+    
+
+<div class="bottom-bar">
+  <div class="bottom-bar-left">
+    <a href="/passages/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F/" data-enable="true">
+      <i class="fa fa-arrow-left"></i>
+    </a>
+    <a href="/passages/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F/" data-enable="true">
+      <i class="fa fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="bottom-bar-right">
+    <a href="javascript:void(0);" data-enable="true" id="site-toc-show-btn">
+      <i class="fa fa-bars"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="site-toggle-share-btn">
+      <i class="fa fa-share-alt"></i>
+    </a>
+    
+    <a href="javascript:void(0);" id="back-top-btn">
+      <i class="fa fa-chevron-up"></i>
+    </a>
+  </div>
+</div>
+    <div id="share-btn">
+  
+  
+  
+    <a id="share-btn-weibo" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-weibo"></i>
+    </a>
+  
+  
+    <a id="share-btn-qq" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-qq"></i>
+    </a>
+  
+  
+    <a id="share-btn-wechat" href="javascript:void(0);" target="_blank">
+      <i class="fa fa-wechat"></i>
+    </a>
+  
+</div>
+    
+
+
+  <script async>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+  </script>
+
+
+
+
+    
+  </body>
+</html>
