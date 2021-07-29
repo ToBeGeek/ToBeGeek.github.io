@@ -237,7 +237,7 @@
 <!-- /TOC -->
 
 <h3 id="写下这篇总结帖的初衷"><a href="#写下这篇总结帖的初衷" class="headerlink" title="写下这篇总结帖的初衷"></a>写下这篇总结帖的初衷</h3><p>14年进入大学，就读软件工程专业。我还记得我是班上最早开始学习Java的那个人（大二才开始的课程）。有点怀念那个时候在图书馆借着一本《Java完全参考手册》一直啃的岁月。有时候经常也会关注一些博文去review一些Java基础知识的东西，零零散散也会手写下来。突然有个想法，把这些零零散散的东西用自己的思考去重温。老是羡慕别人做总结，不如自个动手搞一篇自己的长帖！再次出发！</p>
-<p><img src="/.io//%E7%96%AF%E7%8B%82%E5%AD%A6%E4%B9%A0.jpg" alt="疯狂学习"></p>
+<p><img src="/passages/Java%E5%9F%BA%E7%A1%80%E6%80%BB%E7%BB%93/%E7%96%AF%E7%8B%82%E5%AD%A6%E4%B9%A0.jpg" alt="疯狂学习"></p>
 <h3 id="面向过程or面向对象"><a href="#面向过程or面向对象" class="headerlink" title="面向过程or面向对象"></a>面向过程or面向对象</h3><p>为什么要说这个话题呢，因为学习Java编程是离不开“面向对象”的。“面向对象”与“面向过程”其实是编程界的两种哲学思想。说到哲学，就不可避免地探讨“宏观”与“微观”。在宏观上，我们在编写Java应用地时候，更多地考虑如何用“对象”来描述复杂事务之间的关系。在微观上，我们会去思考一个“对象”具体的行为过程。<strong>“面向过程”强调的是自顶向下的解决过程，以解决事件为中心，分析问题的解决步骤并依次调用</strong>。<strong>“面向对象”强调以对象为中心，将复杂的事物高度抽象化，描述“对象”能做什么事情，具有怎么样的属性。</strong></p>
 <p>借鉴网络上特别生动的一个举例。将“面向过程”与“面向对象”分别比喻成，“蛋炒饭”与“盖浇饭”。虽然蛋炒饭这道菜入味均匀，蛋与饭的耦合度极高，如果你不想吃到鸡蛋的话，你只能选择重做一道。但是盖浇饭就不同了，饭和菜是分离的，如果你不想吃菜的话，可以换菜，不想吃饭可以换面。从软件工程的角度来看，“盖浇饭”的“灵活性高”，“扩展性强”，“耦合度低”，这也是面向对象的优势所在。</p>
 <p>总结：<strong>面向对象相比面向过程开发，使得工程更易维护，易复用，易扩展，更加灵活。</strong></p>
@@ -251,7 +251,7 @@
 <h4 id="什么是平台无关性"><a href="#什么是平台无关性" class="headerlink" title="什么是平台无关性"></a>什么是平台无关性</h4><p><strong>平台无关性就是指一种语言在计算机上的运行不受平台的约束，一次编译，到处执行</strong>。Java作为一门平台无关性语言，Java程序可以在各种各样的设备上运行，甚至是一些嵌入式设备，如打印机、扫描仪等。</p>
 <h4 id="平台无关性的实现"><a href="#平台无关性的实现" class="headerlink" title="平台无关性的实现"></a>平台无关性的实现</h4><p>在计算机世界中，计算机只认识0和1，通过编译原理我们知道程序的执行实际上是计算机对二进制文件的执行(由0和1组成)。我们日常使用的C++,Java，C，Go，Python都是高级编程语言，而非二进制语言。诸如此类的高级语言要想让计算机认识我们写出来的代码，就需要对它们进行“翻译”成二级制文件，这个过程称之为编译。负责编译的处理工具就叫做编译器。</p>
 <p>Java文件要编译成二进制文件，编译过程分成两步骤<strong>前端编译和后端编译。前端编译主要是指与原语言(Java)有关但与目标机无关的编译过程。后端编译是指将前端编译后生成的“中间代码”进行再次编译成机器语言的过程</strong>！我们熟悉的<strong>javac(Java Compiler)就是前端编译的编译器，主要功能是将Java代码转成class代码。</strong></p>
-<p>整个过程中有三个重要的概念。Java语法规范，Class文件，JVM。<br>没有严谨的Java语法规范，javac无法高效地将Java文件编译成class文件，Java语言规范规定了Java语言中地基本数据类型地取值范围和行为。其次，前端编译器会将所有地Java文件编译成中间文件class文件。然后JVM会加载class文件并转换成二进制文件。<br><img src="/.io//Java%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B.png" alt="Java编译过程.png"></p>
+<p>整个过程中有三个重要的概念。Java语法规范，Class文件，JVM。<br>没有严谨的Java语法规范，javac无法高效地将Java文件编译成class文件，Java语言规范规定了Java语言中地基本数据类型地取值范围和行为。其次，前端编译器会将所有地Java文件编译成中间文件class文件。然后JVM会加载class文件并转换成二进制文件。<br><img src="/passages/Java%E5%9F%BA%E7%A1%80%E6%80%BB%E7%BB%93/Java%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B.png" alt="Java编译过程.png"></p>
 <p>从上面的图片简单表达了Java程序的编译过程以及如何实现平台无关性。JVM屏蔽了底层操作系统和硬件的差异，也就是说Java的平台无关性离不开JVM平台有关系基础的支持。因为JVM能够向上提供平台无关性的基础，这些年在JVM平台之上衍生了很多新语言如Scala，Groovy，Kotlin等，他们也是平台无关语言。其原理上是一样的。</p>
 <p>更多的内容推荐大家去阅读这本书《深入理解Java虚拟机》或者阅读我的这篇文章<a href="/passages/Java%E6%98%AF%E5%A6%82%E4%BD%95%E7%BC%96%E8%AF%91%E7%9A%84">《Java是如何编译的》</a></p>
 <h3 id="JDK与JRE是什么玩意"><a href="#JDK与JRE是什么玩意" class="headerlink" title="JDK与JRE是什么玩意"></a>JDK与JRE是什么玩意</h3><p>JDK的全程是Java Development Kit，看名字就知道是JavaSDK。它包含了JRE和Javac和其他工具(如javadoc)。<strong>用于创建和编译程序</strong></p>
@@ -304,7 +304,7 @@
 </tr>
 </tbody></table>
 <p>总结：不论是方法的重写还是重载，都是Java的多态性的不同表现。重写是父类与子类之间多态性的表现，重载是一个类的多态性表现</p>
-<p>借用一个趣图加深印象!<br><img src="/.io//%E9%87%8D%E8%BD%BD%E4%B8%8E%E9%87%8D%E5%86%99.jpg" alt="重载与重写.jpg"></p>
+<p>借用一个趣图加深印象!<br><img src="/passages/Java%E5%9F%BA%E7%A1%80%E6%80%BB%E7%BB%93/%E9%87%8D%E8%BD%BD%E4%B8%8E%E9%87%8D%E5%86%99.jpg" alt="重载与重写.jpg"></p>
 <h3 id="构造器是否可以被继承"><a href="#构造器是否可以被继承" class="headerlink" title="构造器是否可以被继承"></a>构造器是否可以被继承</h3><p>构造器(Constructor)是不能被继承的，因为每个类的类名称都不同，而构造器名称与类名相同，因此也不能被重写(override)，只能在同一个类中对其进行重载(overload)。</p>
 <h3 id="int和Integer的区别"><a href="#int和Integer的区别" class="headerlink" title="int和Integer的区别"></a>int和Integer的区别</h3><p>···· 等我看完《码出高效》再回来补充这个问题</p>
 <h3 id="String、StringBuffer、StringBuilder"><a href="#String、StringBuffer、StringBuilder" class="headerlink" title="String、StringBuffer、StringBuilder"></a>String、StringBuffer、StringBuilder</h3><p>先来看看源码的片段：</p>
@@ -421,7 +421,7 @@
 <p>这也是为什么在循环中，应该采用循环体外的StringBuilder来代替循环体中不断使用“+”拼接字符串的原因。因为在循环中过多的创建StringBuilder实在是浪费内存资源，而且性能也差了！</p>
 <h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><p>数据结构是指逻辑意义上的数据组织方式及其对应的处理方式。说白了就是，一种抽象的结构，它解决了两个问题，1：数据如何存储，2：数据的CRUD处理</p>
 <h4 id="数据结构的分类"><a href="#数据结构的分类" class="headerlink" title="数据结构的分类"></a>数据结构的分类</h4><p>从单个数据节点出发，根据该点的直接前继和直接后继作为区分维度，可以分类出如下的几种数据结构。</p>
-<p><img src="/.io//%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%88%86%E7%B1%BB.png" alt="数据结构分类.png"></p>
+<p><img src="/passages/Java%E5%9F%BA%E7%A1%80%E6%80%BB%E7%BB%93/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%88%86%E7%B1%BB.png" alt="数据结构分类.png"></p>
 <h4 id="数据结构的复杂度问题"><a href="#数据结构的复杂度问题" class="headerlink" title="数据结构的复杂度问题"></a>数据结构的复杂度问题</h4><p>不同的数据组织方式和处理方式带来了一个新的问题，如何衡量数据处理的性能。数据结构的复杂的分成<strong>空间复杂度和时间复杂度</strong>。随着存储设备成本的降低，时间复杂度成为重点考量因素。</p>
 <p>算法的时间复杂度是一种衡量计算性能的指标，反映了程序执行时间随着输入规模增长而增长的<strong>量级</strong>，在很大的程度上可以反映这个算法的性能。一般用大写的O和一个函数表示。从最好到最坏的算法复杂度排序如下：</p>
 <p>常数级<strong>O(1)<strong>、对数级</strong>O(logn)<strong>、线性级</strong>O(n)<strong>、线性对数级</strong>O(nlogn)<strong>、平方级</strong>O(n^2)<strong>、立方级</strong>O(n^3)<strong>、指数级</strong>O(2^n)</strong></p>

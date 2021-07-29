@@ -177,22 +177,22 @@
 <p>FIFO( First In First Out ):先入先出，也就是说先进入缓存的数据，在缓存空间整理的情况下，优先淘汰。</p>
 <p>LRU( Least Recently Used ):最近时间段内最久没有被使用的数据，在缓存空间整理的时候，会被优先淘汰。</p>
 <p>LFU( Less Frequently Used ):最近访问频率低的数据，在缓存空间整理时，优先淘汰。</p>
-<h2 id="LRU-算法"><a href="#LRU-算法" class="headerlink" title="LRU 算法"></a>LRU 算法</h2><p>图解：<br><img src="/.io//lru.png" alt="avatar"></p>
+<h2 id="LRU-算法"><a href="#LRU-算法" class="headerlink" title="LRU 算法"></a>LRU 算法</h2><p>图解：<br><img src="/passages/LRU%E3%80%81LFU%E3%80%81W-TinyLFU%E6%B5%85%E6%9E%90%E4%BC%98%E5%8A%A3/lru.png" alt="avatar"></p>
 <p>从<strong>时间维度</strong>来说，当存在热点数据时，LRU的效率很好。但由于只要访问一次数据，就把该数据移入缓存中，造成了缓存污染的问题.(缓存污染是指将不常用的数据从内存移到缓存，导致缓存的效率变低)。在一些批量操作的情况下会导致LRU的命中率急剧下降。因此在LRU的基础上，衍生了LRU-K算法。</p>
 <p>LRU-K算法，新增了一个访问历史队列记录数据的访问历史，当次数达到K次的条件时候，数据将从历史队列中删除并且移入缓存队列中，后续在缓存队列中进行LRU的更新策略。（没有达到K次的数据，将会在访问历史记录中根据FIFO或者LRU算法进行移除）</p>
-<p>图解:<br><img src="/.io//lru-k.png" alt="avatar"></p>
+<p>图解:<br><img src="/passages/LRU%E3%80%81LFU%E3%80%81W-TinyLFU%E6%B5%85%E6%9E%90%E4%BC%98%E5%8A%A3/lru-k.png" alt="avatar"></p>
 <p>LRU-K的命中率相比LRU-1（LRU）来说，要提高很多，能够有效降低缓存污染带来问题，但是算法更加复杂，CPU消耗也比较高。</p>
 <h2 id="LFU-算法"><a href="#LFU-算法" class="headerlink" title="LFU 算法"></a>LFU 算法</h2><p>LFU(Least Frequently Used)算法表明了这是一个基于访问频率的缓存策略。与基于时间维度的LRU不同，LRU会将时间边缘的数据淘汰。LFU则是将访问频率低的数据淘汰。每次缓存命中的时候，都会更新命中元素所对应的引用计数，然后重新进行优先级排序。当存在新元素进入队列的时候，将引用计数值最低的元素从队列中移除。</p>
-<p>图解:<br><img src="/.io//LFU.jpg" alt="avatar">  </p>
+<p>图解:<br><img src="/passages/LRU%E3%80%81LFU%E3%80%81W-TinyLFU%E6%B5%85%E6%9E%90%E4%BC%98%E5%8A%A3/LFU.jpg" alt="avatar">  </p>
 <p>优缺点分析：<br>相对于基于时间的LRU算法来说，LFU算法要更有效一些。LRU算法中，一些周期性或者偶然性的操作会导致新加入的数据（脏数据）将缓存中实际有效的数据淘汰，真正需要的缓存数据淘汰后直接影响缓存命中率（重申一遍：缓存污染）。然鹅~,LFU也不是完美的，它同样会出现缓存污染问题，只不过它的缓存污染源自于历史数据。</p>
 <p>举个栗子：我们假设微博热搜排名，采用了基于LFU算法的缓存机制，如果这个月1号的时候，某蔡姓明星的一段酷炫炸天的篮球舞蹈视频发布，且在当天搜索热度达到全年顶峰(也就是说，引用计数碾压其余队列元素),根据LFU算法的话蔡某全年占据头条!!(汪峰都要哭了,即使后续无人关注这件事了,但是由于计数值逆天,根本不会被淘汰.换句话说就是占着茅坑不拉屎，不常用的数据占据缓存)</p>
 <h2 id="TinyLFU-算法"><a href="#TinyLFU-算法" class="headerlink" title="TinyLFU 算法"></a>TinyLFU 算法</h2><p>由名字可以得知TinyLFU算法是在LFU算法上的一种变种。上述可知，LFU算法会存在维护访问频率信息的开销，并且当数据的访问模式随着时间发生变化的时候，缓存的命中率会下降。TinyLFU算法是在LFU算法的基础上解决这两个问题。</p>
 <p>1：如何降低因维护访问频率信息带来的开销</p>
 <p>2：数据的访问模式随时间变化的时候采取什么方式应对。</p>
-<p>图解:<br><img src="/.io//Tiny-LFU.jpg" alt="avatar">  </p>
+<p>图解:<br><img src="/passages/LRU%E3%80%81LFU%E3%80%81W-TinyLFU%E6%B5%85%E6%9E%90%E4%BC%98%E5%8A%A3/Tiny-LFU.jpg" alt="avatar">  </p>
 <p>TinyLFU算法借鉴了大数据处理中的梗概(Sketching，在统计精度和存储空间上折衷)的思想，采用了Count-Min Sketch 算法（其实就是把布隆过滤器的实现使用在统计上了，该算法的好处在于仅需要固定内存分配和固定的计算时间）大大缩小了内存和计算的开销，因此可以解决上述的问题1。至于问题2，Tiny-LFU算法采用了一种衰退机制，对维护数据进行简单的重置。每次新增录到Sketch的时候，都会给一个计数器上加1，当计数器达到阈值的时候，所有Sketch数值都除以2。</p>
 <h2 id="W-TinyLFU-算法"><a href="#W-TinyLFU-算法" class="headerlink" title="W-TinyLFU 算法"></a>W-TinyLFU 算法</h2><p>W-TinyLFU算法全名称也是Windows-TinyLFU算法，它基于TinyLFU算法实现。那么它解决了什么问题呢？如果一个新的元素在短期内突然访问流量很多次，依旧有可能无法构建足够的频率数据来保证自己驻留在缓存中。这也是W-TinyLFU算法要解决的痛点。</p>
-<p>W-TinyLFU的结构如下：<br><img src="/.io//W-TinyLFU.png" alt="avatar">  </p>
+<p>W-TinyLFU的结构如下：<br><img src="/passages/LRU%E3%80%81LFU%E3%80%81W-TinyLFU%E6%B5%85%E6%9E%90%E4%BC%98%E5%8A%A3/W-TinyLFU.png" alt="avatar">  </p>
 
   </article>
   <aside class="table-content" id="site-toc">

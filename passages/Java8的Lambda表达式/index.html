@@ -212,7 +212,7 @@
 <h4 id="函数式编程和Lambda表达式"><a href="#函数式编程和Lambda表达式" class="headerlink" title="函数式编程和Lambda表达式"></a>函数式编程和Lambda表达式</h4><p>在面向对象的Java编程中，我们往往给定的参数是数据，而<strong>函数式编程则希望传入的是一个函数，即将函数“参数化”</strong>。相信看到这句话，你大致明白了函数式编程是怎么一回事。<strong>Lambda表达式是一个匿名函数，将行为像数据一样进行传递。</strong></p>
 <h4 id="函数接口"><a href="#函数接口" class="headerlink" title="函数接口"></a>函数接口</h4><p>在Java中，所有的方法参数都有固定的类型，入thread0的例子，参数类型是RunnableImpl。那么在thread2中，参数的类型是什么？</p>
 <p>()-&gt;System.out.println(“Java8的Lambda风格”)。如果你用的是idea开发工具，你可以按住ctrl鼠标点“()”,跳转到Runnable接口类中，这个Runnable接口就是lambda表达式的类型。我们来看看Runnable的源码。</p>
-<p>如下图所示：<br><img src="/.io//runnable.jpg" alt="runnable.jpg"></p>
+<p>如下图所示：<br><img src="/passages/Java8%E7%9A%84Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/runnable.jpg" alt="runnable.jpg"></p>
 <p>不难看出有两个点。<strong>1：Runnable是一个接口类，2：只有一个抽象方法</strong>。我们把这样的一个接口类称为函数接口，lambda表达式的作为方法参数的时候，它的类型一定是函数接口。</p>
 <h5 id="FunctionalInterface注解"><a href="#FunctionalInterface注解" class="headerlink" title="@FunctionalInterface注解"></a>@FunctionalInterface注解</h5><p>Runnable接口采用了FunctionalInterface注解进行标注。该注解会强制Javac编译的时候检查当前的接口是否满足函数接口的标准。如果该注释标注给一个不符合条件的接口，枚举类等，编译的时候将会报错。相当于一种类型检查机制，所以当我们自己实现函数接口的时候，一定要规范的加上这个注解！它能够帮助我们提前发现风险。</p>
 <h5 id="Java中重要的函数接口"><a href="#Java中重要的函数接口" class="headerlink" title="Java中重要的函数接口"></a>Java中重要的函数接口</h5><table>
@@ -271,11 +271,11 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> String method=<span class="string">&quot;匿名内部类方式&quot;</span>;</span><br><span class="line">Thread thread1=<span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Java7-&quot;</span>+method);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
 <p>如果是在内部类中，引用了一个外部对象，那么需要把是这个变量声明成final，这也意味着被引用的变量必须是一个不会再改变值。Java8中，已经不需要显式的指定final关键字，但是被引用的变量必须是“既定已成事实”的变量。我对“既定已成事实的变量”的理解就是，一旦定义且初始化，则后续都不会改变的变量。</p>
-<p>lambda引用之前发生改动，无法编译<br><img src="/.io//%E5%BC%95%E7%94%A8%E5%89%8D%E5%8F%91%E7%94%9F%E6%94%B9%E5%8A%A8.jpg" alt="引用前发生改动.jpg"></p>
-<p>lambda引用时发生改动，无法编译<br><img src="/.io//%E5%BC%95%E7%94%A8%E6%97%B6%E5%8F%91%E7%94%9F%E6%94%B9%E5%8A%A8.jpg" alt="引用时发生改动.jpg"></p>
-<p>lambda引用之后发生改动，无法编译<br><img src="/.io//%E5%BC%95%E7%94%A8%E5%90%8E%E5%8F%91%E7%94%9F%E6%94%B9%E5%8A%A8.jpg" alt="引用后发生改动.jpg"></p>
+<p>lambda引用之前发生改动，无法编译<br><img src="/passages/Java8%E7%9A%84Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/%E5%BC%95%E7%94%A8%E5%89%8D%E5%8F%91%E7%94%9F%E6%94%B9%E5%8A%A8.jpg" alt="引用前发生改动.jpg"></p>
+<p>lambda引用时发生改动，无法编译<br><img src="/passages/Java8%E7%9A%84Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/%E5%BC%95%E7%94%A8%E6%97%B6%E5%8F%91%E7%94%9F%E6%94%B9%E5%8A%A8.jpg" alt="引用时发生改动.jpg"></p>
+<p>lambda引用之后发生改动，无法编译<br><img src="/passages/Java8%E7%9A%84Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/%E5%BC%95%E7%94%A8%E5%90%8E%E5%8F%91%E7%94%9F%E6%94%B9%E5%8A%A8.jpg" alt="引用后发生改动.jpg"></p>
 <p>使用了非“既定已成事实”的变量，则无法编译通过。这也解释了为什么Java中的Lambda表达式被称为闭包。因为闭包的本质是一个定义在函数中的函数。</p>
-<p><img src="/.io//Lambda.png" alt="Lambda.png"></p>
+<p><img src="/passages/Java8%E7%9A%84Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/Lambda.png" alt="Lambda.png"></p>
 
   </article>
   <aside class="table-content" id="site-toc">

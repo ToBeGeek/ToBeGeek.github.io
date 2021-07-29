@@ -186,14 +186,14 @@
 <h3 id="什么是位图？"><a href="#什么是位图？" class="headerlink" title="什么是位图？"></a>什么是位图？</h3><p>位图也叫BitMap，是一种基于位(bit)的映射。</p>
 <p>比如我们要对判断某个用户在今年的某一天中是否登陆过App？最粗暴的方法就是拿着userId+指定日期去log表中查询。这种方案在数据量小的时候，是可以满足性能需求的，但是一旦用户群体膨胀导致log量级变大，那就只能“GG思密达”了。位图是怎么做到呢？</p>
 <p>首先，我们需要给用户登录接口动点“手脚”，当用户登录后，异步地向位图中写入登录结果。过程如图所示</p>
-<p><img src="/.io//%E7%94%A8%E6%88%B7%E7%99%BB%E5%BD%95.jpg" alt="用户登录.jpg"></p>
+<p><img src="/passages/%E5%B7%A7%E7%94%A8%E4%BD%8D%E5%9B%BE/%E7%94%A8%E6%88%B7%E7%99%BB%E5%BD%95.jpg" alt="用户登录.jpg"></p>
 <p>然后是怎么查询：请看下面的伪代码示例</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//定义位图。如果当年是365天则，byte数组定义长度是365</span></span><br><span class="line"><span class="keyword">byte</span>[] xxUsrLoginMap=&#123;<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,....<span class="number">.0</span>&#125;;</span><br><span class="line"><span class="comment">//计算指定的那天，是当年的第几天，即天数的偏移量，比如查询2021年的第三天用户是否登陆</span></span><br><span class="line"><span class="keyword">int</span> offset=getOffset(<span class="string">&quot;20210103&quot;</span>);</span><br><span class="line"><span class="comment">//返回查询结果</span></span><br><span class="line"><span class="keyword">return</span> xxUsrLoginMap[offset]==<span class="number">1</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <h3 id="为什么要使用位图？"><a href="#为什么要使用位图？" class="headerlink" title="为什么要使用位图？"></a>为什么要使用位图？</h3><p>位图是一种非常简单且紧凑的数据结构，本质上是数组。在合适的场景下，位图的使用可以极大的提高程序的空间利用率，加快查询速度从而提高性能。</p>
 <h4 id="排序小能手"><a href="#排序小能手" class="headerlink" title="排序小能手"></a><strong>排序小能手</strong></h4><p>假设有这样一组数据(3,2,7,0,4)，现在要求用最快的方法ASC排序。我们可以利用位图的思想来盘它！</p>
 <p>我们可以把这个问题当作“垃圾回收”。每一个element都想象成一个带有编号的垃圾袋(编号0则表示value也是0)。然后我们要给这些“垃圾”排序。<br>位图就好比是已知道顺序的“垃圾桶”，每一个垃圾桶的编号就是它的索引位值index。遍历每个垃圾袋，丢入对应编号的垃圾桶，然后再检查每个垃圾桶，有“垃圾”的桶就打印它的索引位，最后实现“垃圾排序”。</p>
-<p><img src="/.io//%E4%BD%8D%E5%9B%BE%E6%8E%92%E5%BA%8F.jpg" alt="位图排序.jpg"></p>
+<p><img src="/passages/%E5%B7%A7%E7%94%A8%E4%BD%8D%E5%9B%BE/%E4%BD%8D%E5%9B%BE%E6%8E%92%E5%BA%8F.jpg" alt="位图排序.jpg"></p>
 <p>代码如下示例：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//定义位图</span></span><br><span class="line">        <span class="keyword">byte</span>[] bitMap=&#123;<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>&#125;;</span><br><span class="line">        <span class="comment">//乱序数组</span></span><br><span class="line">        <span class="keyword">int</span>[] arr=&#123;<span class="number">3</span>,<span class="number">2</span>,<span class="number">7</span>,<span class="number">0</span>,<span class="number">4</span>&#125;;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> value : arr) &#123;</span><br><span class="line">            bitMap[value] = <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bitMap.length; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(bitMap[i]==<span class="number">1</span>)&#123;</span><br><span class="line">                System.out.print(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
@@ -205,7 +205,7 @@
 <p>可能有的人会说，可以通过redis给每个推送过的用户记录一个key:{userId}_{xxx活动id},value:1（1表示已经推送成功）。通过简单使用redis的这种方式会造成大量的内存浪费。所以我们推荐使用布隆过滤器，判断重复。</p>
 <p>布隆过滤器的实现原理，简单理解：<strong>对一个元素的值，通过多个散列函数映射到一个足够长的位图上。若下一个元素，散列后发现每一个映射的bit位都已经有1，则判断为重复元素.布隆过滤器中存入的是每个元素的指纹信息</strong></p>
 <p>流程如下：hash1、hash2、hash3分别表示三个不同的hash函数</p>
-<p><img src="/.io//%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.jpg" alt="布隆过滤器.jpg"></p>
+<p><img src="/passages/%E5%B7%A7%E7%94%A8%E4%BD%8D%E5%9B%BE/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.jpg" alt="布隆过滤器.jpg"></p>
 <p>从上图中可见，其实布隆过滤器并不是完美的方案，因为如果整个数组都是标记成1了，那误判率几乎是100%了。所以它需要初始化一个预估计的空间，比如实际用户量一千万，那就设置ini_size=一千两百万（适当冗余）。相比上述的redis简单方案，布隆过滤器不需要存储每个用户的推送标记键值对，更加节省空间（一千万个键值对和一千两百万个bit，可想而知）！</p>
 <p>使用布隆过滤器是一个相对平衡的方案，它性能好，误判率低，即使出现误判，像营销消息推送这种场景，极少数人收不到通知。如果要求一定能接收到，则可以从业务流程上入手，考虑一套软补偿方案！</p>
 <h3 id="场景二的解决方案"><a href="#场景二的解决方案" class="headerlink" title="场景二的解决方案"></a>场景二的解决方案</h3><p>好的，相信看到了这里，大家对BitMap有了基本的了解。接下来回归前言说到的场景二：如何统计活跃用户</p>
@@ -217,7 +217,7 @@
 <p><strong>setbit [key] [offset] [value]</strong>:setbit关键字用于设置指定key的offset位置的值</p>
 <p><strong>bitop [operation] [destkey] key…</strong>:bitop 表示使用运算符 and。destkey即运算后的数据集key</p>
 <p><strong>bitcount key</strong>:计算出指定位图中数值为1的数量</p>
-<p><img src="/.io//%E7%A4%BA%E4%BE%8B%E8%BF%87%E7%A8%8B.jpg" alt="示例过程.jpg"></p>
+<p><img src="/passages/%E5%B7%A7%E7%94%A8%E4%BD%8D%E5%9B%BE/%E7%A4%BA%E4%BE%8B%E8%BF%87%E7%A8%8B.jpg" alt="示例过程.jpg"></p>
 <p>具体代码过程就不展开了！原理简单清晰，但是要注意一点的是，建议在进行运算后的交集中，尽可能采用别的数据结构存储ActiveLoginMap，避免运算积累下来的集合占据太多内存。</p>
 <p>方案给出，小李马上加班加点地code！终于顺利上线新功能~</p>
 <blockquote>

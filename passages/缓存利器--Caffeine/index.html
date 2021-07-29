@@ -215,9 +215,9 @@
 </tbody></table>
 <h2 id="Guava-Cache与Caffeine-Cache"><a href="#Guava-Cache与Caffeine-Cache" class="headerlink" title="Guava Cache与Caffeine Cache"></a>Guava Cache与Caffeine Cache</h2><p>guava cache 是Google guava工具包中提供的十分强大、易用的本地化缓存实现，基于LRU算法，支持多种缓存过期策略。</p>
 <p>Caffeine是收到guava的启发而开发的缓存，它基于JDK8,基于W-TinyLFU(LFU+LRU算法的变种)，支持多种过期策略，且性能更加极致！<br>接下来请欣赏，来这官方的性能评测。</p>
-<p>场景1：八线程并发执行读操作<br><img src="/.io//caffeine1.jpg" alt="avatar"></p>
-<p>场景2：6条线程并发执行读操作，2条现在并发执行写操作（读多写少）<br><img src="/.io//caffeine2.jpg" alt="avatar">  </p>
-<p>场景3：8条线程全部并发执行写操作<br><img src="/.io//caffeine3.jpg" alt="avatar"></p>
+<p>场景1：八线程并发执行读操作<br><img src="/passages/%E7%BC%93%E5%AD%98%E5%88%A9%E5%99%A8--Caffeine/caffeine1.jpg" alt="avatar"></p>
+<p>场景2：6条线程并发执行读操作，2条现在并发执行写操作（读多写少）<br><img src="/passages/%E7%BC%93%E5%AD%98%E5%88%A9%E5%99%A8--Caffeine/caffeine2.jpg" alt="avatar">  </p>
+<p>场景3：8条线程全部并发执行写操作<br><img src="/passages/%E7%BC%93%E5%AD%98%E5%88%A9%E5%99%A8--Caffeine/caffeine3.jpg" alt="avatar"></p>
 <p>由上可知，Caffeine无论是在只读操作，读写并存，只写操作上的效率都远远高于其他缓存工具！Spring5目前也已经放弃了GuavaCache转而使用Caffeine，由此可知Caffeine的强大了吧！赶紧学起来~</p>
 <h2 id="如何使用"><a href="#如何使用" class="headerlink" title="如何使用"></a>如何使用</h2><p>1：引入依赖<br>2：使用配置<br>3：开启缓存支持</p>
 <h3 id="引入依赖"><a href="#引入依赖" class="headerlink" title="引入依赖"></a>引入依赖</h3><blockquote>

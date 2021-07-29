@@ -195,7 +195,7 @@
 
 <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>一说到Java中的动态数组，我们第一个反应就是实现了List接口的ArrayList和LinkedList。但是在这两个之外还有一个Vector类也实现了List接口。它同样可以作为动态数组进行使用，但是由于某些原因它已经成为历史废弃的遗留类，不提倡使用。以下会逐步详解Vector</p>
 <h3 id="Vector简介"><a href="#Vector简介" class="headerlink" title="Vector简介"></a>Vector简介</h3><p>Vector实现了List接口，与ArrayList一样可以维护有序的动态数组，但是ArrayList比Vector快，Vector是线程安全的，而ArrayList不是线程安全的。</p>
-<h4 id="Vector的继承关系和层次关系"><a href="#Vector的继承关系和层次关系" class="headerlink" title="Vector的继承关系和层次关系"></a>Vector的继承关系和层次关系</h4><p><img src="/.io//Vector.png" alt="Vector.png"></p>
+<h4 id="Vector的继承关系和层次关系"><a href="#Vector的继承关系和层次关系" class="headerlink" title="Vector的继承关系和层次关系"></a>Vector的继承关系和层次关系</h4><p><img src="/passages/%E6%B7%B1%E5%85%A5%E4%BA%86%E8%A7%A3Java%E4%B8%AD%E7%9A%84Vector/Vector.png" alt="Vector.png"></p>
 <p>现在我们就根据这张图来进行一个分析，Vector继承于AbstractList，实现了List、RandomAccess、Cloneable、 Serializable等接口。</p>
 <p>（1）Vector 继承了AbstractList，实现了List接口。</p>
 <p>（2）Vector实现了RandmoAccess接口，即提供了随机访问功能。</p>
